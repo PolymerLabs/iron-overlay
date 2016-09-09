@@ -74,337 +74,294 @@ styling can be done like this:
  -->
 <dom-module id="iron-overlay">
   <template>
-    <content></content>
+    <template id="renderer-template">
+      <iron-overlay-renderer
+        data-overlay$="[[dataOverlay]]"
+        opened="[[opened]]">
+      </iron-overlay-renderer>
+    </template>
+  <content></content>
   </template>
 
   <script>
-    Polymer({
-      is: 'iron-overlay',
-      properties: {
-        /**
-         * True if the overlay is currently displayed.
-         */
-        opened: {
-          type: Boolean,
-          notify: true,
-          observer: '_openedChanged'
+    (function() {
+      'use strict';
+      var templatizer = new Polymer.Templatizer();
+
+      Polymer({
+        is: 'iron-overlay',
+        properties: {
+          dataOverlay: {
+            type: String,
+            readOnly: true,
+            value: function() {
+              return this.id;
+            }
+          },
+
+          /**
+           * True if the overlay is currently displayed.
+           */
+          opened: {
+            type: Boolean,
+            notify: true,
+            observer: '_openedChanged'
+          },
+
+          /**
+           * Contains the reason(s) this overlay was last closed (see `iron-overlay-closed`).
+           * `iron-overlay` provides the `canceled` reason.
+           */
+          closingReason: {
+            type: Object,
+            readOnly: true,
+            value: function() {
+              return {
+                canceled: false
+              };
+            }
+          },
+
+          /**
+           * Set to true to disable canceling the overlay with the ESC key.
+           */
+          noCancelOnEscKey: Boolean,
+
+          /**
+           * Set to true to disable canceling the overlay by clicking outside it.
+           */
+          noCancelOnOutsideClick: Boolean,
+
+          /**
+           * Set to true to disable auto-focusing the overlay or child nodes with
+           * the `autofocus` attribute when the overlay is opened.
+           */
+          noAutoFocus: Boolean,
+
+          /**
+           * The renderer for the overlay.
+           */
+          _renderer: Element
+        },
+
+        created: function() {
+          // Needed to fire detach when the overlay gets detached.
+          this.__host = null;
+        },
+
+        attached: function() {
+          this.opened && this._openedChanged(this.opened);
+        },
+
+        detached: function() {
+          this._ensureDetached();
+          this.__host = null;
         },
 
         /**
-         * Contains the reason(s) this overlay was last closed (see `iron-overlay-closed`).
-         * `iron-overlay` provides the `canceled` reason.
+         * Toggle the opened state of the overlay.
          */
-        closingReason: {
-          type: Object,
-          readOnly: true,
-          value: function() {
-            return {
-              canceled: false
-            };
-          }
+        toggle: function() {
+          this.opened ? this.close() : this.open();
         },
 
         /**
-         * Set to true to disable canceling the overlay with the ESC key.
+         * Open the overlay.
          */
-        noCancelOnEscKey: Boolean,
-
-        /**
-         * Set to true to disable canceling the overlay by clicking outside it.
-         */
-        noCancelOnOutsideClick: Boolean,
-
-        /**
-         * Set to true to disable auto-focusing the overlay or child nodes with
-         * the `autofocus` attribute when the overlay is opened.
-         */
-        noAutoFocus: Boolean,
-
-        /**
-         * The renderer for the overlay.
-         */
-        _renderer: Element,
-
-        /**
-         * The instance children, so we can forward bindings.
-         */
-        _children: {
-          type: Array,
-          value: function() {
-            return [];
-          }
+        open: function() {
+          this.closingReason.canceled = false;
+          this.opened = true;
         },
 
         /**
-         * Used to set properties only after renderer is initialized.
-         * TODO(valdrin) remove this once we use templatizer 2.0
+         * Close the overlay.
          */
-        _propertiesToMirror: {
-          type: Object,
-          readOnly: true,
-          value: function() {
-            return {};
-          }
-        },
-      },
-
-      behaviors: [Polymer.Templatizer],
-
-      attached: function() {
-        // Needed to fire detach when the overlay gets detached.
-        this.__host = Polymer.dom(this).getOwnerRoot() || document;
-        this.opened && this._openedChanged(this.opened);
-      },
-
-      detached: function() {
-        this._ensureDetached();
-        this.__host = null;
-      },
-
-      /**
-       * Toggle the opened state of the overlay.
-       */
-      toggle: function() {
-        this.opened ? this.close() : this.open();
-      },
-
-      /**
-       * Open the overlay.
-       */
-      open: function() {
-        this.closingReason.canceled = false;
-        this.opened = true;
-      },
-
-      /**
-       * Close the overlay.
-       */
-      close: function() {
-        this.closingReason.canceled = false;
-        this.opened = false;
-      },
-
-      /**
-       * Focuses the overlay if opened, blurs it if closed.
-       */
-      applyFocus: function() {
-        if (this.noAutoFocus) {
-          return;
-        }
-        var focusNode = this._getFocusNode();
-        if (this.opened) {
-          focusNode && focusNode.focus();
-        } else {
-          focusNode && focusNode.blur();
-        }
-      },
-
-      /**
-       * Cancels the overlay.
-       * @param {!Event} event The original event
-       * @private
-       */
-      _cancel: function(event) {
-        var cancelEvent = this.fire('iron-overlay-canceled', event, {
-          cancelable: true
-        });
-        if (!cancelEvent.defaultPrevented) {
-          this.closingReason.canceled = true;
+        close: function() {
+          this.closingReason.canceled = false;
           this.opened = false;
-        }
-      },
+        },
 
-      /**
-       * Implements extension point from `Polymer.Templatizer`.
-       * Forward values to the stamped children.
-       * @private
-       */
-      _forwardParentProp: function(prop, value) {
-        for (var i = 0; i < this._children.length; i++) {
-          var inst = this._children[i]._templateInstance;
-          // Might be undefined (e.g. for template elements)
-          if (inst) {
-            inst[prop] = value;
+        /**
+         * Focuses the overlay if opened, blurs it if closed.
+         */
+        applyFocus: function() {
+          if (this.noAutoFocus) {
+            return;
           }
-        }
-      },
-
-      /**
-       * Ensures the overlay is created and the content is stamped and appended into the overlay.
-       */
-      _ensureInstance: function() {
-        if (this._renderer) {
-          return;
-        }
-        // Init the renderer.
-        this._renderer = this._createRenderer();
-        if (this.id) {
-          this._renderer.dataset.overlay = this.id;
-        }
-
-        // TODO(valdrin) remove this once we use templatizer 2.0
-        for (var prop in this._propertiesToMirror) {
-          this._renderer[prop] = this._propertiesToMirror[prop];
-        }
-
-        this._renderer.addEventListener('transitioning-changed', this._onTransitioningChanged.bind(this));
-        // Stamp the content.
-        var template = this._getContentTemplate();
-        this.templatize(template);
-        var root = this.stamp().root;
-        // Copy children in a separate array, as they'll be moved into the renderer.
-        this._children = Array.prototype.slice.apply(root.children);
-
-        // Append children to renderer.
-        Polymer.dom(this._renderer).appendChild(root);
-      },
-
-      _getContentTemplate: function() {
-        return Polymer.dom(this).querySelector('template');
-      },
-
-      /**
-       * Creates a renderer.
-       * TODO(valdrin) use template instead of creating element (needs templatizer 2.0)
-       */
-      _createRenderer: function() {
-        return document.createElement('iron-overlay-renderer');
-      },
-
-      /**
-       * Ensures the renderer is attached.
-       */
-      _ensureAttached: function() {
-        if (!this._renderer || this._renderer.isAttached) {
-          return;
-        }
-        var event = this.fire('iron-overlay-attach', {
-          overlay: this,
-          renderer: this._renderer
-        }, {
-          cancelable: true
-        });
-        if (!event.defaultPrevented) {
-          this._warn('overlay not attached!', this);
-        }
-      },
-
-      _ensureDetached: function() {
-        if (!this._renderer || !this._renderer.isAttached) {
-          return;
-        }
-        var event = this.fire('iron-overlay-detach', {
-          overlay: this,
-          renderer: this._renderer
-        }, {
-          node: this.isAttached ? this : this.__host,
-          cancelable: true
-        });
-        if (!event.defaultPrevented) {
-          this._warn('overlay not detached!', this);
-        }
-      },
-
-      _openedChanged: function(opened) {
-        if (!this.isAttached) {
-          return;
-        }
-        if (opened) {
-          this._ensureInstance();
-          this._renderer.opened = true;
-          this._ensureAttached();
-        } else if (this._renderer) {
-          this._renderer.opened = false;
-        }
-      },
-
-      _onEsc: function(event) {
-        // Avoid interactions while transitioning.
-        if (!this.noCancelOnEscKey && !this._renderer.transitioning) {
-          this._cancel(event.detail.keyboardEvent);
-        }
-      },
-
-      _onTap: function(event) {
-        // Avoid interactions while transitioning. Check if tap is outside.
-        if (!this.noCancelOnOutsideClick && !this._renderer.transitioning && !this._isTapInside(event)) {
-          this._cancel(event.detail.sourceEvent);
-        }
-      },
-
-      _isTapInside: function(event) {
-        return Polymer.dom(event).path.indexOf(this._renderer.$.overlay) !== -1;
-      },
-
-      _onTransitioningChanged: function(event) {
-        var transitioning = event.detail.value;
-        if (!transitioning) {
-          this.applyFocus();
+          var focusNode = this._getFocusNode();
           if (this.opened) {
-            this.fire('iron-overlay-opened');
+            focusNode && focusNode.focus();
           } else {
-            this._ensureDetached();
-            this.fire('iron-overlay-closed', this.closingReason);
+            focusNode && focusNode.blur();
           }
-        }
-      },
+        },
+
+        /**
+         * Cancels the overlay.
+         * @param {!Event} event The original event
+         * @private
+         */
+        _cancel: function(event) {
+          var cancelEvent = this.fire('iron-overlay-canceled', event, {
+            cancelable: true
+          });
+          if (!cancelEvent.defaultPrevented) {
+            this.closingReason.canceled = true;
+            this.opened = false;
+          }
+        },
+
+        /**
+         * Ensures the overlay is created and the content is stamped and appended into the overlay.
+         */
+        _ensureInstance: function() {
+          if (this._renderer) {
+            return;
+          }
+          // Init the renderer.
+          var rendererInstance = new(templatizer.templatize(this._getRendererTemplate(), {
+            fwdHostPropToInstance: function(host, prop, value) {
+              rendererInstance && rendererInstance.forwardProperty(prop, value, host);
+            }
+          }))(this);
+          this._renderer = rendererInstance.root.children[0];
+          this._renderer.addEventListener('transitioning-changed', this._onTransitioningChanged.bind(this));
+
+          // Stamp the content.
+          var contentInstance = new(templatizer.templatize(this._getContentTemplate(), {
+            fwdHostPropToInstance: function(host, prop, value) {
+              contentInstance && contentInstance.forwardProperty(prop, value, host);
+            }
+          }))(this);
+          // Append children to renderer.
+          this._renderer.appendChild(contentInstance.root);
+        },
+
+        _getRendererTemplate: function() {
+          return this.$['renderer-template'];
+        },
+
+        _getContentTemplate: function() {
+          return this.querySelector('template');
+        },
+
+        /**
+         * Ensures the renderer is attached.
+         */
+        _ensureAttached: function() {
+          if (!this._renderer || this._renderer.isAttached) {
+            return;
+          }
+          var event = this.fire('iron-overlay-attach', {
+            overlay: this,
+            renderer: this._renderer
+          }, {
+            cancelable: true
+          });
+          if (!event.defaultPrevented) {
+            console.warn('overlay not attached!', this);
+          }
+        },
+
+        _ensureDetached: function() {
+          if (!this._renderer || !this._renderer.isAttached) {
+            return;
+          }
+          var event = this.fire('iron-overlay-detach', {
+            overlay: this,
+            renderer: this._renderer
+          }, {
+            node: this.isAttached ? this : this.__host,
+            cancelable: true
+          });
+          if (!event.defaultPrevented) {
+            console.warn('overlay not detached!', this);
+          }
+        },
+
+        _openedChanged: function(opened) {
+          if (!this.isAttached) {
+            return;
+          }
+          if (opened) {
+            this._ensureInstance();
+            this._ensureAttached();
+          }
+        },
+
+        _onEsc: function(event) {
+          // Avoid interactions while transitioning.
+          if (!this.noCancelOnEscKey && !this._renderer.transitioning) {
+            this._cancel(event.detail.keyboardEvent);
+          }
+        },
+
+        _onTap: function(event) {
+          // Avoid interactions while transitioning. Check if tap is outside.
+          if (!this.noCancelOnOutsideClick && !this._renderer.transitioning && !this._isTapInside(event)) {
+            this._cancel(event.detail.sourceEvent);
+          }
+        },
+
+        _isTapInside: function(event) {
+          return event.composedPath().indexOf(this._renderer.$.overlay) !== -1;
+        },
+
+        _onTransitioningChanged: function(event) {
+          var transitioning = event.detail.value;
+          if (event.target === this._renderer && !transitioning) {
+            this.applyFocus();
+            if (this.opened) {
+              this.fire('iron-overlay-opened');
+            } else {
+              this._ensureDetached();
+              this.fire('iron-overlay-closed', this.closingReason);
+            }
+          }
+        },
+
+        /**
+         * The node to be focused when the overlay is opened.
+         * Defaults to the child with `autofocus` or the overlay itself.
+         */
+        _getFocusNode: function() {
+          if (this._renderer && !this._renderer.transitioning) {
+            return this._renderer.querySelector('[autofocus]') || this._renderer.$.overlay;
+          }
+        },
+      });
 
       /**
-       * The node to be focused when the overlay is opened.
-       * Defaults to the child with `autofocus` or the overlay itself.
+       * Fired when the overlay should be attached.
+       * @event iron-overlay-attach
+       * @param {Event} event Call `event.preventDefault()` to notify the attach has been done.
        */
-      _getFocusNode: function() {
-        if (this._renderer && !this._renderer.transitioning) {
-          return Polymer.dom(this._renderer).querySelector('[autofocus]') || this._renderer.$.overlay;
-        }
-      },
-
 
       /**
-       * Sets a property of the renderer.
-       * TODO(valdrin) remove this once we use templatizer 2.0
-       * @param {!String} prop
-       * @param {?=} value
+       * Fired when the content should be detached.
+       * @event iron-overlay-detach
+       * @param {Event} event Call `event.preventDefault()` to notify the detach has been done.
        */
-      _mirrorPropertyToRenderer: function(prop, value) {
-        if (this._renderer) {
-          this._renderer[prop] = value;
-        } else {
-          this._propertiesToMirror[prop] = value;
-        }
-      }
-    });
 
-    /**
-     * Fired when the overlay should be attached.
-     * @event iron-overlay-attach
-     * @param {Event} event Call `event.preventDefault()` to notify the attach has been done.
-     */
+      /**
+       * Fired after the overlay has been fully opened.
+       * @event iron-overlay-opened
+       */
 
-    /**
-     * Fired when the content should be detached.
-     * @event iron-overlay-detach
-     * @param {Event} event Call `event.preventDefault()` to notify the detach has been done.
-     */
+      /**
+       * Fired when the overlay is canceled, but before it is closed.
+       * @event iron-overlay-canceled
+       * @param {Event} event Call `event.preventDefault()` to prevent the closing.
+       * The `event.detail` is the original event that originated the canceling
+       * (e.g. ESC keyboard event or click event outside the overlay).
+       */
 
-    /**
-     * Fired after the overlay has been fully opened.
-     * @event iron-overlay-opened
-     */
-
-    /**
-     * Fired when the overlay is canceled, but before it is closed.
-     * @event iron-overlay-canceled
-     * @param {Event} event Call `event.preventDefault()` to prevent the closing.
-     * The `event.detail` is the original event that originated the canceling
-     * (e.g. ESC keyboard event or click event outside the overlay).
-     */
-
-    /**
-     * Fired after the overlay has been fully closed.
-     * @event iron-overlay-closed
-     * @param {Event} event The `event.detail` is the `closingReason` property
-     * (e.g. `event.detail.canceled` is whether the overlay was canceled).
-     */
+      /**
+       * Fired after the overlay has been fully closed.
+       * @event iron-overlay-closed
+       * @param {Event} event The `event.detail` is the `closingReason` property
+       * (e.g. `event.detail.canceled` is whether the overlay was canceled).
+       */
+    })();
   </script>
 </dom-module>

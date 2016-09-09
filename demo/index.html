@@ -25,12 +25,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
 
   <link rel="import" href="../iron-overlay.html">
-  <link rel="import" href="../iron-animated-overlay.html">
+  <!-- <link rel="import" href="../iron-animated-overlay.html"> -->
   <link rel="import" href="../iron-overlay-container.html">
   <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
   <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
 
-  <style is="custom-style" include="demo-pages-shared-styles">
+  <custom-style><style is="custom-style" include="demo-pages-shared-styles">
     demo-snippet {
       --demo-snippet-code: {
         max-height: 250px;
@@ -42,7 +42,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         padding: 0;
       }
     }
-  </style>
+  </style></custom-style>
 
 </head>
 
@@ -51,14 +51,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <h3>You need at least one <code>iron-overlay-container</code> defined in your page.</h3>
   <demo-snippet class="no-demo">
     <template>
-      <style is="custom-style">
+      <custom-style><style is="custom-style">
         iron-overlay-container > * {
           --iron-overlay: {
             border: 1px solid gray;
             padding: 10px;
           }
         }
-      </style>
+      </style></custom-style>
       <iron-overlay-container></iron-overlay-container>
       <!-- All iron-animated-overlays will be hosted in here -->
       <iron-overlay-container overlay-type="iron-animated-overlay"></iron-overlay-container>
@@ -112,7 +112,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <h3><code>iron-animated-overlay</code> can be animated.</h3>
   <demo-snippet>
     <template>
-      <style is="custom-style">
+      <custom-style><style is="custom-style">
         [data-overlay="animated2"] {
           --iron-overlay: {
             position: absolute;
@@ -123,7 +123,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
           --iron-overlay-backdrop-color: rgba(0, 0, 255, 0.5);
         }
-      </style>
+      </style></custom-style>
       <button onclick="animated.open()">Animated overlay</button>
       <iron-animated-overlay id="animated">
         <template>
