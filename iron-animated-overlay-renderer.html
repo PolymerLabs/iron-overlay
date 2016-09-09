@@ -1,0 +1,102 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../template-composition/template-composition.html">
+<link rel="import" href="iron-overlay-renderer.html">
+
+<!--
+@demo demo/index.html
+-->
+
+<dom-module id="iron-animated-overlay-renderer">
+  <template strip-whitespace>
+    <style>
+      :host {
+        background-color: transparent;
+        transition: background-color .2s;
+      }
+
+      :host(.opened[with-backdrop]) {
+        background-color: var(--iron-overlay-backdrop-color, rgba(0, 0, 0, 0.6));
+      }
+
+      #overlay {
+        opacity: 0;
+        transform: translateY(100px);
+        transition: opacity .2s, transform .2s;
+      }
+
+      :host(.opened) #overlay {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    </style>
+    <template block="super"></template>
+  </template>
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'iron-animated-overlay-renderer',
+        extends: 'iron-overlay-renderer',
+        behaviors: [Polymer.TemplateComposition],
+
+        properties: {
+          withBackdrop: {
+            type: Boolean,
+            reflectToAttribute: true
+          }
+        },
+
+        listeners: {
+          'transitionend': '__onTransitionEnd'
+        },
+
+        /**
+         * Starts the animation.
+         * @protected
+         */
+        _renderOpenedChanged: function() {
+          // Ensure it is displayed.
+          if (this.opened) {
+            this.style.display = '';
+            // Force layout so animation can happen.
+            this._forceLayout();
+          }
+          this.toggleClass('opened', this.opened);
+        },
+
+        /**
+         * Forces layout.
+         * @protected
+         */
+        _forceLayout: function() {
+          return this.offsetWidth;
+        },
+
+        /**
+         * Ends the animation.
+         * @private
+         */
+        __onTransitionEnd: function(event) {
+          if (Polymer.dom(event).rootTarget === this.$.overlay) {
+            if (!this.opened) {
+              this.style.display = 'none';
+            }
+            this._setTransitioning(false);
+          }
+        }
+      });
+
+    })();
+  </script>
+</dom-module>

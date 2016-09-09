@@ -1,0 +1,173 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-a11y-keys-behavior/iron-a11y-keys-behavior.html">
+
+<!--
+`iron-overlay-container` hosts the overlay renderers by litening to the
+`iron-overlay-attach` and `iron-overlay-detach` events.
+
+This element should be placed in a stacking-context safe node (e.g. `document.body`).
+
+    <div style="transform: translateZ(0);">
+      This div creates a new stacking context
+      <iron-overlay opened>
+        <template>
+          <h2>Hello world!</h2>
+        </template>
+      </iron-overlay>
+    </div>
+
+    <iron-overlay-container></iron-overlay-container>
+
+
+Use `overlayType` to limit which types of overlays this container should host:
+
+    <iron-overlay-container overlay-type="paper-toast"></iron-overlay-container>
+
+@demo demo/index.html
+-->
+
+<dom-module id="iron-overlay-container">
+
+  <template strip-whitespace>
+    <style>
+      :host {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 101;
+      }
+    </style>
+    <content></content>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'iron-overlay-container',
+
+      behaviors: [Polymer.IronA11yKeysBehavior],
+
+      properties: {
+        /**
+         * The HTMLElement that will be firing relevant KeyboardEvents.
+         * Overriden from `Polymer.IronA11yKeysBehavior`.
+         */
+        keyEventTarget: {
+          type: Element,
+          value: document
+        },
+
+        /**
+         * Which overlay type should this container host.
+         */
+        overlayType: String
+      },
+
+      keyBindings: {
+        'esc': '_onEsc'
+      },
+
+      /**
+       * Returns the current overlay.
+       * @type {Node|undefined}
+       */
+      get currentOverlay() {
+        return this._overlays[this._overlays.length - 1];
+      },
+
+      ready: function() {
+        Polymer.Gestures.add(document, 'tap', this._onTap.bind(this));
+        // List of overlays handled by this container.
+        this._overlays = [];
+
+        var host = Polymer.dom(this).getOwnerRoot() || document;
+        host.addEventListener('iron-overlay-attach', this._onAttach.bind(this));
+        host.addEventListener('iron-overlay-detach', this._onDetach.bind(this));
+      },
+
+      /**
+       * Adds the `root` and prevents/stops the event propagation.
+       * @param {!Event} event
+       * @private
+       */
+      _onAttach: function(event) {
+        if (event.defaultPrevented) {
+          return;
+        }
+
+        if (this._canAttach(event.detail)) {
+          this._attachOverlay(event.detail);
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      },
+
+      /**
+       * Removes the `root` and prevents/stops the event propagation.
+       * @param {!Event} event
+       * @private
+       */
+      _onDetach: function(event) {
+        if (event.defaultPrevented) {
+          return;
+        }
+        if (this._detachOverlay(event.detail)) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      },
+
+      _canAttach: function(data) {
+        return !this.overlayType || data.overlay.is === this.overlayType;
+      },
+
+      _attachOverlay: function(data) {
+        this._overlays.push(data.overlay);
+        Polymer.dom(this).appendChild(data.renderer);
+      },
+
+      _detachOverlay: function(data) {
+        var i = this._overlays.indexOf(data.overlay);
+        if (i >= 0) {
+          Polymer.dom(this).removeChild(data.renderer);
+          this._overlays.splice(i, 1);
+          // Move focus to new top overlay.
+          var overlay = this.currentOverlay;
+          overlay && overlay.applyFocus();
+        }
+        return i >= 0;
+      },
+
+      /**
+       * Delegates the handling of the `esc` event to the top overlay.
+       * @param {!Event} event
+       * @private
+       */
+      _onEsc: function(event) {
+        var overlay = this.currentOverlay;
+        overlay && overlay._onEsc(event);
+      },
+
+      /**
+       * Delegates the handling of the `tap` event to the top overlay.
+       * @param {!Event} event
+       * @private
+       */
+      _onTap: function(event) {
+        var overlay = this.currentOverlay;
+        overlay && overlay._onTap(event);
+      }
+
+    });
+  </script>
+
+</dom-module>
