@@ -47,7 +47,7 @@ Use `overlayType` to limit which types of overlays this container should host:
         z-index: 101;
       }
     </style>
-    <content></content>
+    <slot></slot>
   </template>
 
   <script>
@@ -132,13 +132,13 @@ Use `overlayType` to limit which types of overlays this container should host:
 
       _attachOverlay: function(data) {
         this._overlays.push(data.overlay);
-        Polymer.dom(this).appendChild(data.renderer);
+        this.appendChild(data.renderer);
       },
 
       _detachOverlay: function(data) {
         var i = this._overlays.indexOf(data.overlay);
         if (i >= 0) {
-          Polymer.dom(this).removeChild(data.renderer);
+          this.removeChild(data.renderer);
           this._overlays.splice(i, 1);
           // Move focus to new top overlay.
           var overlay = this.currentOverlay;
