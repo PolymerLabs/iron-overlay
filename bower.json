@@ -15,7 +15,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/PolymerElements/iron-overlay.git"
+    "url": "git://github.com/PolymerLabs/iron-overlay.git"
   },
   "dependencies": {
     "iron-a11y-keys-behavior": "PolymerElements/iron-a11y-keys-behavior#^1.0.0",
