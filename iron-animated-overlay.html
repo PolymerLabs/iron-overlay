@@ -16,22 +16,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 @demo demo/index.html
  -->
 <dom-module id="iron-animated-overlay">
+  <template>
+    <template id="renderer-template">
+      <iron-animated-overlay-renderer
+        data-overlay$="[[dataOverlay]]"
+        with-backdrop$="[[withBackdrop]]"
+        opened$="[[opened]]">
+      </iron-animated-overlay-renderer>
+    </template>
+    <slot></slot>
+  </template>
   <script>
     Polymer({
       is: 'iron-animated-overlay',
-      extends: 'iron-overlay',
-
+      behaviors: [Polymer.IronOverlay],
       properties: {
         withBackdrop: Boolean
-      },
-
-      // TODO(valdrin) remove this once we use templatizer 2.0
-      observers: [
-        '_mirrorPropertyToRenderer(\'withBackdrop\', withBackdrop)'
-      ],
-
-      _createRenderer: function() {
-        return document.createElement('iron-animated-overlay-renderer');
       }
     });
   </script>

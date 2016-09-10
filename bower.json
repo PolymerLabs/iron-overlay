@@ -19,12 +19,11 @@
   },
   "dependencies": {
     "iron-a11y-keys-behavior": "PolymerElements/iron-a11y-keys-behavior#^1.0.0",
-    "polymer": "Polymer/polymer#2.0-preview",
-    "template-composition": "PolymerLabs/template-composition"
+    "polymer": "Polymer/polymer#2.0-preview"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
-    "iron-demo-helpers": "git://github.com/notwaldorf/iron-demo-helpers#2.0-preview",
+    "iron-demo-helpers": "PolymerElements/iron-demo-helpers#2.0-preview",
     "iron-flex-layout": "PolymerElements/iron-flex-layout#^1.0.0",
     "iron-list": "PolymerElements/iron-list#^1.0.0",
     "iron-test-helpers": "PolymerElements/iron-test-helpers#^1.0.0",

@@ -47,6 +47,7 @@ Use `overlayType` to limit which types of overlays this container should host:
         z-index: 101;
       }
     </style>
+    <content></content>
     <slot></slot>
   </template>
 
@@ -85,9 +86,17 @@ Use `overlayType` to limit which types of overlays this container should host:
       },
 
       ready: function() {
-        Polymer.Gestures.add(document, 'tap', this._onTap.bind(this));
         // List of overlays handled by this container.
         this._overlays = [];
+
+        document.addEventListener('mousedown', this._onTap.bind(this), {
+          passive: true,
+          capture: true
+        });
+        document.addEventListener('touchstart', this._onTap.bind(this), {
+          passive: true,
+          capture: true
+        });
 
         var host = Polymer.dom(this).getOwnerRoot() || document;
         host.addEventListener('iron-overlay-attach', this._onAttach.bind(this));
