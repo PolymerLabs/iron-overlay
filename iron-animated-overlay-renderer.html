@@ -61,29 +61,37 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <slot></slot>
       </div>
   </template>
+
   <script>
     (function() {
       'use strict';
 
-      Polymer({
-        is: 'iron-animated-overlay-renderer',
-        behaviors: [Polymer.IronOverlayRenderer],
-        properties: {
-          withBackdrop: {
-            type: Boolean,
-            reflectToAttribute: true
-          }
-        },
+      class IronAnimatedOverlayRenderer extends Polymer.IronOverlayRenderer {
+        static get is() {
+          return 'iron-animated-overlay-renderer';
+        }
 
-        ready: function() {
+        static get config() {
+          return {
+            properties: {
+              withBackdrop: {
+                type: Boolean,
+                reflectToAttribute: true
+              }
+            }
+          };
+        }
+
+        ready() {
+          super.ready();
           this.$.overlay.addEventListener('transitionend', this.__onTransitionEnd.bind(this));
-        },
+        }
 
         /**
          * Starts the animation.
          * @protected
          */
-        _renderOpenedChanged: function() {
+        _renderOpenedChanged() {
           // Ensure it is displayed.
           if (this.opened) {
             this.style.display = '';
@@ -91,30 +99,32 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             this._forceLayout();
           }
           this.toggleClass('opened', this.opened);
-        },
+        }
 
         /**
          * Forces layout.
          * @protected
          */
-        _forceLayout: function() {
+        _forceLayout() {
           return this.offsetWidth;
-        },
+        }
 
         /**
          * Ends the animation.
          * @private
          */
-        __onTransitionEnd: function(event) {
-          if (Polymer.dom(event).rootTarget === this.$.overlay) {
+        __onTransitionEnd(event) {
+          if (event.composedPath()[0] === this.$.overlay) {
             if (!this.opened) {
               this.style.display = 'none';
             }
             this._setTransitioning(false);
           }
         }
-      });
+      }
 
+      Polymer.IronAnimatedOverlayRenderer = IronAnimatedOverlayRenderer;
+      customElements.define(IronAnimatedOverlayRenderer.is, IronAnimatedOverlayRenderer);
     })();
   </script>
 </dom-module>
