@@ -70,9 +70,7 @@ styling can be done like this:
     (function() {
       'use strict';
 
-      Polymer({
-        is: 'iron-overlay-renderer',
-
+      Polymer.IronOverlayRenderer = {
         properties: {
           /**
            * True if the overlay is currently displayed.
@@ -135,7 +133,11 @@ styling can be done like this:
           this.style.display = this.opened ? '' : 'none';
           this._setTransitioning(false);
         }
+      };
 
+      Polymer({
+        is: 'iron-overlay-renderer',
+        behaviors: [Polymer.IronOverlayRenderer]
       });
 
     })();
