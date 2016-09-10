@@ -70,49 +70,62 @@ styling can be done like this:
     (function() {
       'use strict';
 
-      Polymer.IronOverlayRenderer = {
-        properties: {
-          /**
-           * True if the overlay is currently displayed.
-           */
-          opened: {
-            type: Boolean,
-            observer: '_openedChanged'
-          },
+      // TODO(valdrin) use Polymer.Element!
+      class IronOverlayRenderer extends Polymer.LegacyElement {
 
-          /**
-           * Is true during the transition from close to open and open to close.
-           */
-          transitioning: {
-            type: Boolean,
-            notify: true,
-            readOnly: true
-          }
-        },
+        static get is() {
+          return 'iron-overlay-renderer';
+        }
 
-        created: function() {
+        static get config() {
+          return {
+            properties: {
+              /**
+               * True if the overlay is currently displayed.
+               */
+              opened: {
+                type: Boolean,
+                observer: '_openedChanged'
+              },
+
+              /**
+               * Is true during the transition from close to open and open to close.
+               */
+              transitioning: {
+                type: Boolean,
+                notify: true,
+                readOnly: true
+              }
+            }
+          };
+        }
+
+        created() {
+          super.created();
           // Ensure it's not visible by default.
           this.style.display = 'none';
           // For a performant transition from open to close and close to open.
           this.__transitionRaf = null;
-        },
+        }
 
-        attached: function() {
+        attached() {
+          super.attached();
           this.opened && this._openedChanged(this.opened);
-        },
+        }
 
-        detached: function() {
+        detached() {
+          super.detached();
           if (this.__transitionRaf) {
             window.cancelAnimationFrame(this.__transitionRaf);
             this.__transitionRaf = null;
           }
-        },
+        }
 
         /**
          * @param {boolean} opened
          * @protected
          */
-        _openedChanged: function(opened) {
+        _openedChanged(opened) {
           // Defer any animation-related code on attached
           // (_openedChanged gets called again on attached).
           if (!this.isAttached) {
@@ -122,23 +135,21 @@ styling can be done like this:
           this._setTransitioning(true);
           this.__transitionRaf && window.cancelAnimationFrame(this.__transitionRaf);
           this.__transitionRaf = window.requestAnimationFrame(this._renderOpenedChanged.bind(this));
-        },
+        }
 
         /**
          * Tasks to be performed to actually open/close. Override this to play
          * animations, and call `_setTransitioning(false)` when those are done.
          * @protected
          */
-        _renderOpenedChanged: function() {
+        _renderOpenedChanged() {
           this.style.display = this.opened ? '' : 'none';
           this._setTransitioning(false);
         }
-      };
+      }
 
-      Polymer({
-        is: 'iron-overlay-renderer',
-        behaviors: [Polymer.IronOverlayRenderer]
-      });
+      Polymer.IronOverlayRenderer = IronOverlayRenderer;
+      customElements.define(IronOverlayRenderer.is, IronOverlayRenderer);
 
     })();
   </script>

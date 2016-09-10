@@ -18,21 +18,31 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <dom-module id="iron-animated-overlay">
   <template>
     <template id="renderer-template">
-      <iron-animated-overlay-renderer
-        data-overlay$="[[dataOverlay]]"
-        with-backdrop$="[[withBackdrop]]"
-        opened$="[[opened]]">
+      <iron-animated-overlay-renderer with-backdrop$="[[withBackdrop]]">
       </iron-animated-overlay-renderer>
     </template>
-    <slot></slot>
+  <slot></slot>
   </template>
   <script>
-    Polymer({
-      is: 'iron-animated-overlay',
-      behaviors: [Polymer.IronOverlay],
-      properties: {
-        withBackdrop: Boolean
+    (function() {
+      'use strict';
+
+      class IronAnimatedOverlay extends Polymer.IronOverlay {
+        static get is() {
+          return 'iron-animated-overlay';
+        }
+
+        static get config() {
+          return {
+            properties: {
+              withBackdrop: Boolean
+            }
+          };
+        }
       }
-    });
+
+      Polymer.IronAnimatedOverlay = IronAnimatedOverlay;
+      customElements.define(IronAnimatedOverlay.is, IronAnimatedOverlay);
+    })();
   </script>
 </dom-module>
