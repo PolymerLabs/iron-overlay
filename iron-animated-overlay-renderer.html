@@ -41,8 +41,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         transition: background-color .2s;
       }
 
-      :host(.opened[with-backdrop]) {
-        background-color: var(--iron-overlay-backdrop-color, rgba(0, 0, 0, 0.6));
+      #backdrop {
+        pointer-events: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: transparent;
+        opacity: 0;
+        transition: background-color .2s, opacity .2s;
+      }
+
+      :host(.opened[with-backdrop]) #backdrop {
+        background-color: black;
+        opacity: 0.6;
+        @apply --iron-overlay-backdrop;
       }
 
       #overlay {
@@ -57,6 +71,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
       </style>
 
+      <div id="backdrop"></div>
       <div id="overlay" tabindex="0">
         <slot></slot>
       </div>
@@ -88,24 +103,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
 
         /**
-         * Starts the animation.
+         * Override this, as we need to wait for animation to complete.
          * @protected
          */
         _renderOpenedChanged() {
-          // Ensure it is displayed.
-          if (this.opened) {
-            this.style.display = '';
-            // Force layout so animation can happen.
-            this._forceLayout();
-          }
-          this.toggleClass('opened', this.opened);
+          this.__forceLayout();
+          this.classList.toggle('opened', this.opened);
         }
 
         /**
          * Forces layout.
-         * @protected
+         * @private
          */
-        _forceLayout() {
+        __forceLayout() {
           return this.offsetWidth;
         }
 
@@ -115,10 +125,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
          */
         __onTransitionEnd(event) {
           if (event.composedPath()[0] === this.$.overlay) {
-            if (!this.opened) {
-              this.style.display = 'none';
-            }
-            this._setTransitioning(false);
+            this._finishRenderOpenedChanged();
           }
         }
       }

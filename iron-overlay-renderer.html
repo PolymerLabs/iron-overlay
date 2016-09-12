@@ -134,18 +134,42 @@ styling can be done like this:
 
           this._setTransitioning(true);
           this.__transitionRaf && window.cancelAnimationFrame(this.__transitionRaf);
-          this.__transitionRaf = window.requestAnimationFrame(this._renderOpenedChanged.bind(this));
+          this.__transitionRaf = window.requestAnimationFrame(this.__startRenderOpenedChanged.bind(this));
         }
 
         /**
          * Tasks to be performed to actually open/close. Override this to play
-         * animations, and call `_setTransitioning(false)` when those are done.
+         * animations, and call `_finishRenderOpenedChanged()` when those are done.
          * @protected
          */
         _renderOpenedChanged() {
-          this.style.display = this.opened ? '' : 'none';
+          this._finishRenderOpenedChanged();
+        }
+
+        /**
+         * @protected
+         */
+        _finishRenderOpenedChanged() {
+          // Ensure it is not displayed.
+          if (!this.opened) {
+            this.style.display = 'none';
+          }
           this._setTransitioning(false);
         }
+
+        /**
+         * Starts the update from open to closed & viceversa.
+         * @private
+         */
+        __startRenderOpenedChanged() {
+          this.__transitionRaf = null;
+          // Ensure it is displayed.
+          if (this.opened) {
+            this.style.display = '';
+          }
+          this._renderOpenedChanged();
+        }
+
       }
 
       Polymer.IronOverlayRenderer = IronOverlayRenderer;
