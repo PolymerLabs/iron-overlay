@@ -21,35 +21,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
 
 
-  <link rel="import" href="../../iron-list/iron-list.html">
-  <link rel="import" href="../../paper-button/paper-button.html">
-  <link rel="import" href="../../paper-dialog/paper-dialog.html">
-  <link rel="import" href="../../neon-animation/neon-animations.html">
-  <link rel="import" href="../../paper-menu-button/paper-menu-button.html">
-  <link rel="import" href="../../paper-listbox/paper-listbox.html">
-  <link rel="import" href="../../paper-item/paper-item.html">
   <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
   <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
 
   <link rel="import" href="../iron-overlay.html">
   <link rel="import" href="../iron-animated-overlay.html">
   <link rel="import" href="../iron-overlay-container.html">
+  <link rel="import" href="x-menu-button.html">
 
-  <style is="custom-style" include="demo-pages-shared-styles">
-    .stacking-context {
-      transform: translateZ(0);
-    }
-
-    demo-snippet {
-      --demo-snippet-demo-display: block;
-    }
-
-    iron-overlay-container > * {
-      --iron-overlay: {
-        padding: 10px;
+  <custom-style>
+    <style is="custom-style" include="demo-pages-shared-styles">
+      .stacking-context {
+        transform: translateZ(0);
       }
-    }
-  </style>
+
+      iron-overlay-container > * {
+        --iron-overlay: {
+          padding: 10px;
+        }
+      }
+    </style>
+  </custom-style>
 </head>
 
 <body unresolved>
@@ -66,34 +58,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <p>Styles can be added inside the template.</p>
     <demo-snippet>
       <template>
-        <style is="custom-style">
-          paper-dialog {
-            background-color: orange;
-            --paper-dialog-button-color: gray;
-          }
-
+        <custom-style><style is="custom-style">
           [data-overlay="c0"] {
             --iron-overlay-background-color: #cec;
           }
-        </style>
+        </style></custom-style>
 
-        <paper-button raised onclick="dialog.open()">trapped</paper-button>
-        <paper-dialog id="dialog" with-backdrop>
-          <h2>Dialog</h2>
-          <div class="buttons">
-            <paper-button dialog-dismiss>close</paper-button>
-          </div>
-        </paper-dialog>
-
-        <paper-button raised onclick="c0.open()">free</paper-button>
+        <button onclick="c0.open()">free</button>
         <iron-animated-overlay id="c0" with-backdrop>
           <template>
             <h2>Dialog</h2>
             <div class="buttons">
-              <paper-button onclick="c0.close()">close</paper-button>
+              <button onclick="c0.close()">close</button>
             </div>
           </template>
-        </iron-animated-overlay>
+      </iron-animated-overlay>
       </template>
     </demo-snippet>
 
@@ -103,113 +82,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <demo-snippet>
       <template>
         <x-menu-button vertical-align="bottom">
-          <paper-button raised class="trigger">x-menu-button</paper-button>
+          <button slot="trigger">x-menu-button</button>
           <template>
-            <paper-listbox>
-              <paper-item>Share</paper-item>
-              <paper-item>Settings</paper-item>
-              <paper-item>Help</paper-item>
-            </paper-listbox>
+            <div>content</div>
           </template>
-        </x-menu-button>
-
-        <dom-module id="x-menu-button">
-          <template>
-            <style>
-              #trigger {
-                display: inline-block;
-              }
-            </style>
-            <div on-tap="open" id="trigger">
-              <content select=".trigger"></content>
-            </div>
-            <content></content>
-          </template>
-
-          <script>
-            Polymer({
-              is: 'x-menu-button',
-              extends: 'iron-animated-overlay',
-              properties: {
-                horizontalAlign: {
-                  type: String,
-                  value: 'left'
-                },
-                verticalAlign: {
-                  type: String,
-                  value: 'top'
-                },
-                _positionTarget: {
-                  type: Element,
-                  readOnly: true,
-                  value: function() {
-                    return this.$.trigger;
-                  }
-                }
-              },
-              observers: [
-                '_mirrorPropertyToRenderer(\'verticalAlign\', verticalAlign)',
-                '_mirrorPropertyToRenderer(\'horizontalAlign\', horizontalAlign)',
-                '_mirrorPropertyToRenderer(\'positionTarget\', _positionTarget)'
-              ],
-              _createRenderer: function() {
-                var renderer = document.createElement('x-menu-button-renderer');
-                renderer.addEventListener('iron-select', this.close.bind(this));
-                document.addEventListener('scroll', this._positionRenderer.bind(this));
-                return renderer;
-              },
-              _positionRenderer: function() {
-                this.__positionRAF && window.cancelAnimationFrame(this.__positionRAF);
-                this.__positionRAF = window.requestAnimationFrame(this._renderer.position.bind(this._renderer));
-              }
-            });
-          </script>
-        </dom-module>
-
-
-
-        <dom-module id="x-menu-button-renderer">
-          <template strip-whitespace>
-            <style>
-              #overlay {
-                position: absolute;
-              }
-            </style>
-            <template block="super"></template>
-          </template>
-
-          <script>
-            Polymer({
-              is: 'x-menu-button-renderer',
-              extends: 'iron-animated-overlay-renderer',
-              properties: {
-                positionTarget: Element,
-                horizontalAlign: {
-                  type: String,
-                  value: 'left'
-                },
-                verticalAlign: {
-                  type: String,
-                  value: 'top'
-                },
-              },
-              _renderOpenedChanged: function() {
-                this.getPrototype('iron-animated-overlay-renderer')._renderOpenedChanged.apply(this);
-                this.position();
-              },
-              position: function() {
-                if (this.opened) {
-                  var rect = this.positionTarget.getBoundingClientRect();
-                  var overlayStyle = this.$.overlay.style;
-                  overlayStyle.top = this.verticalAlign === 'top' ? rect.top + 'px' : '';
-                  overlayStyle.bottom = this.verticalAlign === 'top' ? '' : (window.innerHeight - rect.bottom) + 'px';
-                  overlayStyle.left = this.horizontalAlign === 'left' ? rect.left + 'px' : '';
-                  overlayStyle.right = this.horizontalAlign === 'left' ? '' : (window.innerWidth - rect.right) + 'px';
-                }
-              }
-            });
-          </script>
-        </dom-module>
+      </x-menu-button>
       </template>
     </demo-snippet>
 
@@ -217,100 +94,88 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <demo-snippet>
       <template>
-        <template is="dom-bind">
-          <paper-button raised on-tap="openNextDialog">dialog</paper-button>
-          <iron-animated-overlay with-backdrop id="c1">
-            <template>
-              <template is="dom-repeat" items="{{data}}" as="item">
-                <p>{{item.name}}</p>
+        <dom-bind>
+          <template>
+        <button on-click="openNextOverlay">overlay</button>
+        <iron-animated-overlay with-backdrop id="c1">
+          <template>
+            <dom-repeat items="{{data}}" as="item">
+              <template>
+                <p>{{item.itemName}}</p>
               </template>
-              <paper-button onclick="c1.close()">close</paper-button>
-            </template>
-          </iron-animated-overlay>
-
-          <paper-menu-button>
-            <paper-button raised class="dropdown-trigger">paper-menu-button</paper-button>
-            <paper-listbox class="dropdown-content">
-              <template is="dom-repeat" items="{{data}}" as="item">
-                <paper-item>{{item.name}}</paper-item>
-              </template>
-            </paper-listbox>
-          </paper-menu-button>
-
-          <x-menu-button>
-            <paper-button raised class="trigger">x-menu-button</paper-button>
-            <template is="dom-delegate">
-              <paper-listbox>
-                <template is="dom-repeat" items="{{data}}" as="item">
-                  <paper-item>{{item.name}}</paper-item>
-                </template>
-              </paper-listbox>
-            </template>
-          </x-menu-button>
-
-          <p>
-            <pre><code>index: {{selectedIndex}}<br> json: {{selectedItem}}</code></pre>
-          </p>
-          <iron-list items="{{data}}" as="item" as="item">
-            <template>
-              <div>
-                <paper-button raised on-tap="openNextDialog">dialog {{index}}</paper-button>
-                <iron-animated-overlay with-backdrop>
-                  <template>
-                    <h2>dialog {{index}}</h2>
-                    <p>Name: {{item.name}}</p>
-                    <paper-button on-tap="onAction">show</paper-button>
-                  </template>
-                </iron-animated-overlay>
-
-                <paper-menu-button>
-                  <paper-button raised class="dropdown-trigger">paper-menu-button {{index}}</paper-button>
-                  <paper-listbox class="dropdown-content">
-                    <paper-button on-tap="onAction">show</paper-button>
-                  </paper-listbox>
-                </paper-menu-button>
-
-                <x-menu-button>
-                  <paper-button raised class="trigger">x-menu-button {{index}}</paper-button>
-                  <template>
-                    <paper-listbox>
-                      <paper-button on-tap="onAction" data-index="{{index}}" data-item="{{item}}">show</paper-button>
-                    </paper-listbox>
-                  </template>
-                </x-menu-button>
-              </div>
-            </template>
-          </iron-list>
-          <p>
-            <paper-button raised on-tap="addData">Add</paper-button>
-            <paper-button raised on-tap="resetData">Reset</paper-button>
-          </p>
-        </template>
-        <script>
-          var t = document.querySelector('template[is="dom-bind"]');
-          t.addData = function() {
-            t.data = t.data.concat([{
-              name: 'item ' + t.data.length
-            }]);
-          };
-          t.resetData = function() {
-            t.data = [];
-            t.addData();
-            t.addData();
-            t.addData();
-          };
-          t.onAction = function(e) {
-            t.selectedIndex = e.model.index;
-            t.selectedItem = JSON.stringify(e.model.item);
-          };
-          t.openNextDialog = function(e) {
-            var trigger = Polymer.dom(e).rootTarget;
-            trigger.nextElementSibling.open();
-          };
-          t.resetData();
-        </script>
+      </dom-repeat>
+      <button onclick="c1.close()">close</button>
       </template>
-    </demo-snippet>
+      </iron-animated-overlay>
+
+      <x-menu-button>
+        <button slot="trigger">x-menu-button</button>
+        <template>
+            <ul>
+              <dom-repeat items="{{data}}" as="item">
+                <template><li>{{item.itemName}}</li></template>
+        </dom-repeat>
+        </ul>
+        </template>
+      </x-menu-button>
+
+      <p>
+        <pre><code>index: {{selectedIndex}}<br> json: {{selectedItem}}</code></pre>
+      </p>
+      <dom-repeat items="{{data}}" as="item" as="item">
+        <template>
+          <div>
+            <button on-click="openNextOverlay">dialog {{index}}</button>
+            <iron-animated-overlay with-backdrop>
+              <template>
+                <h2>dialog {{index}}</h2>
+                <p>Name: {{item.itemName}}</p>
+                <button on-click="onAction">show</button>
+              </template>
+        </iron-animated-overlay>
+
+        <x-menu-button>
+          <button slot="trigger">x-menu-button {{index}}</button>
+          <template>
+                  <button on-click="onAction" data-index="{{index}}" data-item="{{item}}">show</button>
+              </template>
+        </x-menu-button>
+  </div>
+  </template>
+  </dom-repeat>
+  <p>
+    <button on-click="addData">Add</button>
+    <button on-click="resetData">Reset</button>
+  </p>
+  </template>
+  <script>
+    var t = document.querySelector('dom-bind');
+    t.addData = function() {
+      t.data.push({
+        itemName: 'item ' + t.data.length
+      });
+      t.data = t.data;
+    };
+    t.resetData = function() {
+      t.data = [];
+      t.addData();
+      t.addData();
+      t.addData();
+    };
+    t.onAction = function(e) {
+      t.selectedIndex = e.model.index;
+      t.selectedItem = JSON.stringify(e.model.item);
+    };
+    t.openNextOverlay = function(e) {
+      var trigger = e.composedPath()[0];
+      trigger.nextElementSibling.open();
+    };
+    t.resetData();
+  </script>
+  </template>
+  </dom-bind>
+  </template>
+  </demo-snippet>
   </div>
 
 </body>

@@ -1,0 +1,125 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../iron-animated-overlay-renderer.html">
+
+<dom-module id="x-menu-button-renderer">
+  <template strip-whitespace>
+    <style>
+      :host {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+
+      #overlay {
+        outline: none;
+        position: absolute;
+        background-color: var(--iron-overlay-background-color, white);
+        @apply(--iron-overlay);
+      }
+
+      :host {
+        background-color: transparent;
+        transition: background-color .2s;
+      }
+
+      :host(.opened[with-backdrop]) {
+        background-color: var(--iron-overlay-backdrop-color, rgba(0, 0, 0, 0.6));
+      }
+
+      #overlay {
+        opacity: 0;
+        transform: translateY(100px);
+        transition: opacity .2s, transform .2s;
+      }
+
+      :host(.opened) #overlay {
+        transform: translateY(0);
+        opacity: 1;
+      }
+      </style>
+
+      <div id="overlay" tabindex="0">
+        <slot></slot>
+      </div>
+  </template>
+
+  <script>
+  (function() {
+    'use strict';
+
+    class XMenuButtonRenderer extends Polymer.IronAnimatedOverlayRenderer {
+
+      static get is() {
+        return 'x-menu-button-renderer';
+      }
+
+      static get config() {
+        return {
+          properties: {
+            horizontalAlign: {
+              type: String,
+              value: 'left'
+            },
+
+            verticalAlign: {
+              type: String,
+              value: 'top'
+            },
+
+            positionTarget: {
+              type: Element
+            },
+
+            _boundPosition: {
+              type: Function,
+              readOnly: true,
+              value: function() {
+                return this._position.bind(this);
+              }
+            }
+          }
+        };
+      }
+
+      _renderOpenedChanged() {
+        super._renderOpenedChanged();
+        document[this.opened ? 'addEventListener' : 'removeEventListener']('scroll', this._boundPosition);
+        this.position();
+      }
+
+      _position() {
+        this.__positionRAF && window.cancelAnimationFrame(this.__positionRAF);
+        this.__positionRAF = window.requestAnimationFrame(this.position.bind(this));
+      }
+
+      position() {
+        if (this.opened && this.positionTarget) {
+          var rect = this.positionTarget.getBoundingClientRect();
+          var overlayStyle = this.$.overlay.style;
+          overlayStyle.top = this.verticalAlign === 'top' ? rect.top + 'px' : '';
+          overlayStyle.bottom = this.verticalAlign === 'top' ? '' : (window.innerHeight - rect.bottom) + 'px';
+          overlayStyle.left = this.horizontalAlign === 'left' ? rect.left + 'px' : '';
+          overlayStyle.right = this.horizontalAlign === 'left' ? '' : (window.innerWidth - rect.right) + 'px';
+        }
+      }
+    }
+    customElements.define(XMenuButtonRenderer.is, XMenuButtonRenderer);
+
+  })();
+  </script>
+</dom-module>

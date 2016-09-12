@@ -1,0 +1,76 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../iron-animated-overlay.html">
+<link rel="import" href="x-menu-button-renderer.html">
+
+<dom-module id="x-menu-button">
+  <template>
+      <style>
+        #trigger {
+          display: inline-block;
+        }
+      </style>
+      <template id="renderer-template">
+        <x-menu-button-renderer
+          with-backdrop$="[[withBackdrop]]"
+          vertical-align="[[verticalAlign]]"
+          horizontal-align="[[horizontalAlign]]"
+          position-target="[[_positionTarget]]"
+          on-iron-select="close">
+        </x-menu-button-renderer>
+      </template>
+  <div on-click="open" id="trigger">
+    <slot name="trigger"></slot>
+  </div>
+  <slot></slot>
+  </template>
+
+  <script>
+  (function() {
+    'use strict';
+
+    class XMenuButton extends Polymer.IronAnimatedOverlay {
+
+      static get is() {
+        return 'x-menu-button';
+      }
+
+      static get config() {
+        return {
+          properties: {
+
+            horizontalAlign: {
+              type: String,
+              value: 'left'
+            },
+
+            verticalAlign: {
+              type: String,
+              value: 'top'
+            },
+
+            _positionTarget: {
+              type: Element,
+              readOnly: true,
+              value: function() {
+                return this;
+              }
+            }
+          }
+        };
+      }
+    }
+
+    customElements.define(XMenuButton.is, XMenuButton);
+
+  })();
+  </script>
+</dom-module>
