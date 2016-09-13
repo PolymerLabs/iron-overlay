@@ -13,24 +13,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <dom-module id="x-menu-button">
   <template>
-      <style>
-        #trigger {
-          display: inline-block;
-        }
-      </style>
-      <template id="renderer-template">
-        <x-menu-button-renderer
-          with-backdrop$="[[withBackdrop]]"
-          vertical-align="[[verticalAlign]]"
-          horizontal-align="[[horizontalAlign]]"
-          position-target="[[_positionTarget]]"
-          on-iron-select="close">
-        </x-menu-button-renderer>
-      </template>
-  <div on-click="open" id="trigger">
-    <slot name="trigger"></slot>
-  </div>
-  <slot></slot>
+    <style>
+      #trigger {
+        display: inline-block;
+      }
+    </style>
+    <template id="renderer-template">
+      <x-menu-button-renderer
+        with-backdrop$="[[withBackdrop]]"
+        vertical-align="[[verticalAlign]]"
+        horizontal-align="[[horizontalAlign]]"
+        position-target="[[_positionTarget]]"
+        on-iron-select="close">
+      </x-menu-button-renderer>
+    </template>
+    <div on-click="open" id="trigger">
+      <slot name="trigger"></slot>
+    </div>
+    <slot></slot>
   </template>
 
   <script>
