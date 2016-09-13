@@ -9,6 +9,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="iron-overlay-renderer-shared-styles.html">
 
 <!--
 `iron-overlay-renderer` renders the overlay content in the center of the screen,
@@ -42,25 +43,7 @@ styling can be done like this:
 
 <dom-module id="iron-overlay-renderer">
   <template strip-whitespace>
-    <style>
-      :host {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-      }
-
-      #overlay {
-        outline: none;
-        background-color: var(--iron-overlay-background-color, white);
-        @apply(--iron-overlay);
-      }
-    </style>
+    <style include="iron-overlay-renderer-shared-styles"></style>
     <div id="overlay" tabindex="0">
       <slot></slot>
     </div>

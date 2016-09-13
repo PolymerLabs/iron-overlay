@@ -10,6 +10,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="iron-overlay-renderer.html">
+<link rel="import" href="iron-animated-overlay-renderer-shared-styles.html">
 
 <!--
 @demo demo/index.html
@@ -17,64 +18,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <dom-module id="iron-animated-overlay-renderer">
   <template strip-whitespace>
-    <style>
-      :host {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-      }
-
-      #overlay {
-        outline: none;
-        background-color: var(--iron-overlay-background-color, white);
-        @apply(--iron-overlay);
-      }
-
-      :host {
-        background-color: transparent;
-        transition: background-color .2s;
-      }
-
-      #backdrop {
-        pointer-events: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: transparent;
-        opacity: 0;
-        transition: background-color .2s, opacity .2s;
-      }
-
-      :host(.opened[with-backdrop]) #backdrop {
-        background-color: black;
-        opacity: 0.6;
-        @apply --iron-overlay-backdrop;
-      }
-
-      #overlay {
-        opacity: 0;
-        transform: translateY(100px);
-        transition: opacity .2s, transform .2s;
-      }
-
-      :host(.opened) #overlay {
-        transform: translateY(0);
-        opacity: 1;
-      }
-      </style>
-
-      <div id="backdrop"></div>
-      <div id="overlay" tabindex="0">
-        <slot></slot>
-      </div>
+    <style include="iron-animated-overlay-renderer-shared-styles"></style>
+    <div id="backdrop"></div>
+    <div id="overlay" tabindex="0">
+      <slot></slot>
+    </div>
   </template>
 
   <script>
