@@ -1,0 +1,46 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+
+<!--
+### Styling
+
+The following custom properties and mixins are available for styling.
+
+Custom property | Description | Default
+----------------|-------------|----------
+`--iron-overlay-background-color` | Overlay background color                     | `white`
+`--iron-overlay`                  | Mixin applied to the overlay                 | `{}`
+-->
+
+<dom-module id="iron-overlay-renderer-shared-styles">
+  <template strip-whitespace>
+    <style>
+      :host {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+
+      #overlay {
+        outline: none;
+        background-color: var(--iron-overlay-background-color, white);
+        @apply(--iron-overlay);
+      }
+    </style>
+  </template>
+</dom-module>

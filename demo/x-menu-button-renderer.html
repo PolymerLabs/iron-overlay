@@ -12,50 +12,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <dom-module id="x-menu-button-renderer">
   <template strip-whitespace>
-    <style>
-      :host {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-      }
-
+    <style include="iron-animated-overlay-renderer-shared-styles">
       #overlay {
-        outline: none;
         position: absolute;
-        background-color: var(--iron-overlay-background-color, white);
-        @apply(--iron-overlay);
       }
-
-      :host {
-        background-color: transparent;
-        transition: background-color .2s;
-      }
-
-      :host(.opened[with-backdrop]) {
-        background-color: var(--iron-overlay-backdrop-color, rgba(0, 0, 0, 0.6));
-      }
-
-      #overlay {
-        opacity: 0;
-        transform: translateY(100px);
-        transition: opacity .2s, transform .2s;
-      }
-
-      :host(.opened) #overlay {
-        transform: translateY(0);
-        opacity: 1;
-      }
-      </style>
-
-      <div id="overlay" tabindex="0">
-        <slot></slot>
-      </div>
+    </style>
+    <div id="overlay" tabindex="0">
+      <slot></slot>
+    </div>
   </template>
 
   <script>
