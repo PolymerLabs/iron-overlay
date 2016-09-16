@@ -135,7 +135,7 @@ Use `overlayType` to limit which types of overlays this container should host:
       },
 
       _canAttach: function(data) {
-        return !this.overlayType || data.overlay.is === this.overlayType;
+        return this.isAttached && (!this.overlayType || data.overlay.localName === this.overlayType);
       },
 
       _attachOverlay: function(data) {
