@@ -240,7 +240,9 @@ styling can be done like this:
         _onEsc(event) {
           // Avoid interactions while transitioning.
           if (!this.noCancelOnEscKey && !this._renderer.transitioning) {
-            this._cancel(event.detail.keyboardEvent);
+            // If synthetic event, search for keyboard event in detail.
+            const keyboardEvent = event.detail.keyboardEvent || event;
+            this._cancel(keyboardEvent);
           }
         }
 
@@ -251,7 +253,9 @@ styling can be done like this:
         _onTap(event) {
           // Avoid interactions while transitioning. Check if tap is outside.
           if (!this.noCancelOnOutsideClick && !this._renderer.transitioning && !this._isTapInside(event)) {
-            this._cancel(event.detail.sourceEvent);
+            // If synthetic event, search for source event in detail.
+            const sourceEvent = event.detail.sourceEvent || event;
+            this._cancel(sourceEvent);
           }
         }
 
