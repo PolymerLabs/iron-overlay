@@ -1,0 +1,123 @@
+<!doctype html>
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<html>
+
+  <head>
+
+    <title>iron-overlay-container tests</title>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="../../web-component-tester/browser.js"></script>
+
+    <link rel="import" href="../../iron-test-helpers/iron-test-helpers.html">
+    <link rel="import" href="../iron-overlay-container.html">
+
+  </head>
+
+  <body>
+
+    <dom-module id="test-overlay">
+      <script>
+        HTMLImports.whenReady(function () {
+          Polymer({
+            is: 'test-overlay',
+            applyFocus: function () {},
+            _onTap: function () {},
+            _onEsc: function () {},
+
+            fireAttach: function () {
+              this._renderer = this._renderer || document.createElement('div');
+              return this.fire('iron-overlay-attach', {
+                overlay: this,
+                renderer: this._renderer
+              }, {cancelable: true});
+            },
+            fireDetach: function () {
+              return this.fire('iron-overlay-detach', {
+                overlay: this,
+                renderer: this._renderer
+              }, {
+                node: this._renderer,
+                cancelable: true
+              });
+            }
+          });
+        });
+      </script>
+    </dom-module>
+
+    <test-fixture id="basic">
+      <template>
+        <iron-overlay-container></iron-overlay-container>
+      </template>
+    </test-fixture>
+
+    <test-fixture id="overlays">
+      <template>
+        <test-overlay></test-overlay>
+        <test-overlay></test-overlay>
+      </template>
+    </test-fixture>
+
+    <script>
+
+      suite('<iron-overlay-container>', function () {
+        var container;
+        var overlay1;
+        var overlay2;
+
+        setup(function () {
+          container = fixture('basic');
+          var overlays = fixture('overlays');
+          overlay1 = overlays[0];
+          overlay2 = overlays[1];
+        });
+
+        test('handles iron-overlay-attach', function () {
+          assert.isTrue(overlay1.fireAttach().defaultPrevented, 'event handled');
+          assert.equal(overlay1._renderer.parentNode, container, 'renderer hosted');
+          assert.equal(overlay1, container.currentOverlay, 'currentOverlay updated');
+        });
+
+        test('handles iron-overlay-detach', function () {
+          overlay1.fireAttach();
+          assert.isTrue(overlay1.fireDetach().defaultPrevented, 'event handled');
+          assert.isNotOk(overlay1._renderer.parentNode, 'renderer detached');
+          assert.isNotOk(container.currentOverlay, 'currentOverlay updated');
+        });
+
+        test('detach and attach to bring overlay on top', function () {
+          overlay1.fireAttach();
+          overlay2.fireAttach();
+          assert.equal(overlay2, container.currentOverlay, 'renderer2 on top');
+          // Bring overlay1 on top.
+          overlay1.fireDetach();
+          overlay1.fireAttach();
+          assert.equal(overlay1, container.currentOverlay, 'renderer1 on top');
+        });
+
+        test('overlay below the last closed one receives focus via applyFocus', function () {
+          overlay1.fireAttach();
+          overlay2.fireAttach();
+          var spy = sinon.spy(overlay1, 'applyFocus');
+          overlay2.fireDetach();
+          assert.isTrue(spy.called, 'Focus is moved to new current overlay');
+        });
+      });
+    </script>
+
+  </body>
+
+</html>
