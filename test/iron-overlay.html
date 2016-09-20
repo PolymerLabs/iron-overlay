@@ -103,13 +103,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         test('overlay starts hidden', function () {
           assert.isNotOk(overlay.opened, 'overlay starts closed');
-          assert.isNotOk(overlay._renderer, 'overlay w/o renderer');
+          assert.isNotOk(overlay.renderer, 'overlay w/o renderer');
         });
 
         test('overlay creates and opens the renderer', function () {
           overlay.opened = true;
-          assert.isOk(overlay._renderer, 'renderer initialized');
-          assert.isTrue(overlay._renderer.opened, 'renderer opened');
+          assert.isOk(overlay.renderer, 'renderer initialized');
+          assert.isTrue(overlay.renderer.opened, 'renderer opened');
         });
 
         test('overlay delegates renderer hosting via iron-overlay-attach', function (done) {
@@ -118,7 +118,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             assert.isTrue(event.cancelable, 'cancelable event');
             assert.deepEqual(event.detail, {
               overlay: overlay,
-              renderer: overlay._renderer
+              renderer: overlay.renderer
             }, 'detail contains overlay and renderer');
             done();
           });
@@ -136,7 +136,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         test('overlay renderer attached on ancestor container', function () {
           overlay.opened = true;
-          assert.isTrue(container.contains(overlay._renderer), 'renderer attached to container');
+          assert.isTrue(container.contains(overlay.renderer), 'renderer attached to container');
         });
 
         test('overlay fires iron-overlay-opened', function (done) {
@@ -177,7 +177,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           runAfterOpen(overlay, function () {
             var spy = sinon.stub();
             overlay.addEventListener('iron-overlay-closed', spy);
-            MockInteractions.tap(overlay._renderer.$.overlay);
+            MockInteractions.tap(overlay.renderer.$.overlay);
             setTimeout(function () {
               assert.isFalse(spy.called, 'iron-overlay-closed should not fire');
               done();
@@ -293,12 +293,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         test('overlay open by default', function () {
           assert.isTrue(overlay.opened, 'overlay starts opened');
-          assert.isOk(overlay._renderer, 'overlay has a renderer');
+          assert.isOk(overlay.renderer, 'overlay has a renderer');
         });
 
         test('overlay positioned & sized properly', function (done) {
           setTimeout(function () {
-            var rect = overlay._renderer.$.overlay.getBoundingClientRect();
+            var rect = overlay.renderer.$.overlay.getBoundingClientRect();
             assert.closeTo(rect.left, (window.innerWidth - rect.width) / 2, 1, 'centered horizontally');
             assert.closeTo(rect.top, (window.innerHeight - rect.height) / 2, 1, 'centered vertically');
             done();
@@ -315,7 +315,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         test('node with autofocus is focused', function (done) {
           runAfterOpen(overlay, function () {
-            assert.isTrue(overlay._renderer.contains(document.activeElement), '<button autofocus> is focused');
+            assert.isTrue(overlay.renderer.contains(document.activeElement), '<button autofocus> is focused');
             done();
           });
         });
@@ -323,11 +323,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         test('no-auto-focus will not focus node with autofocus', function (done) {
           overlay.noAutoFocus = true;
           runAfterOpen(overlay, function () {
-            assert.isFalse(overlay._renderer.contains(document.activeElement), document.activeElement, '<button autofocus> not focused after opened');
+            assert.isFalse(overlay.renderer.contains(document.activeElement), document.activeElement, '<button autofocus> not focused after opened');
             done();
           });
           // In Safari the element with autofocus will immediately receive focus when displayed for the first time http://jsbin.com/woroci/2/ Ensure this is not the case for overlay.
-          assert.isFalse(overlay._renderer.contains(document.activeElement), '<button autofocus> not immediately focused');
+          assert.isFalse(overlay.renderer.contains(document.activeElement), '<button autofocus> not immediately focused');
         });
 
         test('with-backdrop traps the focus within the overlay', function () {
