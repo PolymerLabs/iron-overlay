@@ -83,8 +83,10 @@ styling can be done like this:
   <script>
     (function() {
       'use strict';
-      const templatizer = new Polymer.Templatizer();
 
+      const templatizer = new Polymer.Templatizer();
+      
+      /* Symbols for private properties/methods */
       const _openedChanged = Symbol();
       const _ensureInstance = Symbol();
       const _ensureAttached = Symbol();
