@@ -31,29 +31,44 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <dom-module id="test-overlay">
       <script>
         HTMLImports.whenReady(function () {
-          Polymer({
-            is: 'test-overlay',
-            applyFocus: function () {},
-            _onTap: function () {},
-            _onEsc: function () {},
-
-            fireAttach: function () {
-              this.renderer = this.renderer || document.createElement('div');
-              return this.fire('iron-overlay-attach', {
-                overlay: this,
-                renderer: this.renderer
-              }, {cancelable: true});
-            },
-            fireDetach: function () {
-              return this.fire('iron-overlay-detach', {
-                overlay: this,
-                renderer: this.renderer
-              }, {
-                node: this.renderer,
-                cancelable: true
-              });
+          class TestOverlay extends Polymer.Element {
+            static get is() {
+              return 'test-overlay';
             }
-          });
+            applyFocus() {}
+            _onTap() {}
+            _onEsc() {}
+
+            fireAttach() {
+              this.renderer = this.renderer || document.createElement('div');
+
+              var event = new Event('iron-overlay-attach', {
+                bubbles: true,
+                cancelable: true,
+                composed: true
+              });
+              event.detail = {
+                overlay: this
+              };
+              this.dispatchEvent(event);
+              return event;
+            }
+
+            fireDetach() {
+              var event = new Event('iron-overlay-detach', {
+                bubbles: true,
+                cancelable: true,
+                composed: true
+              });
+              event.detail = {
+                overlay: this
+              };
+              this.renderer.dispatchEvent(event);
+              return event;
+            }
+          }
+
+          customElements.define(TestOverlay.is, TestOverlay);
         });
       </script>
     </dom-module>

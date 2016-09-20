@@ -46,6 +46,7 @@ Use `overlayType` to limit which types of overlays this container should host:
         left: 0;
         z-index: 101;
       }
+
     </style>
     <slot></slot>
   </template>
@@ -84,7 +85,7 @@ Use `overlayType` to limit which types of overlays this container should host:
         return this._overlays[this._overlays.length - 1];
       },
 
-      ready: function() {
+      ready: function () {
         // List of overlays handled by this container.
         this._overlays = [];
 
@@ -107,13 +108,12 @@ Use `overlayType` to limit which types of overlays this container should host:
        * @param {!Event} event
        * @private
        */
-      _onAttach: function(event) {
+      _onAttach: function (event) {
         if (event.defaultPrevented) {
           return;
         }
 
-        if (this._canAttach(event.detail)) {
-          this._attachOverlay(event.detail);
+        if (this._attachOverlay(event.detail.overlay)) {
           event.preventDefault();
           event.stopPropagation();
         }
@@ -124,32 +124,36 @@ Use `overlayType` to limit which types of overlays this container should host:
        * @param {!Event} event
        * @private
        */
-      _onDetach: function(event) {
+      _onDetach: function (event) {
         if (event.defaultPrevented) {
           return;
         }
-        if (this._detachOverlay(event.detail)) {
+        if (this._detachOverlay(event.detail.overlay)) {
           event.preventDefault();
           event.stopPropagation();
         }
       },
 
-      _canAttach: function(data) {
-        return this.isAttached && (!this.overlayType || data.overlay.localName === this.overlayType);
+      _canAttach: function (overlay) {
+        return this.isAttached && (!this.overlayType || overlay.localName === this.overlayType);
       },
 
-      _attachOverlay: function(data) {
-        this._overlays.push(data.overlay);
-        this.appendChild(data.renderer);
+      _attachOverlay: function (overlay) {
+        var canAttach = this._canAttach(overlay);
+        if (canAttach) {
+          this._overlays.push(overlay);
+          this.appendChild(overlay.renderer);
+        }
+        return canAttach;
       },
 
-      _detachOverlay: function(data) {
-        var i = this._overlays.indexOf(data.overlay);
+      _detachOverlay: function (overlay) {
+        var i = this._overlays.indexOf(overlay);
         if (i >= 0) {
-          this.removeChild(data.renderer);
+          this.removeChild(overlay.renderer);
           this._overlays.splice(i, 1);
           // Move focus to new top overlay.
-          var overlay = this.currentOverlay;
+          overlay = this.currentOverlay;
           overlay && overlay.applyFocus();
         }
         return i >= 0;
@@ -160,7 +164,7 @@ Use `overlayType` to limit which types of overlays this container should host:
        * @param {!Event} event
        * @private
        */
-      _onEsc: function(event) {
+      _onEsc: function (event) {
         var overlay = this.currentOverlay;
         overlay && overlay._onEsc(event);
       },
@@ -170,7 +174,7 @@ Use `overlayType` to limit which types of overlays this container should host:
        * @param {!Event} event
        * @private
        */
-      _onTap: function(event) {
+      _onTap: function (event) {
         var overlay = this.currentOverlay;
         overlay && overlay._onTap(event);
       }

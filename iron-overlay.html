@@ -317,8 +317,7 @@ styling can be done like this:
             return;
           }
           var event = this[_fire]('iron-overlay-attach', {
-            overlay: this,
-            renderer: this.renderer
+            overlay: this
           }, {
             cancelable: true
           });
@@ -335,8 +334,7 @@ styling can be done like this:
             return;
           }
           var event = this[_fire]('iron-overlay-detach', {
-            overlay: this,
-            renderer: this.renderer
+            overlay: this
           }, {
             node: this.renderer,
             cancelable: true
@@ -382,7 +380,7 @@ styling can be done like this:
           });
           event.detail = detail;
           var node = options.node || this;
-          node.dispatchEvent(event)
+          node.dispatchEvent(event);
           return event;
         }
 

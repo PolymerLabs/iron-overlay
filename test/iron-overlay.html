@@ -117,8 +117,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             assert.isTrue(event.bubbles, 'bubbling event');
             assert.isTrue(event.cancelable, 'cancelable event');
             assert.deepEqual(event.detail, {
-              overlay: overlay,
-              renderer: overlay.renderer
+              overlay: overlay
             }, 'detail contains overlay and renderer');
             done();
           });
