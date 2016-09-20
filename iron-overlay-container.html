@@ -145,7 +145,7 @@ Use `overlayType` to limit which types of overlays this container should host:
         }
 
         attachOverlay(overlay) {
-          var canAttach = this.canAttach(overlay);
+          const canAttach = this.canAttach(overlay);
           if (canAttach) {
             this[_overlays].push(overlay);
             this.appendChild(overlay.renderer);
@@ -154,7 +154,7 @@ Use `overlayType` to limit which types of overlays this container should host:
         }
 
         detachOverlay(overlay) {
-          var i = this[_overlays].indexOf(overlay);
+          const i = this[_overlays].indexOf(overlay);
           if (i >= 0) {
             this.removeChild(overlay.renderer);
             this[_overlays].splice(i, 1);
@@ -195,7 +195,7 @@ Use `overlayType` to limit which types of overlays this container should host:
         }
 
         [_getHostRoot]() {
-          var n = this;
+          let n = this;
           while (n) {
             if (n.nodeType === Node.DOCUMENT_FRAGMENT_NODE && n.host) {
               return n;
@@ -211,7 +211,7 @@ Use `overlayType` to limit which types of overlays this container should host:
          */
         [_onEsc](event) {
           if (event.key === 'Escape' || event.keyCode === 27) {
-            var overlay = this.currentOverlay;
+            const overlay = this.currentOverlay;
             overlay && overlay._onEsc(event);
           }
         }
@@ -228,7 +228,7 @@ Use `overlayType` to limit which types of overlays this container should host:
          * @private
          */
         [_onTap](event) {
-          var overlay = this.currentOverlay;
+          const overlay = this.currentOverlay;
           overlay && overlay._onTap(event);
         }
       }

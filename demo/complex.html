@@ -149,7 +149,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </p>
   </template>
   <script>
-    var t = document.querySelector('dom-bind');
+    const t = document.querySelector('dom-bind');
     t.addData = function() {
       t.data.push({
         itemName: 'item ' + t.data.length
@@ -167,7 +167,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       t.selectedItem = JSON.stringify(e.model.item);
     };
     t.openNextOverlay = function(e) {
-      var trigger = e.composedPath()[0];
+      const trigger = e.composedPath()[0];
       trigger.nextElementSibling.open();
     };
     t.resetData();
