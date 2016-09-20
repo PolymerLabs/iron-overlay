@@ -9,6 +9,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
 
 <!--
 ### Styling
@@ -25,15 +26,13 @@ Custom property | Description | Default
   <template strip-whitespace>
     <style>
       :host {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
+        /* Take full screen */
+        @apply --layout-fixed-top;
+        @apply --layout-fixed-bottom;
+        /* Center content horizontally & vertically */
+        @apply --layout-vertical;
+        @apply --layout-center;
+        @apply --layout-center-justified;
       }
 
       #overlay {

@@ -10,6 +10,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="iron-overlay-renderer-shared-styles.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
 
 <!--
 ### Styling
@@ -29,12 +30,9 @@ Custom property | Description | Default
   <template strip-whitespace>
     <style include="iron-overlay-renderer-shared-styles">
       #backdrop {
+        @apply --layout-fixed-top;
+        @apply --layout-fixed-bottom;
         pointer-events: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
         background-color: transparent;
         opacity: 0;
         transition: background-color .2s, opacity .2s;
