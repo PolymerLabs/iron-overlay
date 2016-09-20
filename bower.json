@@ -18,7 +18,6 @@
     "url": "git://github.com/PolymerLabs/iron-overlay.git"
   },
   "dependencies": {
-    "iron-a11y-keys-behavior": "PolymerElements/iron-a11y-keys-behavior#2.0-preview",
     "iron-flex-layout": "PolymerElements/iron-flex-layout#2.0-preview",
     "polymer": "Polymer/polymer#2.0-preview"
   },
@@ -33,7 +32,6 @@
   "resolutions": {
     "iron-flex-layout": "2.0-preview",
     "polymer": "2.0-preview",
-    "iron-a11y-keys-behavior": "2.0-preview",
     "webcomponentsjs": "v1"
   }
 }

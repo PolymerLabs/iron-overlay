@@ -9,7 +9,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../polymer/polymer.html">
-<link rel="import" href="../iron-a11y-keys-behavior/iron-a11y-keys-behavior.html">
 
 <!--
 `iron-overlay-container` hosts the overlay renderers by litening to the
@@ -52,134 +51,190 @@ Use `overlayType` to limit which types of overlays this container should host:
   </template>
 
   <script>
-    Polymer({
-      is: 'iron-overlay-container',
 
-      behaviors: [Polymer.IronA11yKeysBehavior],
+    (function () {
+      'use strict';
 
-      properties: {
+      const _overlays = Symbol();
+      const _host = Symbol();
+      const _getHostRoot = Symbol();
+
+      const _onAttach = Symbol();
+      const _boundOnAttach = Symbol();
+      const _onDetach = Symbol();
+      const _boundOnDetach = Symbol();
+      const _onTap = Symbol();
+      const _boundOnTap = Symbol();
+      const _onKeydown = Symbol();
+      const _boundOnKeydown = Symbol();
+      const _onEsc = Symbol();
+
+      class IronOverlayContainer extends Polymer.Element {
+        static get is() {
+          return 'iron-overlay-container';
+        }
+        static get config() {
+          return {
+            properties: {
+              /**
+               * Which overlay type should this container host.
+               */
+              overlayType: String
+            }
+          };
+        }
+        constructor() {
+          super();
+          // List of overlays handled by this container.
+          this[_overlays] = [];
+          this[_host] = null;
+          this[_boundOnAttach] = this[_onAttach].bind(this);
+          this[_boundOnDetach] = this[_onDetach].bind(this);
+          this[_boundOnTap] = this[_onTap].bind(this);
+          this[_boundOnKeydown] = this[_onKeydown].bind(this);
+        }
+
+        connectedCallback() {
+          super.connectedCallback();
+
+          // Document wide listeners for capturing tap outside and esc.
+          document.addEventListener('mousedown', this[_boundOnTap], {
+            passive: true,
+            capture: true
+          });
+          document.addEventListener('touchstart', this[_boundOnTap], {
+            passive: true,
+            capture: true
+          });
+          document.addEventListener('keydown', this[_boundOnKeydown]);
+
+          // Listeners on the host.
+          this[_host] = this[_getHostRoot]();
+          this[_host].addEventListener('iron-overlay-attach', this[_boundOnAttach]);
+          this[_host].addEventListener('iron-overlay-detach', this[_boundOnDetach]);
+        }
+
+        disconnectedCallback() {
+          super.disconnectedCallback();
+
+          document.removeEventListener('mousedown', this[_boundOnTap], {
+            passive: true,
+            capture: true
+          });
+          document.removeEventListener('touchstart', this[_boundOnTap], {
+            passive: true,
+            capture: true
+          });
+          document.removeEventListener('keydown', this[_boundOnKeydown]);
+          this[_host].removeEventListener('iron-overlay-attach', this[_boundOnAttach]);
+          this[_host].removeEventListener('iron-overlay-detach', this[_boundOnDetach]);
+          this[_host] = null;
+        }
+
         /**
-         * The HTMLElement that will be firing relevant KeyboardEvents.
-         * Overriden from `Polymer.IronA11yKeysBehavior`.
+         * Returns the current overlay.
+         * @type {Node|undefined}
          */
-        keyEventTarget: {
-          type: Element,
-          value: document
-        },
+        get currentOverlay() {
+          return this[_overlays][this[_overlays].length - 1];
+        }
+
+
+        canAttach(overlay) {
+          return (!this.overlayType || overlay.localName === this.overlayType);
+        }
+
+        attachOverlay(overlay) {
+          var canAttach = this.canAttach(overlay);
+          if (canAttach) {
+            this[_overlays].push(overlay);
+            this.appendChild(overlay.renderer);
+          }
+          return canAttach;
+        }
+
+        detachOverlay(overlay) {
+          var i = this[_overlays].indexOf(overlay);
+          if (i >= 0) {
+            this.removeChild(overlay.renderer);
+            this[_overlays].splice(i, 1);
+            // Move focus to new top overlay.
+            overlay = this.currentOverlay;
+            overlay && overlay.applyFocus();
+          }
+          return i >= 0;
+        }
 
         /**
-         * Which overlay type should this container host.
+         * Adds the `root` and prevents/stops the event propagation.
+         * @param {!Event} event
          */
-        overlayType: String
-      },
+        [_onAttach](event) {
+          if (event.defaultPrevented) {
+            return;
+          }
 
-      keyBindings: {
-        'esc': '_onEsc'
-      },
-
-      /**
-       * Returns the current overlay.
-       * @type {Node|undefined}
-       */
-      get currentOverlay() {
-        return this._overlays[this._overlays.length - 1];
-      },
-
-      ready: function () {
-        // List of overlays handled by this container.
-        this._overlays = [];
-
-        document.addEventListener('mousedown', this._onTap.bind(this), {
-          passive: true,
-          capture: true
-        });
-        document.addEventListener('touchstart', this._onTap.bind(this), {
-          passive: true,
-          capture: true
-        });
-
-        var host = Polymer.dom(this).getOwnerRoot() || document;
-        host.addEventListener('iron-overlay-attach', this._onAttach.bind(this));
-        host.addEventListener('iron-overlay-detach', this._onDetach.bind(this));
-      },
-
-      /**
-       * Adds the `root` and prevents/stops the event propagation.
-       * @param {!Event} event
-       * @private
-       */
-      _onAttach: function (event) {
-        if (event.defaultPrevented) {
-          return;
+          if (this.attachOverlay(event.detail.overlay)) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
         }
 
-        if (this._attachOverlay(event.detail.overlay)) {
-          event.preventDefault();
-          event.stopPropagation();
+        /**
+         * Removes the `root` and prevents/stops the event propagation.
+         * @param {!Event} event
+         */
+        [_onDetach](event) {
+          if (event.defaultPrevented) {
+            return;
+          }
+          if (this.detachOverlay(event.detail.overlay)) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
         }
-      },
 
-      /**
-       * Removes the `root` and prevents/stops the event propagation.
-       * @param {!Event} event
-       * @private
-       */
-      _onDetach: function (event) {
-        if (event.defaultPrevented) {
-          return;
+        [_getHostRoot]() {
+          var n = this;
+          while (n) {
+            if (n.nodeType === Node.DOCUMENT_FRAGMENT_NODE && n.host) {
+              return n;
+            }
+            n = n.parentNode;
+          }
+          return document;
         }
-        if (this._detachOverlay(event.detail.overlay)) {
-          event.preventDefault();
-          event.stopPropagation();
+
+        /**
+         * Delegates the handling of the `esc` event to the top overlay.
+         * @param {!Event} event
+         */
+        [_onEsc](event) {
+          if (event.key === 'Escape' || event.keyCode === 27) {
+            var overlay = this.currentOverlay;
+            overlay && overlay._onEsc(event);
+          }
         }
-      },
 
-      _canAttach: function (overlay) {
-        return this.isAttached && (!this.overlayType || overlay.localName === this.overlayType);
-      },
-
-      _attachOverlay: function (overlay) {
-        var canAttach = this._canAttach(overlay);
-        if (canAttach) {
-          this._overlays.push(overlay);
-          this.appendChild(overlay.renderer);
+        [_onKeydown](event) {
+          if (event.key === 'Escape' || event.keyCode === 27) {
+            this[_onEsc](event);
+          }
         }
-        return canAttach;
-      },
 
-      _detachOverlay: function (overlay) {
-        var i = this._overlays.indexOf(overlay);
-        if (i >= 0) {
-          this.removeChild(overlay.renderer);
-          this._overlays.splice(i, 1);
-          // Move focus to new top overlay.
-          overlay = this.currentOverlay;
-          overlay && overlay.applyFocus();
+        /**
+         * Delegates the handling of the `tap` event to the top overlay.
+         * @param {!Event} event
+         * @private
+         */
+        [_onTap](event) {
+          var overlay = this.currentOverlay;
+          overlay && overlay._onTap(event);
         }
-        return i >= 0;
-      },
-
-      /**
-       * Delegates the handling of the `esc` event to the top overlay.
-       * @param {!Event} event
-       * @private
-       */
-      _onEsc: function (event) {
-        var overlay = this.currentOverlay;
-        overlay && overlay._onEsc(event);
-      },
-
-      /**
-       * Delegates the handling of the `tap` event to the top overlay.
-       * @param {!Event} event
-       * @private
-       */
-      _onTap: function (event) {
-        var overlay = this.currentOverlay;
-        overlay && overlay._onTap(event);
       }
 
-    });
+      customElements.define(IronOverlayContainer.is, IronOverlayContainer);
+    })();
   </script>
 
 </dom-module>
