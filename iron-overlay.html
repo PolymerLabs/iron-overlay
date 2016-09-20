@@ -83,14 +83,14 @@ styling can be done like this:
   <script>
     (function() {
       'use strict';
-      var templatizer = new Polymer.Templatizer();
+      const templatizer = new Polymer.Templatizer();
 
-      var _openedChanged = Symbol();
-      var _ensureInstance = Symbol();
-      var _ensureAttached = Symbol();
-      var _ensureDetached = Symbol();
-      var _onTransitioningChanged = Symbol();
-      var _fire = Symbol();
+      const _openedChanged = Symbol();
+      const _ensureInstance = Symbol();
+      const _ensureAttached = Symbol();
+      const _ensureDetached = Symbol();
+      const _onTransitioningChanged = Symbol();
+      const _fire = Symbol();
 
       class IronOverlay extends Polymer.Element {
 
@@ -192,7 +192,7 @@ styling can be done like this:
           if (this.noAutoFocus || !this.renderer || this.renderer.transitioning) {
             return;
           }
-          var focusNode = this._getFocusNode();
+          const focusNode = this._getFocusNode();
           if (this.opened) {
             focusNode && focusNode.focus();
           } else {
@@ -233,7 +233,7 @@ styling can be done like this:
          * @protected
          */
         _cancel(event) {
-          var cancelEvent = this[_fire]('iron-overlay-canceled', event, {
+          const cancelEvent = this[_fire]('iron-overlay-canceled', event, {
             cancelable: true
           });
           if (!cancelEvent.defaultPrevented) {
@@ -285,19 +285,19 @@ styling can be done like this:
             return;
           }
           // Init the renderer.
-          var rendererInstance = new(templatizer.templatize(this._getRendererTemplate(), {
+          const rendererInstance = new(templatizer.templatize(this._getRendererTemplate(), {
             fwdHostPropToInstance: function(host, prop, value) {
               rendererInstance && rendererInstance.forwardProperty(prop, value, host);
             }
           }))(this);
-          var renderer = rendererInstance.root.children[0];
+          const renderer = rendererInstance.root.children[0];
           renderer.dataset.overlay = this.id;
           renderer.addEventListener('transitioning-changed', this[_onTransitioningChanged].bind(this));
 
           // Stamp the content if any!
-          var contentTemplate = this._getContentTemplate();
+          const contentTemplate = this._getContentTemplate();
           if (contentTemplate) {
-            var contentInstance = new(templatizer.templatize(contentTemplate, {
+            const contentInstance = new(templatizer.templatize(contentTemplate, {
               fwdHostPropToInstance: function(host, prop, value) {
                 contentInstance && contentInstance.forwardProperty(prop, value, host);
               }
@@ -316,7 +316,7 @@ styling can be done like this:
           if (!this.renderer || this.renderer.isConnected) {
             return;
           }
-          var event = this[_fire]('iron-overlay-attach', {
+          const event = this[_fire]('iron-overlay-attach', {
             overlay: this
           }, {
             cancelable: true
@@ -333,7 +333,7 @@ styling can be done like this:
           if (!this.renderer || !this.renderer.isConnected) {
             return;
           }
-          var event = this[_fire]('iron-overlay-detach', {
+          const event = this[_fire]('iron-overlay-detach', {
             overlay: this
           }, {
             node: this.renderer,
@@ -358,7 +358,7 @@ styling can be done like this:
         }
 
         [_onTransitioningChanged](event) {
-          var transitioning = event.detail.value;
+          const transitioning = event.detail.value;
           if (event.target === this.renderer && !transitioning) {
             this.applyFocus();
             if (this.opened) {
@@ -373,13 +373,13 @@ styling can be done like this:
         [_fire](type, detail, options) {
           options = options || {};
           detail = (detail === null || detail === undefined) ? {} : detail;
-          var event = new Event(type, {
+          const event = new Event(type, {
             bubbles: options.bubbles === undefined ? true : options.bubbles,
             cancelable: Boolean(options.cancelable),
             composed: options.composed === undefined ? true: options.composed
           });
           event.detail = detail;
-          var node = options.node || this;
+          const node = options.node || this;
           node.dispatchEvent(event);
           return event;
         }
