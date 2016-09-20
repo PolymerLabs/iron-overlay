@@ -85,8 +85,14 @@ styling can be done like this:
       'use strict';
       var templatizer = new Polymer.Templatizer();
 
-      // TODO(valdrin) use Polymer.Element!
-      class IronOverlay extends Polymer.LegacyElement {
+      var _openedChanged = Symbol();
+      var _ensureInstance = Symbol();
+      var _ensureAttached = Symbol();
+      var _ensureDetached = Symbol();
+      var _onTransitioningChanged = Symbol();
+      var _fire = Symbol();
+
+      class IronOverlay extends Polymer.Element {
 
         static get is() {
           return 'iron-overlay';
@@ -102,7 +108,7 @@ styling can be done like this:
               opened: {
                 type: Boolean,
                 notify: true,
-                observer: '__openedChanged'
+                observer: _openedChanged
               },
 
               /**
@@ -138,19 +144,22 @@ styling can be done like this:
               /**
                * The renderer for the overlay.
                */
-              _renderer: Element
+              renderer: {
+                type: Polymer.IronOverlayRenderer,
+                readOnly: true
+              }
             }
           };
         }
 
-        attached() {
-          super.attached();
-          this.opened && this.__openedChanged(this.opened);
+        connectedCallback() {
+          super.connectedCallback();
+          this.opened && this[_openedChanged](this.opened);
         }
 
-        detached() {
-          super.detached();
-          this.__ensureDetached();
+        disconnectedCallback() {
+          super.disconnectedCallback();
+          this[_ensureDetached]();
         }
 
         /**
@@ -180,7 +189,7 @@ styling can be done like this:
          * Focuses the overlay if opened, blurs it if closed.
          */
         applyFocus() {
-          if (this.noAutoFocus || !this._renderer || this._renderer.transitioning) {
+          if (this.noAutoFocus || !this.renderer || this.renderer.transitioning) {
             return;
           }
           var focusNode = this._getFocusNode();
@@ -197,7 +206,7 @@ styling can be done like this:
          * @protected
          */
         _getFocusNode() {
-          return this._renderer.querySelector('[autofocus]') || this._renderer.$.overlay;
+          return this.renderer.querySelector('[autofocus]') || this.renderer.$.overlay;
         }
 
         /**
@@ -224,7 +233,7 @@ styling can be done like this:
          * @protected
          */
         _cancel(event) {
-          var cancelEvent = this.fire('iron-overlay-canceled', event, {
+          var cancelEvent = this[_fire]('iron-overlay-canceled', event, {
             cancelable: true
           });
           if (!cancelEvent.defaultPrevented) {
@@ -239,7 +248,7 @@ styling can be done like this:
          */
         _onEsc(event) {
           // Avoid interactions while transitioning.
-          if (!this.noCancelOnEscKey && !this._renderer.transitioning) {
+          if (!this.noCancelOnEscKey && !this.renderer.transitioning) {
             // If synthetic event, search for keyboard event in detail.
             const keyboardEvent = event.detail.keyboardEvent || event;
             this._cancel(keyboardEvent);
@@ -252,7 +261,7 @@ styling can be done like this:
          */
         _onTap(event) {
           // Avoid interactions while transitioning. Check if tap is outside.
-          if (!this.noCancelOnOutsideClick && !this._renderer.transitioning && !this._isTapInside(event)) {
+          if (!this.noCancelOnOutsideClick && !this.renderer.transitioning && !this._isTapInside(event)) {
             // If synthetic event, search for source event in detail.
             const sourceEvent = event.detail.sourceEvent || event;
             this._cancel(sourceEvent);
@@ -265,15 +274,14 @@ styling can be done like this:
          * @protected
          */
         _isTapInside(event) {
-          return event.composedPath().indexOf(this._renderer.$.overlay) !== -1;
+          return event.composedPath().indexOf(this.renderer.$.overlay) !== -1;
         }
 
         /**
          * Ensures the overlay is created and the content is stamped and appended into the overlay.
-         * @private
          */
-        __ensureInstance() {
-          if (this._renderer) {
+        [_ensureInstance]() {
+          if (this.renderer) {
             return;
           }
           // Init the renderer.
@@ -282,9 +290,9 @@ styling can be done like this:
               rendererInstance && rendererInstance.forwardProperty(prop, value, host);
             }
           }))(this);
-          this._renderer = rendererInstance.root.children[0];
-          this._renderer.dataset.overlay = this.id;
-          this._renderer.addEventListener('transitioning-changed', this.__onTransitioningChanged.bind(this));
+          var renderer = rendererInstance.root.children[0];
+          renderer.dataset.overlay = this.id;
+          renderer.addEventListener('transitioning-changed', this[_onTransitioningChanged].bind(this));
 
           // Stamp the content if any!
           var contentTemplate = this._getContentTemplate();
@@ -295,21 +303,22 @@ styling can be done like this:
               }
             }))(this);
             // Append children to renderer.
-            this._renderer.appendChild(contentInstance.root);
+            renderer.appendChild(contentInstance.root);
           }
+
+          this._setRenderer(renderer);
         }
 
         /**
          * Ensures the renderer is attached.
-         * @private
          */
-        __ensureAttached() {
-          if (!this._renderer || this._renderer.isAttached) {
+        [_ensureAttached]() {
+          if (!this.renderer || this.renderer.isConnected) {
             return;
           }
-          var event = this.fire('iron-overlay-attach', {
+          var event = this[_fire]('iron-overlay-attach', {
             overlay: this,
-            renderer: this._renderer
+            renderer: this.renderer
           }, {
             cancelable: true
           });
@@ -320,17 +329,16 @@ styling can be done like this:
 
         /**
          * Ensures the renderer is detached.
-         * @private
          */
-        __ensureDetached() {
-          if (!this._renderer || !this._renderer.isAttached) {
+        [_ensureDetached]() {
+          if (!this.renderer || !this.renderer.isConnected) {
             return;
           }
-          var event = this.fire('iron-overlay-detach', {
+          var event = this[_fire]('iron-overlay-detach', {
             overlay: this,
-            renderer: this._renderer
+            renderer: this.renderer
           }, {
-            node: this._renderer,
+            node: this.renderer,
             cancelable: true
           });
           if (!event.defaultPrevented) {
@@ -338,37 +346,46 @@ styling can be done like this:
           }
         }
 
-        /**
-         * @private
-         */
-        __openedChanged(opened) {
-          if (!this.isAttached) {
+        [_openedChanged](opened) {
+          if (!this.isConnected) {
             return;
           }
           if (opened) {
-            this.__ensureInstance();
-            this._renderer.opened = true;
-            this.__ensureAttached();
-          } else if (this._renderer) {
-            this._renderer.opened = false;
+            this[_ensureInstance]();
+            this.renderer.opened = true;
+            this[_ensureAttached]();
+          } else if (this.renderer) {
+            this.renderer.opened = false;
           }
         }
 
-        /**
-         * @private
-         */
-        __onTransitioningChanged(event) {
+        [_onTransitioningChanged](event) {
           var transitioning = event.detail.value;
-          if (event.target === this._renderer && !transitioning) {
+          if (event.target === this.renderer && !transitioning) {
             this.applyFocus();
             if (this.opened) {
-              this.fire('iron-overlay-opened');
+              this[_fire]('iron-overlay-opened');
             } else {
-              this.__ensureDetached();
-              this.fire('iron-overlay-closed', this.closingReason);
+              this[_ensureDetached]();
+              this[_fire]('iron-overlay-closed', this.closingReason);
             }
           }
         }
+
+        [_fire](type, detail, options) {
+          options = options || {};
+          detail = (detail === null || detail === undefined) ? {} : detail;
+          var event = new Event(type, {
+            bubbles: options.bubbles === undefined ? true : options.bubbles,
+            cancelable: Boolean(options.cancelable),
+            composed: options.composed === undefined ? true: options.composed
+          });
+          event.detail = detail;
+          var node = options.node || this;
+          node.dispatchEvent(event)
+          return event;
+        }
+
       }
 
       /**

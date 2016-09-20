@@ -53,8 +53,7 @@ styling can be done like this:
     (function() {
       'use strict';
 
-      // TODO(valdrin) use Polymer.Element!
-      class IronOverlayRenderer extends Polymer.LegacyElement {
+      class IronOverlayRenderer extends Polymer.Element {
 
         static get is() {
           return 'iron-overlay-renderer';
@@ -83,21 +82,21 @@ styling can be done like this:
           };
         }
 
-        created() {
-          super.created();
+        constructor() {
+          super();
           // Ensure it's not visible by default.
           this.style.display = 'none';
           // For a performant transition from open to close and close to open.
           this.__transitionRaf = null;
         }
 
-        attached() {
-          super.attached();
+        connectedCallback() {
+          super.connectedCallback();
           this.opened && this._openedChanged(this.opened);
         }
 
-        detached() {
-          super.detached();
+        disconnectedCallback() {
+          super.disconnectedCallback();
           if (this.__transitionRaf) {
             window.cancelAnimationFrame(this.__transitionRaf);
             this.__transitionRaf = null;
@@ -111,7 +110,7 @@ styling can be done like this:
         _openedChanged(opened) {
           // Defer any animation-related code on attached
           // (_openedChanged gets called again on attached).
-          if (!this.isAttached) {
+          if (!this.isConnected) {
             return;
           }
 
