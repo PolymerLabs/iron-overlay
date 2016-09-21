@@ -55,6 +55,8 @@ styling can be done like this:
 
       const _openedChanged = Symbol();
       const _startRenderOpenedChanged = Symbol();
+      const _raf = Symbol();
+      const _forceLayout = Symbol();
 
       class IronOverlayRenderer extends Polymer.Element {
 
@@ -90,20 +92,16 @@ styling can be done like this:
           // Ensure it's not visible by default.
           this.style.display = 'none';
           // For a performant transition from open to close and close to open.
-          this.__transitionRaf = null;
+          this[_raf] = null;
           this[_startRenderOpenedChanged] = this[_startRenderOpenedChanged].bind(this);
-        }
-
-        connectedCallback() {
-          super.connectedCallback();
-          this.opened && this[_openedChanged](this.opened);
         }
 
         disconnectedCallback() {
           super.disconnectedCallback();
-          if (this.__transitionRaf) {
-            window.cancelAnimationFrame(this.__transitionRaf);
-            this.__transitionRaf = null;
+          if (this[_raf]) {
+            window.cancelAnimationFrame(this[_raf]);
+            this[_raf] = null;
+            this._finishRenderOpenedChanged();
           }
         }
 
@@ -131,27 +129,30 @@ styling can be done like this:
          * @param {boolean} opened
          */
         [_openedChanged](opened) {
-          // Defer any animation-related code on attached
-          // (_openedChanged gets called again on attached).
-          if (!this.isConnected) {
-            return;
-          }
-
-          this._setTransitioning(true);
-          this.__transitionRaf && window.cancelAnimationFrame(this.__transitionRaf);
-          this.__transitionRaf = window.requestAnimationFrame(this[_startRenderOpenedChanged]);
+          this[_raf] && window.cancelAnimationFrame(this[_raf]);
+          this[_raf] = window.requestAnimationFrame(this[_startRenderOpenedChanged]);
         }
 
         /**
          * Starts the update from open to closed & viceversa.
          */
         [_startRenderOpenedChanged]() {
-          this.__transitionRaf = null;
+          this[_raf] = null;
+          this._setTransitioning(true);
+          this.style.pointerEvents = this.opened ? '' : 'none';
           // Ensure it is displayed.
-          if (this.opened) {
+          if (this.opened && this.style.display) {
             this.style.display = '';
+            this[_forceLayout]();
           }
           this._renderOpenedChanged();
+        }
+
+        /**
+         * Forces layout.
+         */
+        [_forceLayout]() {
+          return this.offsetWidth;
         }
 
       }

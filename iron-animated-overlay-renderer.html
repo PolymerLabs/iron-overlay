@@ -29,9 +29,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     (function() {
       'use strict';
 
-      const _forceLayout = Symbol();
       const _onTransitionEnd = Symbol();
-
 
       class IronAnimatedOverlayRenderer extends Polymer.IronOverlayRenderer {
         static get is() {
@@ -59,15 +57,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
          * @protected
          */
         _renderOpenedChanged() {
-          this[_forceLayout]();
           this.classList.toggle('opened', this.opened);
-        }
-
-        /**
-         * Forces layout.
-         */
-        [_forceLayout]() {
-          return this.offsetWidth;
         }
 
         /**
