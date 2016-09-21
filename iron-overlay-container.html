@@ -159,6 +159,8 @@ Use `overlayType` to limit which types of overlays this container should host:
           if (canAttach) {
             this[_overlays].push(overlay);
             this.appendChild(overlay.renderer);
+            //TODO(valdrin) remove this line after webcomponents/shadydom#17 is fixed.
+            window.ShadyDOM && window.ShadyDOM.inUse && window.ShadyDOM.flush();
           }
           return canAttach;
         }
@@ -174,6 +176,8 @@ Use `overlayType` to limit which types of overlays this container should host:
           const i = this[_overlays].indexOf(overlay);
           if (i >= 0) {
             this.removeChild(overlay.renderer);
+            //TODO(valdrin) remove this line after webcomponents/shadydom#17 is fixed.
+            window.ShadyDOM && window.ShadyDOM.inUse && window.ShadyDOM.flush();
             this[_overlays].splice(i, 1);
             // Move focus to new top overlay.
             overlay = this.currentOverlay;
