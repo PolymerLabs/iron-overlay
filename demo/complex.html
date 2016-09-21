@@ -10,172 +10,187 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 <html>
 
-<head>
+  <head>
 
-  <title>demo</title>
+    <title>demo</title>
 
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
 
-  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
 
+    <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+    <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
 
-  <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
-  <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
+    <link rel="import" href="../iron-overlay.html">
+    <link rel="import" href="../iron-overlay-container.html">
+    <link rel="import" href="x-menu-button.html">
 
-  <link rel="import" href="../iron-overlay.html">
-  <link rel="import" href="../iron-animated-overlay.html">
-  <link rel="import" href="../iron-overlay-container.html">
-  <link rel="import" href="x-menu-button.html">
-
-  <custom-style>
-    <style is="custom-style" include="demo-pages-shared-styles">
-      .stacking-context {
-        transform: translateZ(0);
-      }
-
-      iron-overlay-container > * {
-        --iron-overlay: {
-          padding: 10px;
+    <custom-style>
+      <style is="custom-style" include="demo-pages-shared-styles">
+        .stacking-context {
+          transform: translateZ(0);
         }
-      }
-    </style>
-  </custom-style>
-</head>
 
-<body unresolved>
-
-  <iron-overlay-container></iron-overlay-container>
-
-  <div class="stacking-context">
-
-    <h3>Stacking context</h3>
-
-    <p>Overlays contained in elements that create a new stacking context are trapped within it.
-      <br> E.g. Click on <code>trapped</code> and notice how the overlay renders behind the backdrop and scrolls together with the rest of the content.</p>
-    <p><code>dom-delegate</code> solves this issue while still providing a reference to the overlay at the spot where it is created.</p>
-    <p>Styles can be added inside the template.</p>
-    <demo-snippet>
-      <template>
-        <custom-style><style is="custom-style">
-          [data-overlay="c0"] {
-            --iron-overlay-background-color: #cec;
+        iron-overlay-container > * {
+          --iron-overlay: {
+            padding: 10px;
           }
-        </style></custom-style>
+        }
 
-        <button onclick="c0.open()">free</button>
-        <iron-animated-overlay id="c0" with-backdrop>
-          <template>
-            <h2>Dialog</h2>
-            <div class="buttons">
-              <button onclick="c0.close()">close</button>
-            </div>
-          </template>
-      </iron-animated-overlay>
-      </template>
-    </demo-snippet>
+      </style>
+    </custom-style>
+  </head>
 
-    <p>
-      Extend <code>iron-overlay</code> and its renderer.
-    </p>
-    <demo-snippet>
-      <template>
-        <x-menu-button vertical-align="bottom">
-          <button slot="trigger">x-menu-button</button>
-          <template>
-            <div>content</div>
-          </template>
-      </x-menu-button>
-      </template>
-    </demo-snippet>
+  <body unresolved>
 
-    <h3>Data binding</h3>
+    <iron-overlay-container></iron-overlay-container>
 
-    <demo-snippet>
-      <template>
-        <dom-bind>
-          <template>
-        <button on-click="openNextOverlay">overlay</button>
-        <iron-animated-overlay with-backdrop id="c1">
-          <template>
-            <dom-repeat items="{{data}}" as="item">
-              <template>
-                <p>{{item.itemName}}</p>
-              </template>
-      </dom-repeat>
-      <button onclick="c1.close()">close</button>
-      </template>
-      </iron-animated-overlay>
+    <div class="stacking-context">
 
-      <x-menu-button>
-        <button slot="trigger">x-menu-button</button>
+      <h3>Stacking context</h3>
+
+      <p>Overlays contained in elements that create a new stacking context are trapped within it.
+        <br>
+        E.g. Click on
+        <code>trapped</code>
+        and notice how the overlay renders behind the backdrop and scrolls together with the rest of the content.</p>
+      <p>
+        <code>dom-delegate</code>
+        solves this issue while still providing a reference to the overlay at the spot where it is created.</p>
+      <p>Styles can be added inside the template.</p>
+      <demo-snippet>
         <template>
-            <ul>
-              <dom-repeat items="{{data}}" as="item">
-                <template><li>{{item.itemName}}</li></template>
-        </dom-repeat>
-        </ul>
+          <custom-style>
+            <style is="custom-style">
+              [data-overlay="c0"] {
+                --iron-overlay-background-color: #cec;
+              }
+
+            </style>
+          </custom-style>
+
+          <button onclick="c0.open()">free</button>
+          <iron-overlay id="c0" with-backdrop>
+            <template>
+              <h2>Dialog</h2>
+              <div class="buttons">
+                <button onclick="c0.close()">close</button>
+              </div>
+            </template>
+          </iron-overlay>
         </template>
-      </x-menu-button>
+      </demo-snippet>
 
       <p>
-        <pre><code>index: {{selectedIndex}}<br> json: {{selectedItem}}</code></pre>
+        Extend
+        <code>iron-overlay</code>
+        and its renderer.
       </p>
-      <dom-repeat items="{{data}}" as="item" as="item">
+      <demo-snippet>
         <template>
-          <div>
-            <button on-click="openNextOverlay">dialog {{index}}</button>
-            <iron-animated-overlay with-backdrop>
-              <template>
-                <h2>dialog {{index}}</h2>
-                <p>Name: {{item.itemName}}</p>
-                <button on-click="onAction">show</button>
-              </template>
-        </iron-animated-overlay>
+          <x-menu-button animated vertical-align="bottom">
+            <button slot="trigger">x-menu-button</button>
+            <template>
+              <div>content</div>
+            </template>
+          </x-menu-button>
+        </template>
+      </demo-snippet>
 
-        <x-menu-button>
-          <button slot="trigger">x-menu-button {{index}}</button>
-          <template>
-                  <button on-click="onAction" data-index="{{index}}" data-item="{{item}}">show</button>
-              </template>
-        </x-menu-button>
-  </div>
-  </template>
-  </dom-repeat>
-  <p>
-    <button on-click="addData">Add</button>
-    <button on-click="resetData">Reset</button>
-  </p>
-  </template>
-  <script>
-    const t = document.querySelector('dom-bind');
-    t.addData = function() {
-      t.data.push({
-        itemName: 'item ' + t.data.length
-      });
-      t.data = t.data;
-    };
-    t.resetData = function() {
-      t.data = [];
-      t.addData();
-      t.addData();
-      t.addData();
-    };
-    t.onAction = function(e) {
-      t.selectedIndex = e.model.index;
-      t.selectedItem = JSON.stringify(e.model.item);
-    };
-    t.openNextOverlay = function(e) {
-      const trigger = e.composedPath()[0];
-      trigger.nextElementSibling.open();
-    };
-    t.resetData();
-  </script>
-  </template>
-  </dom-bind>
-  </template>
-  </demo-snippet>
+      <h3>Data binding</h3>
+
+      <demo-snippet>
+        <template>
+          <dom-bind>
+            <template>
+              <button on-click="openNextOverlay">overlay</button>
+              <iron-overlay with-backdrop id="c1">
+                <template>
+                  <dom-repeat items="{{data}}" as="item">
+                    <template>
+                      <p>{{item.itemName}}</p>
+                    </template>
+                  </dom-repeat>
+                  <button onclick="c1.close()">close</button>
+                </template>
+              </iron-overlay>
+
+              <x-menu-button>
+                <button slot="trigger">x-menu-button</button>
+                <template>
+                  <ul>
+                    <dom-repeat items="{{data}}" as="item">
+                      <template>
+                        <li>{{item.itemName}}</li>
+                      </template>
+                    </dom-repeat>
+                  </ul>
+                </template>
+              </x-menu-button>
+
+              <p>
+                <pre><code>index: {{selectedIndex}}<br> json: {{selectedItem}}</code></pre>
+              </p>
+              <dom-repeat items="{{data}}" as="item" as="item">
+                <template>
+                  <div>
+                    <button on-click="openNextOverlay">dialog
+                      {{index}}</button>
+                    <iron-overlay with-backdrop>
+                      <template>
+                        <h2>dialog
+                          {{index}}</h2>
+                        <p>Name:
+                          {{item.itemName}}</p>
+                        <button on-click="onAction">show</button>
+                      </template>
+                    </iron-overlay>
+
+                    <x-menu-button>
+                      <button slot="trigger">x-menu-button
+                        {{index}}</button>
+                      <template>
+                        <button on-click="onAction" data-index="{{index}}" data-item="{{item}}">show</button>
+                      </template>
+                    </x-menu-button>
+                  </div>
+                </template>
+              </dom-repeat>
+              <p>
+                <button on-click="addData">Add</button>
+                <button on-click="resetData">Reset</button>
+              </p>
+            </template>
+            <script>
+              const t = document.querySelector('dom-bind');
+              t.addData = function () {
+                t.data.push({
+                  itemName: 'item ' + t.data.length
+                });
+                t.data = t.data;
+              };
+              t.resetData = function () {
+                t.data = [];
+                t.addData();
+                t.addData();
+                t.addData();
+              };
+              t.onAction = function (e) {
+                t.selectedIndex = e.model.index;
+                t.selectedItem = JSON.stringify(e.model.item);
+              };
+              t.openNextOverlay = function (e) {
+                const trigger = e.composedPath()[0];
+                trigger.nextElementSibling.open();
+              };
+              t.resetData();
+            </script>
+          </template>
+        </dom-bind>
+      </template>
+    </demo-snippet>
   </div>
 
 </body>

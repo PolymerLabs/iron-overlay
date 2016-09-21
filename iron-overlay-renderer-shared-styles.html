@@ -18,8 +18,13 @@ The following custom properties and mixins are available for styling.
 
 Custom property | Description | Default
 ----------------|-------------|----------
-`--iron-overlay-background-color` | Overlay background color                     | `white`
-`--iron-overlay`                  | Mixin applied to the overlay                 | `{}`
+`--iron-overlay-background-color`  | Overlay background color                                | `white`
+`--iron-backdrop-background-color` | Overlay backdrop color                                  | `black`
+`--iron-backdrop-opacity`          | Overlay backdrop opacity                                | `0.6`
+`--iron-overlay`                   | Mixin applied to the overlay                            | `{}`
+`--iron-overlay-opened`            | Mixin applied to the animated and opened overlay        | `{}`
+`--iron-backdrop`                  | Mixin applied to the backdrop                           | `{}`
+`--iron-backdrop-opened`           | Mixin applied to the backdrop when overlay is opened    | `{}`
 -->
 
 <dom-module id="iron-overlay-renderer-shared-styles">
@@ -35,11 +40,44 @@ Custom property | Description | Default
         @apply --layout-center-justified;
       }
 
+      #backdrop {
+        /* Take full screen */
+        @apply --layout-fixed-top;
+        @apply --layout-fixed-bottom;
+        pointer-events: none;
+        z-index: -1;
+        background-color: transparent;
+        opacity: 0;
+        transition: background-color .2s, opacity .2s;
+        @apply --iron-backdrop;
+        @apply --iron-backdrop-closed;
+      }
+
+      :host([with-backdrop]) #backdrop.opened {
+        background-color: var(--iron-backdrop-background-color, black);
+        opacity: var(--iron-backdrop-opacity, 0.6);
+        @apply --iron-backdrop-opened;
+      }
+
       #overlay {
         outline: none;
         background-color: var(--iron-overlay-background-color, white);
+        opacity: 0;
+        transition: opacity .2s;
         @apply --iron-overlay;
+        @apply --iron-overlay-closed;
       }
+
+      #overlay.opened {
+        opacity: 1;
+        @apply --iron-overlay-opened;
+      }
+
+      :host(:not([animated])) #overlay,
+      :host(:not([animated])) #backdrop {
+        transition: none;
+      }
+
     </style>
   </template>
 </dom-module>

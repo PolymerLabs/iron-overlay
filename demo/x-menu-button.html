@@ -8,7 +8,7 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 
-<link rel="import" href="../iron-animated-overlay.html">
+<link rel="import" href="../iron-overlay.html">
 <link rel="import" href="x-menu-button-renderer.html">
 
 <dom-module id="x-menu-button">
@@ -20,7 +20,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </style>
     <template id="renderer-template">
       <x-menu-button-renderer
-        with-backdrop$="[[withBackdrop]]"
+        opened$="[[opened]]"
+        animated$="[[animated]]"
         vertical-align="[[verticalAlign]]"
         horizontal-align="[[horizontalAlign]]"
         position-target="[[_positionTarget]]"
@@ -37,7 +38,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   (function() {
     'use strict';
 
-    class XMenuButton extends Polymer.IronAnimatedOverlay {
+    class XMenuButton extends Polymer.IronOverlay {
 
       static get is() {
         return 'x-menu-button';

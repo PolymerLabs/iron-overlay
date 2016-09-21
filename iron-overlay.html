@@ -75,7 +75,10 @@ styling can be done like this:
 <dom-module id="iron-overlay">
   <template>
     <template id="renderer-template">
-      <iron-overlay-renderer></iron-overlay-renderer>
+      <iron-overlay-renderer
+        opened$="[[opened]]"
+        animated$="[[animated]]"
+        with-backdrop$="[[withBackdrop]]"></iron-overlay-renderer>
     </template>
     <slot></slot>
   </template>
@@ -85,7 +88,7 @@ styling can be done like this:
       'use strict';
 
       const templatizer = new Polymer.Templatizer();
-      
+
       /* Symbols for private properties/methods */
       const _openedChanged = Symbol();
       const _ensureInstance = Symbol();
@@ -111,6 +114,20 @@ styling can be done like this:
                 type: Boolean,
                 notify: true,
                 observer: _openedChanged
+              },
+
+              /**
+               * True if the overlay has open/close animation.
+               */
+              animated: {
+                type: Boolean
+              },
+
+              /**
+               * True if the overlay should have a backdrop.
+               */
+              withBackdrop: {
+                type: Boolean
               },
 
               /**
@@ -287,7 +304,9 @@ styling can be done like this:
             return;
           }
           // Init the renderer.
-          const rendererInstance = new(templatizer.templatize(this._getRendererTemplate(), {
+          // TODO(valdrin) check if this can be a const Polymer/polymer#3977
+          let rendererInstance;
+          rendererInstance = new(templatizer.templatize(this._getRendererTemplate(), {
             fwdHostPropToInstance: function(host, prop, value) {
               rendererInstance && rendererInstance.forwardProperty(prop, value, host);
             }
@@ -299,7 +318,9 @@ styling can be done like this:
           // Stamp the content if any!
           const contentTemplate = this._getContentTemplate();
           if (contentTemplate) {
-            const contentInstance = new(templatizer.templatize(contentTemplate, {
+            // TODO(valdrin) check if this can be a const Polymer/polymer#3977
+            let contentInstance;
+            contentInstance = new(templatizer.templatize(contentTemplate, {
               fwdHostPropToInstance: function(host, prop, value) {
                 contentInstance && contentInstance.forwardProperty(prop, value, host);
               }
@@ -352,10 +373,7 @@ styling can be done like this:
           }
           if (opened) {
             this[_ensureInstance]();
-            this.renderer.opened = true;
             this[_ensureAttached]();
-          } else if (this.renderer) {
-            this.renderer.opened = false;
           }
         }
 
