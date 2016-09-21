@@ -8,13 +8,19 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 
-<link rel="import" href="../iron-animated-overlay-renderer.html">
+<link rel="import" href="../iron-overlay-renderer.html">
 
 <dom-module id="x-menu-button-renderer">
   <template strip-whitespace>
-    <style include="iron-animated-overlay-renderer-shared-styles">
+    <style include="iron-overlay-renderer-shared-styles">
       #overlay {
         position: absolute;
+        transform: translateY(20px);
+        transition: opacity .2s, transform .2s;
+      }
+
+      #overlay.opened {
+        transform: translateY(0);
       }
     </style>
     <div id="overlay" tabindex="0">
@@ -26,7 +32,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   (function() {
     'use strict';
 
-    class XMenuButtonRenderer extends Polymer.IronAnimatedOverlayRenderer {
+    const _position = Symbol();
+    const _raf = Symbol();
+
+    class XMenuButtonRenderer extends Polymer.IronOverlayRenderer {
 
       static get is() {
         return 'x-menu-button-renderer';
@@ -47,28 +56,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
             positionTarget: {
               type: Element
-            },
-
-            _boundPosition: {
-              type: Function,
-              readOnly: true,
-              value: function() {
-                return this._position.bind(this);
-              }
             }
           }
         };
       }
 
-      _renderOpenedChanged() {
-        super._renderOpenedChanged();
-        document[this.opened ? 'addEventListener' : 'removeEventListener']('scroll', this._boundPosition);
-        this.position();
+      constructor() {
+        super();
+        this[_raf] = null;
+        document.addEventListener('scroll', this[_position].bind(this), {passive: true});
       }
 
-      _position() {
-        this.__positionRAF && window.cancelAnimationFrame(this.__positionRAF);
-        this.__positionRAF = window.requestAnimationFrame(this.position.bind(this));
+      _renderOpenedChanged() {
+        super._renderOpenedChanged();
+        this.position();
       }
 
       position() {
@@ -79,6 +80,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           overlayStyle.bottom = this.verticalAlign === 'top' ? '' : (window.innerHeight - rect.bottom) + 'px';
           overlayStyle.left = this.horizontalAlign === 'left' ? rect.left + 'px' : '';
           overlayStyle.right = this.horizontalAlign === 'left' ? '' : (window.innerWidth - rect.right) + 'px';
+        }
+      }
+
+      [_position]() {
+        this[_raf] && window.cancelAnimationFrame(this[_raf]);
+        if (this.opened && !this.transitioning) {
+          this[_raf] = window.requestAnimationFrame(this.position.bind(this));
         }
       }
     }

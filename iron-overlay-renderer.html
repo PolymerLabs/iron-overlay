@@ -44,6 +44,7 @@ styling can be done like this:
 <dom-module id="iron-overlay-renderer">
   <template strip-whitespace>
     <style include="iron-overlay-renderer-shared-styles"></style>
+    <div id="backdrop"></div>
     <div id="overlay" tabindex="0">
       <slot></slot>
     </div>
@@ -56,7 +57,9 @@ styling can be done like this:
       const _openedChanged = Symbol();
       const _startRenderOpenedChanged = Symbol();
       const _raf = Symbol();
+      const _onNextAF = Symbol();
       const _forceLayout = Symbol();
+      const _onTransitionEnd = Symbol();
 
       class IronOverlayRenderer extends Polymer.Element {
 
@@ -73,6 +76,20 @@ styling can be done like this:
               opened: {
                 type: Boolean,
                 observer: _openedChanged
+              },
+
+              /**
+               * True if the overlay has open/close animation.
+               */
+              animated: {
+                type: Boolean
+              },
+
+              /**
+               * True if the overlay should have a backdrop.
+               */
+              withBackdrop: {
+                type: Boolean
               },
 
               /**
@@ -93,16 +110,11 @@ styling can be done like this:
           this.style.display = 'none';
           // For a performant transition from open to close and close to open.
           this[_raf] = null;
-          this[_startRenderOpenedChanged] = this[_startRenderOpenedChanged].bind(this);
         }
 
-        disconnectedCallback() {
-          super.disconnectedCallback();
-          if (this[_raf]) {
-            window.cancelAnimationFrame(this[_raf]);
-            this[_raf] = null;
-            this._finishRenderOpenedChanged();
-          }
+        ready() {
+          super.ready();
+          this.$.overlay.addEventListener('transitionend', this[_onTransitionEnd].bind(this));
         }
 
         /**
@@ -111,7 +123,10 @@ styling can be done like this:
          * @protected
          */
         _renderOpenedChanged() {
-          this._finishRenderOpenedChanged();
+          // Doesn't wait for animations if animated is false.
+          if (!this.animated) {
+            this._finishRenderOpenedChanged();
+          }
         }
 
         /**
@@ -129,22 +144,26 @@ styling can be done like this:
          * @param {boolean} opened
          */
         [_openedChanged](opened) {
-          this[_raf] && window.cancelAnimationFrame(this[_raf]);
-          this[_raf] = window.requestAnimationFrame(this[_startRenderOpenedChanged]);
+          this[_onNextAF](this[_startRenderOpenedChanged]);
         }
 
         /**
          * Starts the update from open to closed & viceversa.
          */
         [_startRenderOpenedChanged]() {
-          this[_raf] = null;
           this._setTransitioning(true);
+          // Update interactions with element.
           this.style.pointerEvents = this.opened ? '' : 'none';
           // Ensure it is displayed.
           if (this.opened && this.style.display) {
             this.style.display = '';
+            // Need to force layout for any animation to trigger.
             this[_forceLayout]();
           }
+          // Update classes for overlay and backdrop.
+          this.$.overlay.classList.toggle('opened', this.opened);
+          // Check if there is a backdrop in the shadow dom.
+          this.$.backdrop && this.$.backdrop.classList.toggle('opened', this.opened);
           this._renderOpenedChanged();
         }
 
@@ -153,6 +172,31 @@ styling can be done like this:
          */
         [_forceLayout]() {
           return this.offsetWidth;
+        }
+
+        /**
+         * Callback for transitionend, ends the animation.
+         * @param {!Event} event
+         */
+        [_onTransitionEnd](event) {
+          if (event.target === this.$.overlay) {
+            // Since there might be multiple animations (e.g. opacity + transition),
+            // call finish function only once (reuse RAF).
+            this[_onNextAF](this._finishRenderOpenedChanged);
+          }
+        }
+
+        /**
+         * Executes the callback at the next available animation frame.
+         * @param {!Function} callback Its scope will be the renderer itself
+         */
+        [_onNextAF](callback) {
+          this[_raf] && window.cancelAnimationFrame(this[_raf]);
+          const self = this;
+          this[_raf] = window.requestAnimationFrame(function nextAnimationFrame() {
+            self[_raf] = null;
+            callback.call(self);
+          });
         }
 
       }
