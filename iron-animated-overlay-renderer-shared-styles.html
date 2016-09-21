@@ -33,6 +33,7 @@ Custom property | Description | Default
         @apply --layout-fixed-top;
         @apply --layout-fixed-bottom;
         pointer-events: none;
+        z-index: -1;
         background-color: transparent;
         opacity: 0;
         transition: background-color .2s, opacity .2s;
@@ -46,12 +47,10 @@ Custom property | Description | Default
 
       #overlay {
         opacity: 0;
-        transform: translateY(100px);
-        transition: opacity .2s, transform .2s;
+        transition: opacity .2s;
       }
 
       :host(.opened) #overlay {
-        transform: translateY(0);
         opacity: 1;
       }
     </style>

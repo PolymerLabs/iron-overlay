@@ -29,6 +29,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     (function() {
       'use strict';
 
+      const _forceLayout = Symbol();
+      const _onTransitionEnd = Symbol();
+
+
       class IronAnimatedOverlayRenderer extends Polymer.IronOverlayRenderer {
         static get is() {
           return 'iron-animated-overlay-renderer';
@@ -47,7 +51,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         ready() {
           super.ready();
-          this.$.overlay.addEventListener('transitionend', this.__onTransitionEnd.bind(this));
+          this.$.overlay.addEventListener('transitionend', this[_onTransitionEnd].bind(this));
         }
 
         /**
@@ -55,24 +59,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
          * @protected
          */
         _renderOpenedChanged() {
-          this.__forceLayout();
+          this[_forceLayout]();
           this.classList.toggle('opened', this.opened);
         }
 
         /**
          * Forces layout.
-         * @private
          */
-        __forceLayout() {
+        [_forceLayout]() {
           return this.offsetWidth;
         }
 
         /**
          * Ends the animation.
-         * @private
          */
-        __onTransitionEnd(event) {
-          if (event.composedPath()[0] === this.$.overlay) {
+        [_onTransitionEnd](event) {
+          if (event.target === this.$.overlay) {
             this._finishRenderOpenedChanged();
           }
         }
