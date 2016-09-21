@@ -53,6 +53,9 @@ styling can be done like this:
     (function() {
       'use strict';
 
+      const _openedChanged = Symbol();
+      const _startRenderOpenedChanged = Symbol();
+
       class IronOverlayRenderer extends Polymer.Element {
 
         static get is() {
@@ -67,7 +70,7 @@ styling can be done like this:
                */
               opened: {
                 type: Boolean,
-                observer: '_openedChanged'
+                observer: _openedChanged
               },
 
               /**
@@ -88,11 +91,12 @@ styling can be done like this:
           this.style.display = 'none';
           // For a performant transition from open to close and close to open.
           this.__transitionRaf = null;
+          this[_startRenderOpenedChanged] = this[_startRenderOpenedChanged].bind(this);
         }
 
         connectedCallback() {
           super.connectedCallback();
-          this.opened && this._openedChanged(this.opened);
+          this.opened && this[_openedChanged](this.opened);
         }
 
         disconnectedCallback() {
@@ -101,22 +105,6 @@ styling can be done like this:
             window.cancelAnimationFrame(this.__transitionRaf);
             this.__transitionRaf = null;
           }
-        }
-
-        /**
-         * @param {boolean} opened
-         * @protected
-         */
-        _openedChanged(opened) {
-          // Defer any animation-related code on attached
-          // (_openedChanged gets called again on attached).
-          if (!this.isConnected) {
-            return;
-          }
-
-          this._setTransitioning(true);
-          this.__transitionRaf && window.cancelAnimationFrame(this.__transitionRaf);
-          this.__transitionRaf = window.requestAnimationFrame(this.__startRenderOpenedChanged.bind(this));
         }
 
         /**
@@ -140,10 +128,24 @@ styling can be done like this:
         }
 
         /**
-         * Starts the update from open to closed & viceversa.
-         * @private
+         * @param {boolean} opened
          */
-        __startRenderOpenedChanged() {
+        [_openedChanged](opened) {
+          // Defer any animation-related code on attached
+          // (_openedChanged gets called again on attached).
+          if (!this.isConnected) {
+            return;
+          }
+
+          this._setTransitioning(true);
+          this.__transitionRaf && window.cancelAnimationFrame(this.__transitionRaf);
+          this.__transitionRaf = window.requestAnimationFrame(this[_startRenderOpenedChanged]);
+        }
+
+        /**
+         * Starts the update from open to closed & viceversa.
+         */
+        [_startRenderOpenedChanged]() {
           this.__transitionRaf = null;
           // Ensure it is displayed.
           if (this.opened) {
