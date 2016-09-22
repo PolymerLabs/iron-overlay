@@ -147,18 +147,24 @@ styling can be done like this:
               /**
                * Set to true to disable canceling the overlay with the ESC key.
                */
-              noCancelOnEscKey: Boolean,
+              noCancelOnEscKey: {
+                type: Boolean
+              },
 
               /**
                * Set to true to disable canceling the overlay by clicking outside it.
                */
-              noCancelOnOutsideClick: Boolean,
+              noCancelOnOutsideClick: {
+                type: Boolean
+              },
 
               /**
                * Set to true to disable auto-focusing the overlay or child nodes with
                * the `autofocus` attribute when the overlay is opened.
                */
-              noAutoFocus: Boolean,
+              noAutoFocus: {
+                type: Boolean
+              },
 
               /**
                * The renderer for the overlay.
