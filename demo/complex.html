@@ -108,9 +108,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <button on-click="openNextOverlay">overlay</button>
               <iron-overlay with-backdrop id="c1">
                 <template>
-                  <dom-repeat items="{{data}}" as="item">
+                  <dom-repeat items="[[data]]" as="item">
                     <template>
-                      <p>{{item.itemName}}</p>
+                      <p>[[item.itemName]]</p>
                     </template>
                   </dom-repeat>
                   <button onclick="c1.close()">close</button>
@@ -121,9 +121,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <button slot="trigger">x-menu-button</button>
                 <template>
                   <ul>
-                    <dom-repeat items="{{data}}" as="item">
+                    <dom-repeat items="[[data]]" as="item">
                       <template>
-                        <li>{{item.itemName}}</li>
+                        <li>[[item.itemName]]</li>
                       </template>
                     </dom-repeat>
                   </ul>
@@ -131,28 +131,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               </x-menu-button>
 
               <p>
-                <pre><code>index: {{selectedIndex}}<br> json: {{selectedItem}}</code></pre>
+                <pre><code>index: [[selectedIndex]]<br> json: [[selectedItem]]</code></pre>
               </p>
-              <dom-repeat items="{{data}}" as="item" as="item">
+              <dom-repeat items="[[data]]" as="item" as="item">
                 <template>
                   <div>
                     <button on-click="openNextOverlay">dialog
-                      {{index}}</button>
+                      [[index]]</button>
                     <iron-overlay with-backdrop>
                       <template>
                         <h2>dialog
-                          {{index}}</h2>
+                          [[index]]</h2>
                         <p>Name:
-                          {{item.itemName}}</p>
+                          [[item.itemName]]</p>
                         <button on-click="onAction">show</button>
                       </template>
                     </iron-overlay>
 
                     <x-menu-button>
                       <button slot="trigger">x-menu-button
-                        {{index}}</button>
+                        [[index]]</button>
                       <template>
-                        <button on-click="onAction" data-index="{{index}}" data-item="{{item}}">show</button>
+                        <button on-click="onAction" data-index="[[index]]" data-item="[[item]]">show</button>
                       </template>
                     </x-menu-button>
                   </div>

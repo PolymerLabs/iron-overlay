@@ -310,9 +310,7 @@ styling can be done like this:
             return;
           }
           // Init the renderer.
-          // TODO(valdrin) check if this can be a const Polymer/polymer#3977
-          let rendererInstance;
-          rendererInstance = new(templatizer.templatize(this._getRendererTemplate(), {
+          const rendererInstance = new(templatizer.templatize(this._getRendererTemplate(), {
             fwdHostPropToInstance: function(host, prop, value) {
               rendererInstance && rendererInstance.forwardProperty(prop, value, host);
             }
@@ -324,9 +322,7 @@ styling can be done like this:
           // Stamp the content if any!
           const contentTemplate = this._getContentTemplate();
           if (contentTemplate) {
-            // TODO(valdrin) check if this can be a const Polymer/polymer#3977
-            let contentInstance;
-            contentInstance = new(templatizer.templatize(contentTemplate, {
+            const contentInstance = new(templatizer.templatize(contentTemplate, {
               fwdHostPropToInstance: function(host, prop, value) {
                 contentInstance && contentInstance.forwardProperty(prop, value, host);
               }
