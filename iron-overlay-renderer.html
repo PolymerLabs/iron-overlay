@@ -106,8 +106,6 @@ styling can be done like this:
 
         constructor() {
           super();
-          // Ensure it's not visible by default.
-          this.style.display = 'none';
           // For a performant transition from open to close and close to open.
           this[_raf] = null;
         }
@@ -133,10 +131,6 @@ styling can be done like this:
          * @protected
          */
         _finishRenderOpenedChanged() {
-          // Ensure it is not displayed.
-          if (!this.opened) {
-            this.style.display = 'none';
-          }
           this._setTransitioning(false);
         }
 
@@ -154,10 +148,8 @@ styling can be done like this:
           this._setTransitioning(true);
           // Update interactions with element.
           this.style.pointerEvents = this.opened ? '' : 'none';
-          // Ensure it is displayed.
-          if (this.opened && this.style.display) {
-            this.style.display = '';
-            // Need to force layout for any animation to trigger.
+          // Need to force layout for any animation to trigger.
+          if (this.animated) {
             this[_forceLayout]();
           }
           // Update classes for overlay and backdrop.
