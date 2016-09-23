@@ -45,8 +45,7 @@ styling can be done like this:
   <template strip-whitespace>
     <style include="iron-overlay-renderer-shared-styles"></style>
     <div id="backdrop"></div>
-    <!-- TODO(valdrin) should use delegatesFocus instead of tabindex here, see Polymer/polymer#3988 -->
-    <div id="overlay" tabindex="0">
+    <div id="overlay">
       <slot></slot>
     </div>
   </template>
@@ -113,7 +112,31 @@ styling can be done like this:
 
         ready() {
           super.ready();
+          // If delegatesFocus is not supported or class is extended but doesn't
+          // have a shadow root, make the element focusable but not tabbable.
+          if (!this.shadowRoot || !this.shadowRoot.delegatesFocus) {
+            this.setAttribute('tabindex', '-1');
+          }
           this.$.overlay.addEventListener('transitionend', this[_onTransitionEnd].bind(this));
+        }
+
+        /**
+         * Overridden from Polymer.Element to ensure the shadow root delegates focus.
+         * See Polymer/polymer#3988
+         * @protected
+         */
+        _attachDom(dom) {
+          if (dom && this.attachShadow) {
+            if (!this.shadowRoot) {
+              this.attachShadow({
+                mode: 'open',
+                delegatesFocus: true
+              });
+            }
+            this.shadowRoot.appendChild(dom);
+            return this.shadowRoot;
+          }
+          super._attachDom(dom);
         }
 
         /**
