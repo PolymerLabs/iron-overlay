@@ -61,9 +61,6 @@ Use `overlayType` to limit which types of overlays this container should host:
       const _getHostRoot = Symbol();
       const _onAttach = Symbol();
       const _onDetach = Symbol();
-      const _onTap = Symbol();
-      const _onKeydown = Symbol();
-      const _onEsc = Symbol();
 
       class IronOverlayContainer extends Polymer.Element {
         static get is() {
@@ -87,24 +84,10 @@ Use `overlayType` to limit which types of overlays this container should host:
           // Bind these methods to `this` as they are used for event listeners.
           this[_onAttach] = this[_onAttach].bind(this);
           this[_onDetach] = this[_onDetach].bind(this);
-          this[_onTap] = this[_onTap].bind(this);
-          this[_onKeydown] = this[_onKeydown].bind(this);
         }
 
         connectedCallback() {
           super.connectedCallback();
-
-          // Document wide listeners for capturing tap outside and esc.
-          document.addEventListener('mousedown', this[_onTap], {
-            passive: true,
-            capture: true
-          });
-          document.addEventListener('touchstart', this[_onTap], {
-            passive: true,
-            capture: true
-          });
-          document.addEventListener('keydown', this[_onKeydown]);
-
           // Listeners on the host.
           const host = this[_getHostRoot]();
           host.addEventListener('iron-overlay-attach', this[_onAttach]);
@@ -114,17 +97,6 @@ Use `overlayType` to limit which types of overlays this container should host:
 
         disconnectedCallback() {
           super.disconnectedCallback();
-
-          document.removeEventListener('mousedown', this[_onTap], {
-            passive: true,
-            capture: true
-          });
-          document.removeEventListener('touchstart', this[_onTap], {
-            passive: true,
-            capture: true
-          });
-          document.removeEventListener('keydown', this[_onKeydown]);
-
           const host = this[_host];
           host.removeEventListener('iron-overlay-attach', this[_onAttach]);
           host.removeEventListener('iron-overlay-detach', this[_onDetach]);
@@ -228,32 +200,6 @@ Use `overlayType` to limit which types of overlays this container should host:
             n = n.parentNode;
           }
           return document;
-        }
-
-        /**
-         * Delegates the handling of the `esc` event to the top overlay.
-         * @param {!Event} event
-         */
-        [_onEsc](event) {
-          if (event.key === 'Escape' || event.keyCode === 27) {
-            const overlay = this.currentOverlay;
-            overlay && overlay._onEsc(event);
-          }
-        }
-
-        [_onKeydown](event) {
-          if (event.key === 'Escape' || event.keyCode === 27) {
-            this[_onEsc](event);
-          }
-        }
-
-        /**
-         * Delegates the handling of the `tap` event to the top overlay.
-         * @param {!Event} event
-         */
-        [_onTap](event) {
-          const overlay = this.currentOverlay;
-          overlay && overlay._onTap(event);
         }
       }
 
