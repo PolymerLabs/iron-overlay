@@ -45,6 +45,7 @@ styling can be done like this:
   <template strip-whitespace>
     <style include="iron-overlay-renderer-shared-styles"></style>
     <div id="backdrop"></div>
+    <!-- TODO(valdrin) should use delegatesFocus instead of tabindex here, see Polymer/polymer#3988 -->
     <div id="overlay" tabindex="0">
       <slot></slot>
     </div>
