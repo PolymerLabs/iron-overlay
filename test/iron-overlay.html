@@ -352,12 +352,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           runAfterOpen(overlay1, function () {
             runAfterOpen(overlay2, function () {
               MockInteractions.pressAndReleaseKeyOn(document, 27);
-              // Not synchronous handling of events.
-              setTimeout(function() {
-                assert.isFalse(overlay2.opened, 'overlay2 was closed');
-                assert.isTrue(overlay1.opened, 'overlay1 is still opened');
-                done();
-              });
+              assert.isFalse(overlay2.opened, 'overlay2 was closed');
+              assert.isTrue(overlay1.opened, 'overlay1 is still opened');
+              done();
             });
           });
         });

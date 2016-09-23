@@ -187,6 +187,7 @@ styling can be done like this:
           super();
           this[_onTap] = this[_onTap].bind(this);
           this[_onKeydown] = this[_onKeydown].bind(this);
+          this[_eventHandler] = this[_eventHandler].bind(this);
         }
 
         connectedCallback() {
@@ -295,28 +296,46 @@ styling can be done like this:
             passive: true
           });
           document[method]('keydown', this[_onKeydown]);
+
+          document[method]('iron-overlay-event-handler', this[_eventHandler]);
         }
 
         /**
-         * This method should be used when the last element to listen for an
-         * event wants to be the one to handle it; e.g. el1, el2, el3 listen
-         * for the same 'click' event, but el3 (last to add the listener)
-         * wants to be the one to handle it.
-         * The method waits a tick to see if any other element declares to be
-         * the handler of this event.
+         * Returns true if the event can be handled by the overlay.
          * @param {!Event} event The original event
-         * @param {Function=} callback The original event passed as input
+         * @returns {boolean}
          * @protected
          */
-        _handleEvent(event, callback) {
-          const self = this;
-          event[_eventHandler] = self;
-          window.setTimeout(function() {
-            if (event[_eventHandler] === self) {
-              callback && callback.call(self, event);
-              event[_eventHandler] = undefined;
-            }
+        _canHandleEvent(event) {
+          if (event.type === 'keydown') {
+            return (event.key === 'Escape' || event.keyCode === 27) && !this.noCancelOnEscKey;
+          }
+          if (event.type === 'mousedown' || event.type === 'touchstart') {
+            return !this.noCancelOnOutsideClick;
+          }
+          return false;
+        }
+
+        /**
+         * Returns true if the overlay should be handling the event.
+         * It fires a `iron-overlay-event-handler` to check if there is another
+         * overlay on that should take care of the event.
+         * @param {!Event} event
+         * @param {boolean}
+         * @protected
+         */
+        _shouldHandleEvent(event) {
+          // Don't fire event if cannot even handle it!
+          if (!this._canHandleEvent(event)) {
+            return false;
+          }
+          var handlerEvent = this[_fire]('iron-overlay-event-handler', {
+            sourceEvent: event,
+            handler: this
+          }, {
+            node: document
           });
+          return (handlerEvent.detail.handler === this);
         }
 
         /**
@@ -327,17 +346,16 @@ styling can be done like this:
           return event.composedPath().indexOf(this.renderer.$.overlay) !== -1;
         }
 
+        /**
+         * @param {!Event} event
+         */
         [_onKeydown](event) {
-          // Not escape!
-          if (event.key !== 'Escape' && event.keyCode !== 27) {
-            return;
-          }
-          if (!this.noCancelOnEscKey) {
+          if (this._shouldHandleEvent(event)) {
             // Avoid event handling conflicts with native overlays like <dialog>.
             // E.g. ESC key should not bubble up to the native dialog.
             // Needs to be synchronous.
             event.preventDefault();
-            this._handleEvent(event, this._cancel);
+            this._cancel(event);
           }
         }
 
@@ -345,8 +363,16 @@ styling can be done like this:
          * @param {!Event} event
          */
         [_onTap](event) {
-          if (!this.noCancelOnOutsideClick) {
-            this._handleEvent(event, this[_isTapInside](event) ? null : this._cancel);
+          // If it should handle the event it means it is the top overlay.
+          // If the tap is outside, we should cancel it.
+          if (this._shouldHandleEvent(event) && !this[_isTapInside](event)) {
+            this._cancel(event);
+          };
+        }
+
+        [_eventHandler](event) {
+          if (this._canHandleEvent(event.detail.sourceEvent)) {
+            event.detail.handler = this;
           }
         }
 
@@ -432,7 +458,6 @@ styling can be done like this:
         }
 
         [_onTransitioningChanged](event) {
-          // Not our guy
           if (event.target !== this.renderer) {
             return;
           }
