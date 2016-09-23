@@ -126,17 +126,14 @@ styling can be done like this:
          * @protected
          */
         _attachDom(dom) {
-          if (dom && this.attachShadow) {
-            if (!this.shadowRoot) {
-              this.attachShadow({
-                mode: 'open',
-                delegatesFocus: true
-              });
-            }
-            this.shadowRoot.appendChild(dom);
-            return this.shadowRoot;
+          // Create shadowRoot only when there is content to be added
+          if (dom && this.attachShadow && !this.shadowRoot) {
+            this.attachShadow({
+              mode: 'open',
+              delegatesFocus: true
+            });
           }
-          super._attachDom(dom);
+          return super._attachDom(dom);
         }
 
         /**
