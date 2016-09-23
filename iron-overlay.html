@@ -87,6 +87,67 @@ styling can be done like this:
     (function() {
       'use strict';
 
+      const _events = Symbol();
+      const _handleEvent = Symbol();
+      const _boundHandleEvent = Symbol();
+
+      /**
+       * SharedEventListener allows to register callback for an event on document
+       * ensuring that the last registered callback is the one called.
+       * e.g. `node1`, `node2`, then `node3` listen for `click` event -> `node3`
+       * is the one to handle it.
+       */
+      class SharedEventListener {
+
+        constructor() {
+          this[_events] = {};
+          // In ShadyDOM, different events with same callback have issues
+          // (see shadydom#24), so we generate a bound handleEvent for each event.
+          // TODO(valdrin) replace this with commented line once shadydom#24 is fixed.
+          // this[_handleEvent] = this[_handleEvent].bind(this);
+          this[_boundHandleEvent] = {};
+        }
+
+        listen(eventName, listener, callback) {
+          let listeners = this[_events][eventName];
+          if (!listeners) {
+            listeners = [];
+            this[_boundHandleEvent][eventName] = this[_handleEvent].bind(this);
+            document.addEventListener(eventName, this[_boundHandleEvent][eventName]);
+            this[_events][eventName] = listeners;
+          }
+          // It's fine if we have duplicates, as the last one counts.
+          listeners.push({
+            listener: listener,
+            callback: callback
+          });
+        }
+
+        unlisten(eventName, listener) {
+          let listeners = this[_events][eventName];
+          if (!listeners) {
+            return;
+          }
+          listeners = listeners.filter(function(obj) {
+            return obj.listener !== listener;
+          });
+          if (!listeners.length) {
+            document.removeEventListener(eventName, this[_boundHandleEvent][eventName]);
+            this[_boundHandleEvent][eventName] = null;
+            listeners = null;
+          }
+          this[_events][eventName] = listeners;
+        }
+
+        [_handleEvent](event) {
+          const handlers = this[_events][event.type];
+          const handler = handlers[handlers.length - 1];
+          handler.listener[handler.callback](event);
+        }
+      }
+
+      const sharedListener = new SharedEventListener();
+
       const templatizer = new Polymer.Templatizer();
 
       /* Symbols for private properties/methods */
@@ -181,13 +242,6 @@ styling can be done like this:
               }
             }
           };
-        }
-
-        constructor() {
-          super();
-          this[_onTap] = this[_onTap].bind(this);
-          this[_onKeydown] = this[_onKeydown].bind(this);
-          this[_eventHandler] = this[_eventHandler].bind(this);
         }
 
         connectedCallback() {
@@ -287,55 +341,18 @@ styling can be done like this:
          * @protected
          */
         _toggleListeners() {
-          const method = this.opened ? 'addEventListener' : 'removeEventListener';
-          // Document wide listeners.
-          document[method]('mousedown', this[_onTap], {
-            passive: true
-          });
-          document[method]('touchstart', this[_onTap], {
-            passive: true
-          });
-          document[method]('keydown', this[_onKeydown]);
-
-          document[method]('iron-overlay-event-handler', this[_eventHandler]);
-        }
-
-        /**
-         * Returns true if the event can be handled by the overlay.
-         * @param {!Event} event The original event
-         * @returns {boolean}
-         * @protected
-         */
-        _canHandleEvent(event) {
-          if (event.type === 'keydown') {
-            return (event.key === 'Escape' || event.keyCode === 27) && !this.noCancelOnEscKey;
+          if (this.opened && !this.noCancelOnOutsideClick) {
+            sharedListener.listen('mousedown', this, _onTap);
+            sharedListener.listen('touchstart', this, _onTap);
+          } else {
+            sharedListener.unlisten('mousedown', this);
+            sharedListener.unlisten('touchstart', this);
           }
-          if (event.type === 'mousedown' || event.type === 'touchstart') {
-            return !this.noCancelOnOutsideClick;
+          if (this.opened && !this.noCancelOnEscKey) {
+            sharedListener.listen('keydown', this, _onKeydown);
+          } else {
+            sharedListener.unlisten('keydown', this);
           }
-          return false;
-        }
-
-        /**
-         * Returns true if the overlay should be handling the event.
-         * It fires a `iron-overlay-event-handler` to check if there is another
-         * overlay on that should take care of the event.
-         * @param {!Event} event
-         * @param {boolean}
-         * @protected
-         */
-        _shouldHandleEvent(event) {
-          // Don't fire event if cannot even handle it!
-          if (!this._canHandleEvent(event)) {
-            return false;
-          }
-          var handlerEvent = this[_fire]('iron-overlay-event-handler', {
-            sourceEvent: event,
-            handler: this
-          }, {
-            node: document
-          });
-          return (handlerEvent.detail.handler === this);
         }
 
         /**
@@ -350,7 +367,7 @@ styling can be done like this:
          * @param {!Event} event
          */
         [_onKeydown](event) {
-          if (this._shouldHandleEvent(event)) {
+          if (event.key === 'Escape' || event.keyCode === 27) {
             // Avoid event handling conflicts with native overlays like <dialog>.
             // E.g. ESC key should not bubble up to the native dialog.
             // Needs to be synchronous.
@@ -365,15 +382,9 @@ styling can be done like this:
         [_onTap](event) {
           // If it should handle the event it means it is the top overlay.
           // If the tap is outside, we should cancel it.
-          if (this._shouldHandleEvent(event) && !this[_isTapInside](event)) {
+          if (!this[_isTapInside](event)) {
             this._cancel(event);
           };
-        }
-
-        [_eventHandler](event) {
-          if (this._canHandleEvent(event.detail.sourceEvent)) {
-            event.detail.handler = this;
-          }
         }
 
         /**
