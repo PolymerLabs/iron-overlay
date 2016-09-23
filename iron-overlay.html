@@ -445,7 +445,9 @@ styling can be done like this:
 
           // Force removing.
           const parent = this.renderer.parentNode;
-          parent && parent.removeChild(this.renderer);
+          // TODO(valdrin) check why in ShadyDOM the parent is defined but does
+          // not contain the renderer.
+          parent && parent.contains(this.renderer) && parent.removeChild(this.renderer);
         }
 
         [_openedChanged](opened) {
