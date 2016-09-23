@@ -35,176 +35,158 @@ Use `overlayType` to limit which types of overlays this container should host:
 @demo demo/index.html
 -->
 
-<dom-module id="iron-overlay-container">
+<script>
+  (function() {
+    'use strict';
 
-  <template strip-whitespace>
-    <style>
-      :host {
-        position: fixed;
-        top: 0;
-        left: 0;
-        z-index: 101;
+    /* Symbols for private properties/methods */
+    const _overlays = Symbol();
+    const _host = Symbol();
+    const _getHostRoot = Symbol();
+    const _onAttach = Symbol();
+    const _onDetach = Symbol();
+
+    class IronOverlayContainer extends Polymer.Element {
+      static get is() {
+        return 'iron-overlay-container';
+      }
+      static get config() {
+        return {
+          properties: {
+            /**
+             * Which overlay type should this container host.
+             */
+            overlayType: String
+          }
+        };
+      }
+      constructor() {
+        super();
+        // List of overlays handled by this container.
+        this[_overlays] = [];
+        this[_host] = null;
+        // Bind these methods to `this` as they are used for event listeners.
+        this[_onAttach] = this[_onAttach].bind(this);
+        this[_onDetach] = this[_onDetach].bind(this);
       }
 
-    </style>
-    <slot></slot>
-  </template>
+      connectedCallback() {
+        super.connectedCallback();
+        // Listeners on the host.
+        const host = this[_getHostRoot]();
+        host.addEventListener('iron-overlay-attach', this[_onAttach]);
+        host.addEventListener('iron-overlay-detach', this[_onDetach]);
+        this[_host] = host;
+      }
 
-  <script>
+      disconnectedCallback() {
+        super.disconnectedCallback();
+        const host = this[_host];
+        host.removeEventListener('iron-overlay-attach', this[_onAttach]);
+        host.removeEventListener('iron-overlay-detach', this[_onDetach]);
+        this[_host] = null;
+      }
 
-    (function () {
-      'use strict';
+      /**
+       * Returns the current overlay.
+       * @type {Node|undefined}
+       */
+      get currentOverlay() {
+        return this[_overlays][this[_overlays].length - 1];
+      }
 
-      /* Symbols for private properties/methods */
-      const _overlays = Symbol();
-      const _host = Symbol();
-      const _getHostRoot = Symbol();
-      const _onAttach = Symbol();
-      const _onDetach = Symbol();
+      /**
+       * Returns true if the overlay can be hosted (if it matches the overlayType).
+       * @param {!Polymer.IronOverlay} overlay
+       * @returns {boolean}
+       */
+      canAttach(overlay) {
+        return (!this.overlayType || overlay.localName === this.overlayType);
+      }
 
-      class IronOverlayContainer extends Polymer.Element {
-        static get is() {
-          return 'iron-overlay-container';
+      /**
+       * Hosts the overlay renderer if if can be hosted (see `canHost`).
+       * Returns true if the overlay was hosted.
+       * @param {!Polymer.IronOverlay} overlay
+       * @returns {boolean}
+       */
+      attachOverlay(overlay) {
+        const canAttach = this.canAttach(overlay);
+        if (canAttach) {
+          this[_overlays].push(overlay);
+          this.appendChild(overlay.renderer);
+          //TODO(valdrin) remove this line after webcomponents/shadydom#17 is fixed.
+          window.ShadyDOM && window.ShadyDOM.inUse && window.ShadyDOM.flush();
         }
-        static get config() {
-          return {
-            properties: {
-              /**
-               * Which overlay type should this container host.
-               */
-              overlayType: String
-            }
-          };
-        }
-        constructor() {
-          super();
-          // List of overlays handled by this container.
-          this[_overlays] = [];
-          this[_host] = null;
-          // Bind these methods to `this` as they are used for event listeners.
-          this[_onAttach] = this[_onAttach].bind(this);
-          this[_onDetach] = this[_onDetach].bind(this);
-        }
+        return canAttach;
+      }
 
-        connectedCallback() {
-          super.connectedCallback();
-          // Listeners on the host.
-          const host = this[_getHostRoot]();
-          host.addEventListener('iron-overlay-attach', this[_onAttach]);
-          host.addEventListener('iron-overlay-detach', this[_onDetach]);
-          this[_host] = host;
-        }
 
-        disconnectedCallback() {
-          super.disconnectedCallback();
-          const host = this[_host];
-          host.removeEventListener('iron-overlay-attach', this[_onAttach]);
-          host.removeEventListener('iron-overlay-detach', this[_onDetach]);
-          this[_host] = null;
+      /**
+       * Stops hosting the overlay renderer, moves focus to the new `currentOverlay`.
+       * Returns true if the overlay was removed.
+       * @param {Polymer.IronOverlay} overlay
+       * @returns {boolean}
+       */
+      detachOverlay(overlay) {
+        const i = this[_overlays].indexOf(overlay);
+        if (i >= 0) {
+          this.removeChild(overlay.renderer);
+          //TODO(valdrin) remove this line after webcomponents/shadydom#17 is fixed.
+          window.ShadyDOM && window.ShadyDOM.inUse && window.ShadyDOM.flush();
+          this[_overlays].splice(i, 1);
+          // Move focus to new top overlay.
+          overlay = this.currentOverlay;
+          overlay && overlay.applyFocus();
         }
+        return i >= 0;
+      }
 
-        /**
-         * Returns the current overlay.
-         * @type {Node|undefined}
-         */
-        get currentOverlay() {
-          return this[_overlays][this[_overlays].length - 1];
-        }
-
-        /**
-         * Returns true if the overlay can be hosted (if it matches the overlayType).
-         * @param {!Polymer.IronOverlay} overlay
-         * @returns {boolean}
-         */
-        canAttach(overlay) {
-          return (!this.overlayType || overlay.localName === this.overlayType);
-        }
-
-        /**
-         * Hosts the overlay renderer if if can be hosted (see `canHost`).
-         * Returns true if the overlay was hosted.
-         * @param {!Polymer.IronOverlay} overlay
-         * @returns {boolean}
-         */
-        attachOverlay(overlay) {
-          const canAttach = this.canAttach(overlay);
-          if (canAttach) {
-            this[_overlays].push(overlay);
-            this.appendChild(overlay.renderer);
-            //TODO(valdrin) remove this line after webcomponents/shadydom#17 is fixed.
-            window.ShadyDOM && window.ShadyDOM.inUse && window.ShadyDOM.flush();
-          }
-          return canAttach;
+      /**
+       * Adds the `root` and prevents/stops the event propagation.
+       * @param {!Event} event
+       */
+      [_onAttach](event) {
+        if (event.defaultPrevented) {
+          return;
         }
 
-
-        /**
-         * Stops hosting the overlay renderer, moves focus to the new `currentOverlay`.
-         * Returns true if the overlay was removed.
-         * @param {Polymer.IronOverlay} overlay
-         * @returns {boolean}
-         */
-        detachOverlay(overlay) {
-          const i = this[_overlays].indexOf(overlay);
-          if (i >= 0) {
-            this.removeChild(overlay.renderer);
-            //TODO(valdrin) remove this line after webcomponents/shadydom#17 is fixed.
-            window.ShadyDOM && window.ShadyDOM.inUse && window.ShadyDOM.flush();
-            this[_overlays].splice(i, 1);
-            // Move focus to new top overlay.
-            overlay = this.currentOverlay;
-            overlay && overlay.applyFocus();
-          }
-          return i >= 0;
-        }
-
-        /**
-         * Adds the `root` and prevents/stops the event propagation.
-         * @param {!Event} event
-         */
-        [_onAttach](event) {
-          if (event.defaultPrevented) {
-            return;
-          }
-
-          if (this.attachOverlay(event.detail.overlay)) {
-            event.preventDefault();
-            event.stopPropagation();
-          }
-        }
-
-        /**
-         * Removes the `root` and prevents/stops the event propagation.
-         * @param {!Event} event
-         */
-        [_onDetach](event) {
-          if (event.defaultPrevented) {
-            return;
-          }
-          if (this.detachOverlay(event.detail.overlay)) {
-            event.preventDefault();
-            event.stopPropagation();
-          }
-        }
-
-        /**
-         * Returns the root element hosting the container.
-         * @returns {Node}
-         */
-        [_getHostRoot]() {
-          let n = this;
-          while (n) {
-            if (n.nodeType === Node.DOCUMENT_FRAGMENT_NODE && n.host) {
-              return n;
-            }
-            n = n.parentNode;
-          }
-          return document;
+        if (this.attachOverlay(event.detail.overlay)) {
+          event.preventDefault();
+          event.stopPropagation();
         }
       }
 
-      customElements.define(IronOverlayContainer.is, IronOverlayContainer);
-    })();
-  </script>
+      /**
+       * Removes the `root` and prevents/stops the event propagation.
+       * @param {!Event} event
+       */
+      [_onDetach](event) {
+        if (event.defaultPrevented) {
+          return;
+        }
+        if (this.detachOverlay(event.detail.overlay)) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      }
 
-</dom-module>
+      /**
+       * Returns the root element hosting the container.
+       * @returns {Node}
+       */
+      [_getHostRoot]() {
+        let n = this;
+        while (n) {
+          if (n.nodeType === Node.DOCUMENT_FRAGMENT_NODE && n.host) {
+            return n;
+          }
+          n = n.parentNode;
+        }
+        return document;
+      }
+    }
+
+    customElements.define(IronOverlayContainer.is, IronOverlayContainer);
+  })();
+</script>
