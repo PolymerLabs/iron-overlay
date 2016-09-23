@@ -22,6 +22,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   <link rel="import" href="../iron-overlay.html">
   <link rel="import" href="../iron-overlay-container.html">
+  <link rel="import" href="x-menu-button.html">
+
   <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
   <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
 
@@ -47,7 +49,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <demo-snippet class="no-demo">
     <template>
       <custom-style><style is="custom-style">
-        iron-overlay-container > * {
+        [data-overlay] {
           --iron-overlay: {
             border: 1px solid gray;
             padding: 10px;
@@ -61,7 +63,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           };
         }
       </style></custom-style>
-      <iron-overlay-container></iron-overlay-container>
+      <iron-overlay-container overlay-type="iron-overlay"></iron-overlay-container>
     </template>
   </demo-snippet>
 
@@ -109,7 +111,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </template>
   </demo-snippet>
 
-  <h3><code>iron-overlay</code> can be animated.</h3>
+  <h3><code>iron-overlay</code> can be animated and extended.</h3>
   <demo-snippet>
     <template>
       <button onclick="animated.open()">Animated overlay</button>
@@ -120,23 +122,34 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <button onclick="animated.withBackdrop = !animated.withBackdrop">toggle backdrop</button>
           <button onclick="animated2.open()">Another animated overlay</button>
           <button onclick="animated.close()">Close</button>
-          <iron-overlay id="animated2" animated>
+        </template>
+      </iron-overlay>
+
+      <iron-overlay id="animated2" animated>
+        <template>
+          <custom-style><style is="custom-style">
+            [data-overlay="animated2"] {
+              left: 20px;
+              bottom: 20px;
+              top: auto;
+              right: auto;
+              --iron-backdrop-background-color: blue;
+              --iron-backdrop-opacity: 0.4;
+            }
+          </style></custom-style>
+          <h2>Animated 2</h2>
+          <button onclick="animated2.withBackdrop = !animated2.withBackdrop">toggle backdrop</button>
+          <x-menu-button animated vertical-align="bottom">
+            <button slot="trigger">x-menu-button</button>
             <template>
-              <custom-style><style is="custom-style">
-                [data-overlay="animated2"] {
-                  left: 20px;
-                  bottom: 20px;
-                  top: auto;
-                  right: auto;
-                  --iron-backdrop-background-color: blue;
-                  --iron-backdrop-opacity: 0.4;
-                }
-              </style></custom-style>
-              <h2>Animated 2</h2>
-              <button onclick="animated2.withBackdrop = !animated2.withBackdrop">toggle backdrop</button>
-              <button onclick="animated2.close()">Close</button>
+              <ul>
+                <li>one</li>
+                <li>two</li>
+                <li>three</li>
+              </ul>
             </template>
-          </iron-overlay>
+          </x-menu-button>
+          <button onclick="animated2.close()">Close</button>
         </template>
       </iron-overlay>
     </template>
