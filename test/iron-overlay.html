@@ -23,17 +23,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <link rel="import" href="../../iron-test-helpers/iron-test-helpers.html">
     <link rel="import" href="../iron-overlay.html">
-    <link rel="import" href="../iron-overlay-container.html">
 
   </head>
 
   <body>
-
-    <test-fixture id="container">
-      <template>
-        <iron-overlay-container></iron-overlay-container>
-      </template>
-    </test-fixture>
 
     <test-fixture id="basic">
       <template>
@@ -80,7 +73,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <script>
 
       var overlay;
-      var container;
 
       function runAfterOpen(overlay, callback) {
         overlay.addEventListener('iron-overlay-opened', callback);
@@ -91,8 +83,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         overlay.addEventListener('iron-overlay-closed', callback);
         overlay.close();
       }
-
-      suite('events', function () {
+      
+      suite('basic overlay', function () {
 
         setup(function () {
           overlay = fixture('basic');
@@ -121,18 +113,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           overlay.opened = true;
         });
 
-      });
-
-      suite('basic overlay', function () {
-
-        setup(function () {
-          container = fixture('container');
-          overlay = fixture('basic');
-        });
-
-        test('overlay renderer attached on ancestor container', function () {
+        test('overlay renderer attached on body', function () {
           overlay.opened = true;
-          assert.isTrue(container.contains(overlay.renderer), 'renderer attached to container');
+          assert.isTrue(document.body.contains(overlay.renderer), 'renderer attached to body');
         });
 
         test('overlay fires iron-overlay-opened', function (done) {
@@ -283,7 +266,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       suite('opened overlay', function () {
 
         setup(function () {
-          container = fixture('container');
           overlay = fixture('opened');
         });
 
@@ -305,7 +287,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       suite('focus handling', function () {
 
         setup(function () {
-          container = fixture('container');
           overlay = fixture('basic');
         });
 
@@ -342,7 +323,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           overlay2;
 
         setup(function () {
-          container = fixture('container');
           var f = fixture('multiple');
           overlay1 = f[0];
           overlay2 = f[1];
