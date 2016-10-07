@@ -192,7 +192,7 @@ styling can be done like this:
          * @param {!Event} event
          */
         [_onTransitionEnd](event) {
-          if (event.target === this.$.overlay) {
+          if (event.target === this.$.overlay && this.transitioning) {
             // Since there might be multiple animations (e.g. opacity + transition),
             // call finish function only once (reuse RAF).
             this[_onNextAF](this._finishRenderOpenedChanged);

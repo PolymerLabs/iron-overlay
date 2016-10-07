@@ -474,17 +474,22 @@ styling can be done like this:
           if (opened) {
             this[_ensureAttached]();
           }
+          // If renderer is already transitioning, it means the previous transition
+          // didn't complete yet, e.g. close before open animation is completed.
+          // We need to update here the listeners and move focus, as we won't receive
+          // a `transitioning = true` notification.
+          if (this.renderer.transitioning) {
+            this._toggleListeners();
+            this.applyFocus();
+          }
         }
 
         [_onTransitioningChanged](event) {
-          if (event.target !== this.renderer) {
-            return;
-          }
           const transitioning = event.detail.value;
           if (transitioning) {
             this._toggleListeners();
-          } else {
             this.applyFocus();
+          } else {
             if (this.opened) {
               this[_fire]('iron-overlay-opened');
             } else {
