@@ -341,14 +341,14 @@ styling can be done like this:
          * @protected
          */
         _toggleListeners() {
-          if (this.opened && !this.noCancelOnOutsideClick) {
+          if (this.opened) {
             sharedListener.listen('mousedown', this, _onTap);
             sharedListener.listen('touchstart', this, _onTap);
           } else {
             sharedListener.unlisten('mousedown', this);
             sharedListener.unlisten('touchstart', this);
           }
-          if (this.opened && !this.noCancelOnEscKey) {
+          if (this.opened) {
             sharedListener.listen('keydown', this, _onKeydown);
           } else {
             sharedListener.unlisten('keydown', this);
@@ -367,6 +367,9 @@ styling can be done like this:
          * @param {!Event} event
          */
         [_onKeydown](event) {
+          if (this.noCancelOnEscKey) {
+            return;
+          }
           if (event.key === 'Escape' || event.keyCode === 27) {
             // Avoid event handling conflicts with native overlays like <dialog>.
             // E.g. ESC key should not bubble up to the native dialog.
@@ -380,6 +383,9 @@ styling can be done like this:
          * @param {!Event} event
          */
         [_onTap](event) {
+          if (this.noCancelOnOutsideClick) {
+            return;
+          }
           // If it should handle the event it means it is the top overlay.
           // If the tap is outside, we should cancel it.
           if (!this[_isTapInside](event)) {
