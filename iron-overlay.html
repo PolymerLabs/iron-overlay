@@ -168,7 +168,7 @@ styling can be done like this:
 
       const _onTap = Symbol();
       const _onKeydown = Symbol();
-      const _isTapInside = Symbol();
+      const _isTapOutside = Symbol();
 
       const _eventHandler = Symbol();
 
@@ -349,12 +349,12 @@ styling can be done like this:
          * @protected
          */
         _toggleListeners() {
-          if (this.opened) {
+          if (this.opened && !this.noCancelOnOutsideClick) {
             sharedListener.listen('tap', this, _onTap);
           } else {
             sharedListener.unlisten('tap', this);
           }
-          if (this.opened) {
+          if (this.opened && !this.noCancelOnEscKey) {
             sharedListener.listen('keydown', this, _onKeydown);
           } else {
             sharedListener.unlisten('keydown', this);
@@ -363,19 +363,8 @@ styling can be done like this:
 
         /**
          * @param {!Event} event
-         * @returns {boolean}
-         */
-        [_isTapInside](event) {
-          return event.composedPath().indexOf(this.renderer.$.overlay) !== -1;
-        }
-
-        /**
-         * @param {!Event} event
          */
         [_onKeydown](event) {
-          if (this.noCancelOnEscKey) {
-            return;
-          }
           if (event.key === 'Escape' || event.keyCode === 27) {
             // Avoid event handling conflicts with native overlays like <dialog>.
             // E.g. ESC key should not bubble up to the native dialog.
@@ -389,14 +378,19 @@ styling can be done like this:
          * @param {!Event} event
          */
         [_onTap](event) {
-          if (this.noCancelOnOutsideClick) {
-            return;
-          }
           // If it should handle the event it means it is the top overlay.
           // If the tap is outside, we should cancel it.
-          if (!this[_isTapInside](event)) {
+          if (this[_isTapOutside](event)) {
             this._cancel(event);
           };
+        }
+
+        /**
+         * @param {!Event} event
+         * @returns {boolean}
+         */
+        [_isTapOutside](event) {
+          return event.composedPath().indexOf(this.renderer.$.overlay) === -1;
         }
 
         /**
