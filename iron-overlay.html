@@ -90,6 +90,7 @@ styling can be done like this:
       const _events = Symbol();
       const _handleEvent = Symbol();
       const _boundHandleEvent = Symbol();
+      const _tapEnsured = Symbol();
 
       /**
        * SharedEventListener allows to register callback for an event on document
@@ -106,14 +107,21 @@ styling can be done like this:
           // TODO(valdrin) replace this with commented line once shadydom#24 is fixed.
           // this[_handleEvent] = this[_handleEvent].bind(this);
           this[_boundHandleEvent] = {};
+          // Used to ensure document-wide tap recognizer is enabled.
+          this[_tapEnsured] = false;
         }
 
         listen(eventName, listener, callback) {
           let listeners = this[_events][eventName];
+          if (!this[_tapEnsured] && eventName === 'tap') {
+            this[_tapEnsured] = true;
+            // Enable document-wide gesture recognizer.
+            Polymer.Gestures.add(document, 'tap', null);
+          }
           if (!listeners) {
             listeners = [];
             this[_boundHandleEvent][eventName] = this[_handleEvent].bind(this);
-            document.addEventListener(eventName, this[_boundHandleEvent][eventName]);
+            document.addEventListener(eventName, this[_boundHandleEvent][eventName], {capture: true});
             this[_events][eventName] = listeners;
           }
           // It's fine if we have duplicates, as the last one counts.
@@ -132,7 +140,7 @@ styling can be done like this:
             return obj.listener !== listener;
           });
           if (!listeners.length) {
-            document.removeEventListener(eventName, this[_boundHandleEvent][eventName]);
+            document.removeEventListener(eventName, this[_boundHandleEvent][eventName], {capture: true});
             this[_boundHandleEvent][eventName] = null;
             listeners = null;
           }
@@ -342,11 +350,9 @@ styling can be done like this:
          */
         _toggleListeners() {
           if (this.opened) {
-            sharedListener.listen('mousedown', this, _onTap);
-            sharedListener.listen('touchstart', this, _onTap);
+            sharedListener.listen('tap', this, _onTap);
           } else {
-            sharedListener.unlisten('mousedown', this);
-            sharedListener.unlisten('touchstart', this);
+            sharedListener.unlisten('tap', this);
           }
           if (this.opened) {
             sharedListener.listen('keydown', this, _onKeydown);
