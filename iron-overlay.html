@@ -247,6 +247,11 @@ styling can be done like this:
               renderer: {
                 type: Polymer.IronOverlayRenderer,
                 readOnly: true
+              },
+
+              _restoreFocusNode: {
+                type: Node,
+                value: null
               }
             }
           };
@@ -288,15 +293,26 @@ styling can be done like this:
         /**
          * Focuses the overlay if opened, blurs it if closed.
          */
-        applyFocus() {
+        _applyFocus() {
           if (this.noAutoFocus || !this.renderer) {
             return;
           }
-          const focusNode = this._getFocusNode();
           if (this.opened) {
-            focusNode && focusNode.focus();
+            this._getFocusNode().focus();
           } else {
-            focusNode && focusNode.blur();
+            let active = document.activeElement;
+            if (active === this.renderer || this.renderer.contains(active)) {
+              active.blur();
+              active = null;
+            }
+            // If the activeElement is body or null, we are allowed to restore
+            // the focus. In all the other cases focus might have been moved
+            // elsewhere by another component or by an user interaction
+            // (e.g. click on a button outside the overlay).
+            if (this._restoreFocusNode && (!active || active === document.body)) {
+              this._restoreFocusNode.focus();
+            }
+            this._restoreFocusNode = null;
           }
         }
 
@@ -472,6 +488,13 @@ styling can be done like this:
             return;
           }
           if (opened) {
+            // Save the active element.
+            let active = document.activeElement;
+            while (active && active.shadowRoot && active.shadowRoot.activeElement) {
+              active = active.shadowRoot.activeElement;
+            }
+            // Consider <body> as "no active element".
+            this._restoreFocusNode = active === document.body ? null : active;
             this[_ensureAttached]();
           }
           // If renderer is already transitioning, it means the previous transition
@@ -480,7 +503,7 @@ styling can be done like this:
           // a `transitioning = true` notification.
           if (this.renderer.transitioning) {
             this._toggleListeners();
-            this.applyFocus();
+            this._applyFocus();
           }
         }
 
@@ -488,7 +511,7 @@ styling can be done like this:
           const transitioning = event.detail.value;
           if (transitioning) {
             this._toggleListeners();
-            this.applyFocus();
+            this._applyFocus();
           } else {
             if (this.opened) {
               this[_fire]('iron-overlay-opened');
