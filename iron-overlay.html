@@ -235,7 +235,8 @@ styling can be done like this:
 
               /**
                * Set to true to disable auto-focusing the overlay or child nodes with
-               * the `autofocus` attribute when the overlay is opened.
+               * the `autofocus` attribute when the overlay is opened, and to
+               * disable the restoring of the focus to the previous node when closed.
                */
               noAutoFocus: {
                 type: Boolean
@@ -291,9 +292,10 @@ styling can be done like this:
         }
 
         /**
-         * Focuses the overlay if opened, blurs it if closed.
+         * Focuses the overlay if opened, blurs it and restores the focus to
+         * previous focused node if closed.
          */
-        _applyFocus() {
+        applyFocus() {
           if (this.noAutoFocus || !this.renderer) {
             return;
           }
@@ -312,7 +314,6 @@ styling can be done like this:
             if (this._restoreFocusNode && (!active || active === document.body)) {
               this._restoreFocusNode.focus();
             }
-            this._restoreFocusNode = null;
           }
         }
 
@@ -503,7 +504,7 @@ styling can be done like this:
           // a `transitioning = true` notification.
           if (this.renderer.transitioning) {
             this._toggleListeners();
-            this._applyFocus();
+            this.applyFocus();
           }
         }
 
@@ -511,7 +512,7 @@ styling can be done like this:
           const transitioning = event.detail.value;
           if (transitioning) {
             this._toggleListeners();
-            this._applyFocus();
+            this.applyFocus();
           } else {
             if (this.opened) {
               this[_fire]('iron-overlay-opened');
