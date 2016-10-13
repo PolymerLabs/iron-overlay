@@ -35,7 +35,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             static get is() {
               return 'test-overlay';
             }
-            applyFocus() {}
             _onTap() {}
             _onEsc() {}
 
@@ -121,14 +120,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           overlay1.fireDetach();
           overlay1.fireAttach();
           assert.equal(overlay1, container.currentOverlay, 'renderer1 on top');
-        });
-
-        test('overlay below the last closed one receives focus via applyFocus', function () {
-          overlay1.fireAttach();
-          overlay2.fireAttach();
-          var spy = sinon.spy(overlay1, 'applyFocus');
-          overlay2.fireDetach();
-          assert.isTrue(spy.called, 'Focus is moved to new current overlay');
         });
       });
     </script>

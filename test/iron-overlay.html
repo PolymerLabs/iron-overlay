@@ -70,6 +70,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </template>
     </test-fixture>
 
+    <test-fixture id="buttons">
+      <template>
+        <button>button</button>
+        <button>button</button>
+      </template>
+    </test-fixture>
+
     <script>
 
       var overlay;
@@ -314,6 +321,35 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             overlay.opened = true;
             assert.isTrue(document.$blockingElements.has(overlay), 'is a blocking element when opened');
           }
+        });
+
+
+        suite('restore focus', function() {
+          let buttons;
+          setup(function() {
+            buttons = fixture('buttons');
+          });
+
+          test('restores focus to previous focusable', function (done) {
+            buttons[0].focus();
+            runAfterOpen(overlay, function () {
+              runAfterClose(overlay, function () {
+                assert.equal(document.activeElement, buttons[0], 'focus returned to button');
+                done();
+              });
+            });
+          });
+
+          test('avoids restoring focus if focus changed', function (done) {
+            buttons[0].focus();
+            runAfterOpen(overlay, function () {
+              buttons[1].focus();
+              runAfterClose(overlay, function () {
+                assert.equal(document.activeElement, buttons[1], 'focus was not modified');
+                done();
+              });
+            });
+          });
         });
 
       });
