@@ -479,8 +479,7 @@ styling can be done like this:
 
           // Force removing.
           const parent = this.renderer.parentNode;
-          // TODO(valdrin) check why in ShadyDOM the parent is defined but does
-          // not contain the renderer.
+          // TODO(valdrin) remove `contains` check after webcomponents/custom-elements#19 is fixed.
           parent && parent.contains(this.renderer) && parent.removeChild(this.renderer);
         }
 
