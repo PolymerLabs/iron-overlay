@@ -87,11 +87,6 @@ styling can be done like this:
     (function() {
       'use strict';
 
-      const _events = Symbol();
-      const _handleEvent = Symbol();
-      const _boundHandleEvent = Symbol();
-      const _tapEnsured = Symbol();
-
       /**
        * SharedEventListener allows to register callback for an event on document
        * ensuring that the last registered callback is the one called.
@@ -101,61 +96,57 @@ styling can be done like this:
       class SharedEventListener {
 
         constructor() {
-          this[_events] = {};
-          // In ShadyDOM, different events with same callback have issues
-          // (see shadydom#24), so we generate a bound handleEvent for each event.
-          // TODO(valdrin) replace this with commented line once shadydom#24 is fixed.
-          // this[_handleEvent] = this[_handleEvent].bind(this);
-          this[_boundHandleEvent] = {};
+          this._events = {};
+          this._handleEvent = this._handleEvent.bind(this);
           // Used to ensure document-wide tap recognizer is enabled.
-          this[_tapEnsured] = false;
+          this._tapEnsured = false;
         }
 
         listen(eventName, listener, callback) {
-          let listeners = this[_events][eventName];
-          if (!this[_tapEnsured] && eventName === 'tap') {
-            this[_tapEnsured] = true;
+          if (!this._tapEnsured && eventName === 'tap') {
+            this._tapEnsured = true;
             // Enable document-wide gesture recognizer.
             Polymer.Gestures.add(document, 'tap', null);
           }
-          if (!listeners) {
-            listeners = [];
-            this[_boundHandleEvent][eventName] = this[_handleEvent].bind(this);
-            document.addEventListener(eventName, this[_boundHandleEvent][eventName], {capture: true});
-            this[_events][eventName] = listeners;
+          if (!this._events[eventName]) {
+            this._events[eventName] = [];
+            document.addEventListener(eventName, this._handleEvent, {
+              capture: true
+            });
           }
           // It's fine if we have duplicates, as the last one counts.
-          listeners.push({
+          this._events[eventName].push({
             listener: listener,
             callback: callback
           });
         }
 
         unlisten(eventName, listener) {
-          let listeners = this[_events][eventName];
-          if (!listeners) {
+          if (!this._events[eventName]) {
             return;
           }
-          listeners = listeners.filter(function(obj) {
+          // Remove all matching listeners.
+          const listeners = this._events[eventName].filter(function(obj) {
             return obj.listener !== listener;
           });
-          if (!listeners.length) {
-            document.removeEventListener(eventName, this[_boundHandleEvent][eventName], {capture: true});
-            this[_boundHandleEvent][eventName] = null;
-            listeners = null;
+          if (listeners.length) {
+            this._events[eventName] = listeners;
+          } else {
+            this._events[eventName] = null;
+            document.removeEventListener(eventName, this._handleEvent, {
+              capture: true
+            });
           }
-          this[_events][eventName] = listeners;
         }
 
-        [_handleEvent](event) {
-          const handlers = this[_events][event.type];
+        _handleEvent(event) {
+          const handlers = this._events[event.type];
           const handler = handlers[handlers.length - 1];
           handler.listener[handler.callback](event);
         }
       }
 
       const sharedListener = new SharedEventListener();
-
       const templatizer = new Polymer.Templatizer();
 
       /* Symbols for private properties/methods */
