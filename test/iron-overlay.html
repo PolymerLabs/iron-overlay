@@ -399,6 +399,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           });
         });
 
+        test('button tap event handling closes only top overlay', function (done) {
+          overlay2.noCancelOnOutsideClick = true;
+          runAfterOpen(overlay1, function () {
+            runAfterOpen(overlay2, function () {
+              const button = overlay2.renderer.querySelector('button');
+              button.addEventListener('tap', overlay2.close.bind(overlay2));
+              MockInteractions.tap(button);
+              assert.isFalse(overlay2.opened, 'overlay2 closed');
+              assert.isTrue(overlay1.opened, 'overlay1 still opened');
+              done();
+            });
+          });
+        });
+
         test('close an overlay in proximity to another overlay', function (done) {
           // Open and close a separate overlay.
           overlay1.open();
