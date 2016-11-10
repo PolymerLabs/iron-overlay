@@ -101,7 +101,10 @@ styling can be done like this:
           // Used to ensure document-wide tap recognizer is enabled.
           this._tapEnsured = false;
         }
-
+        /**
+         * Expects a callback that returns true when it handles the event, false
+         * to allow the event to be handled by the next listener.
+         */
         listen(eventName, listener, callback) {
           if (!this._tapEnsured && eventName === 'tap') {
             this._tapEnsured = true;
@@ -141,8 +144,11 @@ styling can be done like this:
 
         _handleEvent(event) {
           const handlers = this._events[event.type];
-          const handler = handlers[handlers.length - 1];
-          handler.listener[handler.callback](event);
+          let i = handlers.length - 1;
+          let handler = null;
+          while ((handler = handlers[i--]) && !handler.listener[handler.callback](event)) {
+            // Keep looping until someone handles the event.
+          }
         }
       }
 
@@ -357,40 +363,57 @@ styling can be done like this:
          * @protected
          */
         _toggleListeners() {
-          if (this.opened && !this.noCancelOnOutsideClick) {
+          if (this.opened) {
             sharedListener.listen('tap', this, _onTap);
-          } else {
-            sharedListener.unlisten('tap', this);
-          }
-          if (this.opened && !this.noCancelOnEscKey) {
             sharedListener.listen('keydown', this, _onKeydown);
           } else {
+            sharedListener.unlisten('tap', this);
             sharedListener.unlisten('keydown', this);
           }
         }
 
         /**
+         * Returns if the event was handled or not.
          * @param {!Event} event
+         * @return {boolean} handled
          */
         [_onKeydown](event) {
+          // By default the overlay says it handles this event. It should say
+          // it does not handle it if the user has pressed ESC and noCancelOnEscKey
+          // is true.
+          let handled = true;
           if (event.key === 'Escape' || event.keyCode === 27) {
-            // Avoid event handling conflicts with native overlays like <dialog>.
-            // E.g. ESC key should not bubble up to the native dialog.
-            // Needs to be synchronous.
-            event.preventDefault();
-            this._cancel(event);
+            if (this.noCancelOnEscKey) {
+              handled = false;
+            } else {
+              // Avoid event handling conflicts with native overlays like <dialog>.
+              // E.g. ESC key should not bubble up to the native dialog.
+              // Needs to be synchronous.
+              event.preventDefault();
+              this._cancel(event);
+            }
           }
+          return handled;
         }
 
         /**
+         * Returns if the event was handled or not.
          * @param {!Event} event
+         * @return {boolean} handled
          */
         [_onTap](event) {
-          // If it should handle the event it means it is the top overlay.
-          // If the tap is outside, we should cancel it.
+          // By default the overlay says it handles this event. It should say
+          // it does not handle it if the user has clicked outside the overlay
+          // and noCancelOnOutsideClick is true.
+          let handled = true;
           if (this[_isTapOutside](event)) {
-            this._cancel(event);
-          };
+            if (this.noCancelOnOutsideClick) {
+              handled = false;
+            } else {
+              this._cancel(event);
+            }
+          }
+          return handled;
         }
 
         /**
