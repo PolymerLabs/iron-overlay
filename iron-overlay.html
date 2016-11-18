@@ -153,7 +153,6 @@ styling can be done like this:
       }
 
       const sharedListener = new SharedEventListener();
-      const templatizer = new Polymer.Templatizer();
 
       /* Symbols for private properties/methods */
       const _openedChanged = Symbol();
@@ -324,24 +323,6 @@ styling can be done like this:
         }
 
         /**
-         * The template containing the renderer.
-         * @type {!HTMLTemplateElement}
-         * @protected
-         */
-        _getRendererTemplate() {
-          return this.$['renderer-template'];
-        }
-
-        /**
-         * The template containing the content to be stamped in the renderer.
-         * @type {!HTMLTemplateElement}
-         * @protected
-         */
-        _getContentTemplate() {
-          return this.querySelector('template');
-        }
-
-        /**
          * Fires `iron-overlay-canceled` event to notify that the overlay is about
          * to be closed, and if this event is not prevented, it proceeds to
          * close the overlay.
@@ -370,6 +351,35 @@ styling can be done like this:
             sharedListener.unlisten('tap', this);
             sharedListener.unlisten('keydown', this);
           }
+        }
+
+        /**
+         * Creates the renderer and its content; the content is appended into
+         * the light dom of the renderer.
+         * @returns {!Polymer.IronOverlayRenderer}
+         * @protected
+         */
+        _createRenderer() {
+          const templatizer = new Polymer.Templatizer();
+
+          const rendererInstance = new(templatizer.templatize(this.$['renderer-template'], {
+            fwdHostPropToInstance: function(host, prop, value) {
+              rendererInstance && rendererInstance.forwardProperty(prop, value, host);
+            }
+          }))(this);
+          const renderer = rendererInstance.root.firstElementChild;
+          // Stamp the content (if any)
+          const contentTemplate = this.querySelector('template');
+          if (contentTemplate) {
+            const contentInstance = new(templatizer.templatize(contentTemplate, {
+              fwdHostPropToInstance: function(host, prop, value) {
+                contentInstance && contentInstance.forwardProperty(prop, value, host);
+              }
+            }))(this);
+            // Append children to renderer.
+            renderer.appendChild(contentInstance.root);
+          }
+          return renderer;
         }
 
         /**
@@ -432,27 +442,10 @@ styling can be done like this:
             return;
           }
           // Init the renderer.
-          const rendererInstance = new(templatizer.templatize(this._getRendererTemplate(), {
-            fwdHostPropToInstance: function(host, prop, value) {
-              rendererInstance && rendererInstance.forwardProperty(prop, value, host);
-            }
-          }))(this);
-          const renderer = rendererInstance.root.children[0];
+          const renderer = this._createRenderer();
+
           renderer.dataset.overlay = this.id;
           renderer.addEventListener('transitioning-changed', this[_onTransitioningChanged].bind(this));
-
-          // Stamp the content if any!
-          const contentTemplate = this._getContentTemplate();
-          if (contentTemplate) {
-            const contentInstance = new(templatizer.templatize(contentTemplate, {
-              fwdHostPropToInstance: function(host, prop, value) {
-                contentInstance && contentInstance.forwardProperty(prop, value, host);
-              }
-            }))(this);
-            // Append children to renderer.
-            renderer.appendChild(contentInstance.root);
-          }
-
           this._setRenderer(renderer);
         }
 
