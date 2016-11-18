@@ -114,6 +114,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <h3><code>iron-overlay</code> can be animated and extended.</h3>
   <demo-snippet>
     <template>
+      <custom-style><style is="custom-style">
+        [data-overlay="animated2"] {
+          left: 20px;
+          bottom: 20px;
+          top: auto;
+          right: auto;
+          --iron-backdrop-background-color: blue;
+          --iron-backdrop-opacity: 0.4;
+        }
+      </style></custom-style>
+
       <button onclick="animated.open()">Animated overlay</button>
       <iron-overlay id="animated" animated>
         <template>
@@ -127,16 +138,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       <iron-overlay id="animated2" animated>
         <template>
-          <custom-style><style is="custom-style">
-            [data-overlay="animated2"] {
-              left: 20px;
-              bottom: 20px;
-              top: auto;
-              right: auto;
-              --iron-backdrop-background-color: blue;
-              --iron-backdrop-opacity: 0.4;
-            }
-          </style></custom-style>
           <h2>Animated 2</h2>
           <button onclick="animated2.withBackdrop = !animated2.withBackdrop">toggle backdrop</button>
           <x-menu-button animated vertical-align="bottom">
