@@ -268,14 +268,13 @@ styling can be done like this:
          * Toggle the opened state of the overlay.
          */
         toggle() {
-          this.opened ? this.close() : this.open();
+          this.opened = !this.opened;
         }
 
         /**
          * Open the overlay.
          */
         open() {
-          this.closingReason.canceled = false;
           this.opened = true;
         }
 
@@ -283,7 +282,6 @@ styling can be done like this:
          * Close the overlay.
          */
         close() {
-          this.closingReason.canceled = false;
           this.opened = false;
         }
 
@@ -334,8 +332,9 @@ styling can be done like this:
             cancelable: true
           });
           if (!cancelEvent.defaultPrevented) {
-            this.closingReason.canceled = true;
+            // _openedChanged will reset the closing reason, so set it to true right after.
             this.opened = false;
+            this.closingReason.canceled = true;
           }
         }
 
@@ -463,7 +462,9 @@ styling can be done like this:
             cancelable: true
           });
           // If no handler responded, add it to body.
-          if (!event.defaultPrevented) {
+          if (!event.defaultPrevented && !this.renderer.isConnected) {
+            // TODO(valdrin) remove patching when webcomponents/shadydom#7 is fixed.
+            window.ShadyDOM && window.ShadyDOM.patch(document.body);
             document.body.appendChild(this.renderer);
           }
         }
@@ -485,15 +486,17 @@ styling can be done like this:
           });
 
           // Force removing.
-          const parent = this.renderer.parentNode;
-          // TODO(valdrin) remove `contains` check after webcomponents/custom-elements#19 is fixed.
-          parent && parent.contains(this.renderer) && parent.removeChild(this.renderer);
+          if (this.renderer.isConnected) {
+            this.renderer.parentNode.removeChild(this.renderer);
+          }
         }
 
         [_openedChanged](opened) {
           if (!this.isConnected) {
             return;
           }
+          // Reset the closing reason to false.
+          this.closingReason.canceled = false;
           if (opened) {
             // Save the active element.
             let active = document.activeElement;
