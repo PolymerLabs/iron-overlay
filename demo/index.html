@@ -45,43 +45,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <body unresolved class="centered">
 
-  <h3>You need at least one <code>iron-overlay-container</code> defined in your page.</h3>
-  <demo-snippet class="no-demo">
-    <template>
-      <custom-style><style is="custom-style">
-        [data-overlay] {
-          --iron-overlay: {
-            border: 1px solid gray;
-            padding: 10px;
-          };
-          --iron-overlay-closed: {
-            transform: scale(.5);
-            transition: opacity .2s, transform .2s;
-          };
-          --iron-overlay-opened: {
-            transform: none;
-          };
-        }
-      </style></custom-style>
-      <iron-overlay-container overlay-type="iron-overlay"></iron-overlay-container>
-    </template>
-  </demo-snippet>
-
   <h3><code>iron-overlay</code> can be opened, closed, toggled.</h3>
   <demo-snippet>
     <template>
-      <button onclick="plain.open()">Plain overlay</button>
+      <button onclick="plain.opened = true">Plain overlay</button>
       <iron-overlay id="plain" no-cancel-on-outside-click>
         <template>
           <h2>Hello world!</h2>
           <p>This can be closed by pressing the ESC key too.</p>
-          <button onclick="plain2.open()" autofocus>Another Plain overlay</button>
-          <button onclick="plain.close()">Close</button>
+          <button onclick="plain2.opened = true" autofocus>Another Plain overlay</button>
+          <button onclick="plain.opened = false">Close</button>
         </template>
         <iron-overlay id="plain2">
           <template>
             <h2>Plain 2</h2>
-            <button onclick="plain2.close()">Close</button>
+            <button onclick="plain2.opened = false">Close</button>
           </template>
         </iron-overlay>
       </iron-overlay>
@@ -91,7 +69,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <h3>Content can be styled.</h3>
   <demo-snippet>
     <template>
-      <button onclick="styledContent.open()">Overlay with styled content</button>
+      <button onclick="styledContent.opened = true">Overlay with styled content</button>
       <iron-overlay id="styledContent">
         <template>
           <style>
@@ -104,7 +82,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <h2>Hello world!</h2>
             <p>"styled-content" class styles are applied into the scope of the
               node containing this overlay renderer.</p>
-            <button onclick="styledContent.close()">Close</button>
+            <button onclick="styledContent.opened = false">Close</button>
           </div>
         </template>
       </iron-overlay>
@@ -125,14 +103,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       </style></custom-style>
 
-      <button onclick="animated.open()">Animated overlay</button>
+      <button onclick="animated.opened = true">Animated overlay</button>
       <iron-overlay id="animated" animated>
         <template>
           <h2>Animated!</h2>
           <p>This can be closed by pressing the ESC key too.</p>
           <button onclick="animated.withBackdrop = !animated.withBackdrop">toggle backdrop</button>
-          <button onclick="animated2.open()">Another animated overlay</button>
-          <button onclick="animated.close()">Close</button>
+          <button onclick="animated2.opened = true">Another animated overlay</button>
+          <button onclick="animated.opened = false">Close</button>
         </template>
       </iron-overlay>
 
@@ -150,9 +128,31 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               </ul>
             </template>
           </x-menu-button>
-          <button onclick="animated2.close()">Close</button>
+          <button onclick="animated2.opened = false">Close</button>
         </template>
       </iron-overlay>
+    </template>
+  </demo-snippet>
+
+  <h3>You can host overlay renderers by using <code>iron-overlay-container</code></h3>
+  <demo-snippet class="no-demo">
+    <template>
+      <custom-style><style is="custom-style">
+        [data-overlay] {
+          --iron-overlay: {
+            border: 1px solid gray;
+            padding: 10px;
+          };
+          --iron-overlay-closed: {
+            transform: scale(.5);
+            transition: opacity .2s, transform .2s;
+          };
+          --iron-overlay-opened: {
+            transform: none;
+          };
+        }
+      </style></custom-style>
+      <iron-overlay-container overlay-type="iron-overlay"></iron-overlay-container>
     </template>
   </demo-snippet>
 

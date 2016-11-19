@@ -45,8 +45,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   <body unresolved>
 
-    <iron-overlay-container></iron-overlay-container>
-
     <div class="stacking-context">
 
       <h3>Stacking context</h3>
@@ -71,12 +69,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </style>
           </custom-style>
 
-          <button onclick="c0.open()">free</button>
+          <button onclick="c0.opened = true">free</button>
           <iron-overlay id="c0" with-backdrop>
             <template>
               <h2>Dialog</h2>
               <div class="buttons">
-                <button onclick="c0.close()">close</button>
+                <button onclick="c0.opened = false">close</button>
               </div>
             </template>
           </iron-overlay>
@@ -113,7 +111,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                       <p>[[item.itemName]]</p>
                     </template>
                   </dom-repeat>
-                  <button onclick="c1.close()">close</button>
+                  <button onclick="c1.opened = false">close</button>
                 </template>
               </iron-overlay>
 
@@ -183,7 +181,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               };
               t.openNextOverlay = function (e) {
                 const trigger = e.composedPath()[0];
-                trigger.nextElementSibling.open();
+                trigger.nextElementSibling.opened = true;
               };
               t.resetData();
             </script>
@@ -192,6 +190,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </template>
     </demo-snippet>
   </div>
+
+  <iron-overlay-container></iron-overlay-container>
 
 </body>
 

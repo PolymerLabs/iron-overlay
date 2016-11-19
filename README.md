@@ -33,16 +33,13 @@ the new stacking context), resulting in problems like [this one](http://jsbin.co
 stacking-context-safe node.
 
 ```html
-<!-- it will contain all the overlay renderers -->
-<iron-overlay-container></iron-overlay-container>
-
 <!-- this creates a new stacking context -->
 <div style="transform: translateZ(0);">
-  <button onclick="this.nextElementSibling.open()">Open overlay</button>
+  <button onclick="this.nextElementSibling.opened = true">Open overlay</button>
   <iron-overlay>
     <template>
       <!-- overlay content -->
-      This text will be contained in iron-overlay-content
+      This text will be stamped and appended to the document body.
     </template>
   </iron-overlay>
 </div>
@@ -52,8 +49,9 @@ stacking-context-safe node.
 
 It delegates rendering of the overlay content to a renderer (`iron-overlay-renderer`).
 It won't host the renderer, but request another element to host it through the
-events `iron-overlay-attach` and `iron-overlay-detach`. It requires overlay contents
-to be contained in a `<template>` (since they need to be hosted in the renderer).
+events `iron-overlay-attach` and `iron-overlay-detach`, or append it to `<body>`.
+It requires overlay contents to be contained in a `<template>` (since they need
+to be hosted in the renderer).
 
 ## iron-overlay-renderer
 
@@ -66,42 +64,55 @@ Hosts the overlay renderers, keeps track of the opened overlays and delegates `t
 event and `esc` keyboard event to the top overlay. This element should be placed
 in a stacking-context safe node (e.g. `document.body`).
 
+```html
+<div style="transform: translateZ(0);">
+  <button onclick="this.nextElementSibling.opened = true">Open overlay</button>
+  <iron-overlay>
+    <template>
+      <!-- overlay content -->
+      This text will be contained in iron-overlay-content
+    </template>
+  </iron-overlay>
+</div>
+
+<!-- it will contain all the overlay renderers -->
+<iron-overlay-container></iron-overlay-container>
+```
+
 ## Styling
 
-Content will be stamped outside the styling scope of `iron-overlay`. To ensure
-there is no leaking of styles for the content, the best approach is to create a
-custom element for your content.
-
-To help styling the content, `iron-overlay` sets the renderer's `data-overlay`
-attribute to be its id, so that styling can be done like this:
+`iron-overlay` sets the renderer's `data-overlay` attribute to be its id, so
+that styling of the overlay can be done like this:
 
 ```html
-<style is="custom-style">
-  iron-overlay-renderer {  
+<custom-style><style is="custom-style">
+  [data-overlay] {  
     --iron-overlay-background-color: yellow;
   }
-  iron-overlay-renderer[data-overlay="overlay1"] {
+  [data-overlay="overlay1"] {
     --iron-overlay-background-color: orange;
   }
-</style>
+</style></custom-style>
 
-<iron-overlay-container></iron-overlay-container>
-
-<iron-overlay>
-  <template>Overlay Content</template>
-</iron-overlay>
-<iron-overlay id="overlay1">
-  <template>Overlay 1 Content</template>
-</iron-overlay>
+<div style="transform: translateZ(0);">
+  <iron-overlay>
+    <template>Overlay Content</template>
+  </iron-overlay>
+  <iron-overlay id="overlay1">
+    <template>Overlay 1 Content</template>
+  </iron-overlay>
+</div>
 ```
+
+Styling of the content should be done in the context of where it will be hosted.
+The best approach is to create a custom element for your content to ensure style
+encapsulation.
 
 Content can be styled as well by passing a `<style>` element into the template,
 but beware of possible conflicts with classes, as selectors will apply to all
-matching elements contained in `iron-overlay-container`:
+matching elements in the styling context where they're hosted:
 
 ```html
-<iron-overlay-container></iron-overlay-container>
-
 <iron-overlay>
   <template>
     <style>
