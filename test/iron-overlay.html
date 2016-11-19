@@ -85,12 +85,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       function runAfterOpen(overlay, callback) {
         overlay.addEventListener('iron-overlay-opened', callback);
-        overlay.open();
+        overlay.opened = true;
       }
 
       function runAfterClose(overlay, callback) {
         overlay.addEventListener('iron-overlay-closed', callback);
-        overlay.close();
+        overlay.opened = false;
       }
 
       suite('basic overlay', function () {
@@ -150,10 +150,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         test('close an overlay quickly after open', function (done) {
           // first, open the overlay
-          overlay.open();
+          overlay.opened = true;
           setTimeout(function () {
             // during the opening transition, close the overlay
-            this.close();
+            this.opened = false;
             // wait for any exceptions to be thrown until the transition is done.
             setTimeout(function () {
               done();
@@ -417,11 +417,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         test('close an overlay in proximity to another overlay', function (done) {
           // Open and close a separate overlay.
-          overlay1.open();
-          overlay1.close();
+          overlay1.opened = true;
+          overlay1.opened = false;
 
           // Open the overlay we care about.
-          overlay2.open();
+          overlay2.opened = true;
 
           // Immediately close the first overlay. Wait for infinite recursion, otherwise we win.
           runAfterClose(overlay2, function () {
