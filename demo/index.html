@@ -71,14 +71,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <demo-snippet>
     <template>
       <button onclick="plain.open()">Plain overlay</button>
-      <iron-overlay id="plain">
+      <iron-overlay id="plain" no-cancel-on-outside-click>
         <template>
           <h2>Hello world!</h2>
           <p>This can be closed by pressing the ESC key too.</p>
           <button onclick="plain2.open()" autofocus>Another Plain overlay</button>
           <button onclick="plain.close()">Close</button>
         </template>
-        <iron-overlay id="plain2" no-cancel-on-outside-click>
+        <iron-overlay id="plain2">
           <template>
             <h2>Plain 2</h2>
             <button onclick="plain2.close()">Close</button>
@@ -103,7 +103,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <div class="styled-content">
             <h2>Hello world!</h2>
             <p>"styled-content" class styles are applied into the scope of the
-              <code>iron-overlay-container</code> containing this overlay.</p>
+              node containing this overlay renderer.</p>
             <button onclick="styledContent.close()">Close</button>
           </div>
         </template>
