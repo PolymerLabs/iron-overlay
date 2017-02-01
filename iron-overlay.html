@@ -430,7 +430,7 @@ styling can be done like this:
          * @returns {boolean}
          */
         [_isTapOutside](event) {
-          return event.composedPath().indexOf(this.renderer.$.overlay) === -1;
+          return event.composedPath().indexOf(this.renderer) === -1;
         }
 
         /**

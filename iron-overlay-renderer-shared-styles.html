@@ -40,13 +40,13 @@ Custom property | Description | Default
         @apply --layout-center-justified;
         z-index: 101;
         outline: none;
+        pointer-events: none;
       }
 
       #backdrop {
         /* Take full screen */
         @apply --layout-fixed-top;
         @apply --layout-fixed-bottom;
-        pointer-events: none;
         z-index: -1;
         background-color: transparent;
         opacity: 0;
@@ -56,6 +56,7 @@ Custom property | Description | Default
       }
 
       :host([with-backdrop]) #backdrop.opened {
+        pointer-events: all;
         background-color: var(--iron-backdrop-background-color, black);
         opacity: var(--iron-backdrop-opacity, 0.6);
         @apply --iron-backdrop-opened;
@@ -70,6 +71,7 @@ Custom property | Description | Default
       }
 
       #overlay.opened {
+        pointer-events: all;
         opacity: 1;
         @apply --iron-overlay-opened;
       }
