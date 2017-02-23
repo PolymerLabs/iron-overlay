@@ -18,7 +18,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
 
-    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="../../webcomponentsjs/webcomponents-loader.js"></script>
 
     <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
     <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
@@ -131,7 +131,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <p>
                 <pre><code>index: [[selectedIndex]]<br> json: [[selectedItem]]</code></pre>
               </p>
-              <dom-repeat items="[[data]]" as="item" as="item">
+              <dom-repeat items="[[data]]">
                 <template>
                   <div>
                     <button on-click="openNextOverlay">dialog
@@ -170,10 +170,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 t.data = t.data;
               };
               t.resetData = function () {
-                t.data = [];
-                t.addData();
-                t.addData();
-                t.addData();
+                t.data = [{
+                  itemName: 'item 0'
+                },{
+                  itemName: 'item 1'
+                },{
+                  itemName: 'item 2'
+                }];
               };
               t.onAction = function (e) {
                 t.selectedIndex = e.model.index;

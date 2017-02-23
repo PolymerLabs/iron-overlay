@@ -359,24 +359,25 @@ styling can be done like this:
          * @protected
          */
         _createRenderer() {
-          const templatizer = new Polymer.Templatizer();
-
-          const rendererInstance = new(templatizer.templatize(this.$['renderer-template'], {
-            fwdHostPropToInstance: function(host, prop, value) {
-              rendererInstance && rendererInstance.forwardProperty(prop, value, host);
+          // NOTE: we must keep track of __rendererInstance and __contentInstance
+          // because Templatize memoizes the instance forwardHostProp and would invoke it on the
+          // first instance stamped by this element.
+          this.__rendererInstance = new(Polymer.Templatize.templatize(this.$['renderer-template'], this, {
+            forwardHostProp: function(prop, value) {
+              this.__rendererInstance.forwardHostProp(prop, value);
             }
-          }))(this);
-          const renderer = rendererInstance.root.firstElementChild;
+          }))();
+          const renderer = this.__rendererInstance.root.firstElementChild;
           // Stamp the content (if any)
           const contentTemplate = this.querySelector('template');
           if (contentTemplate) {
-            const contentInstance = new(templatizer.templatize(contentTemplate, {
-              fwdHostPropToInstance: function(host, prop, value) {
-                contentInstance && contentInstance.forwardProperty(prop, value, host);
+            this.__contentInstance = new(Polymer.Templatize.templatize(contentTemplate, this, {
+              forwardHostProp: function(prop, value) {
+                this.__contentInstance.forwardHostProp(prop, value);
               }
-            }))(this);
+            }))();
             // Append children to renderer.
-            renderer.appendChild(contentInstance.root);
+            renderer.appendChild(this.__contentInstance.root);
           }
           return renderer;
         }
