@@ -115,6 +115,9 @@ Use `overlayType` to limit which types of overlays this container should host:
         if (canAttach) {
           this[_overlays].push(overlay);
           this.appendChild(overlay.renderer);
+          // Appending twice seems to trigger ShadyCSS MO.
+          // TODO(valdrin) remove when webcomponents/shadycss#17 is fixed.
+          window.ShadyDOM && this.appendChild(overlay.renderer);
         }
         return canAttach;
       }

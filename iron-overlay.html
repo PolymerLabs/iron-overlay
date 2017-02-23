@@ -464,8 +464,11 @@ styling can be done like this:
           });
           // If no handler responded, add it to body.
           if (!event.defaultPrevented && !this.renderer.isConnected) {
-            // TODO(valdrin) remove patching when webcomponents/shadydom#7 is fixed.
-            window.ShadyDOM && window.ShadyDOM.patch(document.body);
+            // TODO(valdrin) remove when webcomponents/shadydom#7 is fixed.
+            window.ShadyDOM && ShadyDOM.patch(document.body);
+            // Appending twice seems to trigger ShadyCSS MO.
+            // TODO(valdrin) remove when webcomponents/shadycss#17 is fixed.
+            window.ShadyDOM && document.body.appendChild(this.renderer);
             document.body.appendChild(this.renderer);
           }
         }
