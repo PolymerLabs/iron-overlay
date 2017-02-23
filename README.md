@@ -60,9 +60,8 @@ opened state to closed state & viceversa.
 
 ## iron-overlay-container
 
-Hosts the overlay renderers, keeps track of the opened overlays and delegates `tap`
-event and `esc` keyboard event to the top overlay. This element should be placed
-in a stacking-context safe node (e.g. `document.body`).
+Hosts the overlay renderers, keeps track of the opened overlays. This element should 
+be placed in a stacking-context safe node (e.g. `document.body`).
 
 ```html
 <div style="transform: translateZ(0);">
@@ -80,6 +79,10 @@ in a stacking-context safe node (e.g. `document.body`).
 ```
 
 ## Styling
+
+Styling must be done in the context of where iron-overlay will be hosted.
+
+### Styling the renderer
 
 `iron-overlay` sets the renderer's `data-overlay` attribute to be its id, so
 that styling of the overlay can be done like this:
@@ -104,11 +107,9 @@ that styling of the overlay can be done like this:
 </div>
 ```
 
-Styling of the content should be done in the context of where it will be hosted.
-The best approach is to create a custom element for your content to ensure style
-encapsulation.
+### Styling the content
 
-Content can be styled as well by passing a `<style>` element into the template,
+Content can be styled by passing a `<style>` element into the template,
 but beware of possible conflicts with classes, as selectors will apply to all
 matching elements in the styling context where they're hosted:
 
@@ -128,6 +129,23 @@ matching elements in the styling context where they're hosted:
   <template>
     <!-- Will have yellow background as well -->
     <div class="my-content">Other Content</div>
+  </template>
+</iron-overlay>
+```
+
+The best approach to ensure style encapsulation is to create a custom element
+for your content.
+
+```html
+<iron-overlay>
+  <template>
+    <my-content>Content</my-content>
+  </template>
+</iron-overlay>
+
+<iron-overlay>
+  <template>
+    <my-other-content>Other Content</my-other-content>
   </template>
 </iron-overlay>
 ```
