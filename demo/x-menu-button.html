@@ -19,13 +19,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
     <template id="renderer-template">
-      <x-menu-button-renderer
-        opened$="[[opened]]"
-        animated$="[[animated]]"
-        vertical-align="[[verticalAlign]]"
-        horizontal-align="[[horizontalAlign]]"
-        position-target="[[_positionTarget]]"
-        on-iron-select="close">
+      <x-menu-button-renderer opened$="[[opened]]" animated$="[[animated]]" vertical-align="[[verticalAlign]]" horizontal-align="[[horizontalAlign]]"
+        position-target="[[_positionTarget]]" on-iron-select="close">
       </x-menu-button-renderer>
     </template>
     <div on-click="open" id="trigger">
@@ -35,19 +30,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </template>
 
   <script>
-  (function() {
-    'use strict';
+    (function() {
+      'use strict';
 
-    class XMenuButton extends Polymer.IronOverlay {
+      class XMenuButton extends Polymer.IronOverlay {
 
-      static get is() {
-        return 'x-menu-button';
-      }
+        static get is() {
+          return 'x-menu-button';
+        }
 
-      static get config() {
-        return {
-          properties: {
-
+        static get properties() {
+          return {
             horizontalAlign: {
               type: String,
               value: 'left'
@@ -65,13 +58,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 return this;
               }
             }
-          }
-        };
+          };
+        }
       }
-    }
 
-    customElements.define(XMenuButton.is, XMenuButton);
+      customElements.define(XMenuButton.is, XMenuButton);
 
-  })();
+    })();
   </script>
 </dom-module>

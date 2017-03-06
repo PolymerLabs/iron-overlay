@@ -50,14 +50,12 @@ Use `overlayType` to limit which types of overlays this container should host:
       static get is() {
         return 'iron-overlay-container';
       }
-      static get config() {
+      static get properties() {
         return {
-          properties: {
-            /**
-             * Which overlay type should this container host.
-             */
-            overlayType: String
-          }
+          /**
+           * Which overlay type should this container host.
+           */
+          overlayType: String
         };
       }
       constructor() {

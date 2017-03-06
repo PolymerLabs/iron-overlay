@@ -164,19 +164,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <script>
               const t = document.querySelector('dom-bind');
               t.addData = function () {
-                t.data.push({
+                t.push('data', {
                   itemName: 'item ' + t.data.length
                 });
-                t.data = t.data;
               };
               t.resetData = function () {
-                t.data = [{
+                t.set('data', [{
                   itemName: 'item 0'
                 },{
                   itemName: 'item 1'
                 },{
                   itemName: 'item 2'
-                }];
+                }]);
               };
               t.onAction = function (e) {
                 t.selectedIndex = e.model.index;
