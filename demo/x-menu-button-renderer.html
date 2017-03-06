@@ -18,7 +18,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         transform: translateY(20px);
         transition: opacity .2s, transform .2s;
       }
-
+      
       #overlay.opened {
         transform: translateY(0);
       }
@@ -29,21 +29,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </template>
 
   <script>
-  (function() {
-    'use strict';
+    (function() {
+      'use strict';
 
-    const _position = Symbol();
-    const _raf = Symbol();
+      const _position = Symbol();
+      const _raf = Symbol();
 
-    class XMenuButtonRenderer extends Polymer.IronOverlayRenderer {
+      class XMenuButtonRenderer extends Polymer.IronOverlayRenderer {
 
-      static get is() {
-        return 'x-menu-button-renderer';
-      }
+        static get is() {
+          return 'x-menu-button-renderer';
+        }
 
-      static get config() {
-        return {
-          properties: {
+        static get properties() {
+          return {
             horizontalAlign: {
               type: String,
               value: 'left'
@@ -57,41 +56,42 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             positionTarget: {
               type: Element
             }
+          };
+        }
+
+        constructor() {
+          super();
+          this[_raf] = null;
+          document.addEventListener('scroll', this[_position].bind(this), {
+            passive: true
+          });
+        }
+
+        _renderOpenedChanged() {
+          super._renderOpenedChanged();
+          this.position();
+        }
+
+        position() {
+          if (this.opened && this.positionTarget) {
+            var rect = this.positionTarget.getBoundingClientRect();
+            var overlayStyle = this.$.overlay.style;
+            overlayStyle.top = this.verticalAlign === 'top' ? rect.top + 'px' : '';
+            overlayStyle.bottom = this.verticalAlign === 'top' ? '' : (window.innerHeight - rect.bottom) + 'px';
+            overlayStyle.left = this.horizontalAlign === 'left' ? rect.left + 'px' : '';
+            overlayStyle.right = this.horizontalAlign === 'left' ? '' : (window.innerWidth - rect.right) + 'px';
           }
-        };
-      }
+        }
 
-      constructor() {
-        super();
-        this[_raf] = null;
-        document.addEventListener('scroll', this[_position].bind(this), {passive: true});
-      }
-
-      _renderOpenedChanged() {
-        super._renderOpenedChanged();
-        this.position();
-      }
-
-      position() {
-        if (this.opened && this.positionTarget) {
-          var rect = this.positionTarget.getBoundingClientRect();
-          var overlayStyle = this.$.overlay.style;
-          overlayStyle.top = this.verticalAlign === 'top' ? rect.top + 'px' : '';
-          overlayStyle.bottom = this.verticalAlign === 'top' ? '' : (window.innerHeight - rect.bottom) + 'px';
-          overlayStyle.left = this.horizontalAlign === 'left' ? rect.left + 'px' : '';
-          overlayStyle.right = this.horizontalAlign === 'left' ? '' : (window.innerWidth - rect.right) + 'px';
+        [_position]() {
+          this[_raf] && window.cancelAnimationFrame(this[_raf]);
+          if (this.opened && !this.transitioning) {
+            this[_raf] = window.requestAnimationFrame(this.position.bind(this));
+          }
         }
       }
+      customElements.define(XMenuButtonRenderer.is, XMenuButtonRenderer);
 
-      [_position]() {
-        this[_raf] && window.cancelAnimationFrame(this[_raf]);
-        if (this.opened && !this.transitioning) {
-          this[_raf] = window.requestAnimationFrame(this.position.bind(this));
-        }
-      }
-    }
-    customElements.define(XMenuButtonRenderer.is, XMenuButtonRenderer);
-
-  })();
+    })();
   </script>
 </dom-module>

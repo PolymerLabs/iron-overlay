@@ -76,10 +76,7 @@ styling can be done like this:
   <template>
     <slot></slot>
     <template id="renderer-template">
-      <iron-overlay-renderer
-        opened$="[[opened]]"
-        animated$="[[animated]]"
-        with-backdrop$="[[withBackdrop]]"></iron-overlay-renderer>
+      <iron-overlay-renderer opened$="[[opened]]" animated$="[[animated]]" with-backdrop$="[[withBackdrop]]"></iron-overlay-renderer>
     </template>
   </template>
 
@@ -174,82 +171,79 @@ styling can be done like this:
           return 'iron-overlay';
         }
 
-        static get config() {
+        static get properties() {
           return {
-            properties: {
+            /**
+             * True if the overlay is currently displayed.
+             */
+            opened: {
+              type: Boolean,
+              notify: true,
+              observer: _openedChanged
+            },
 
-              /**
-               * True if the overlay is currently displayed.
-               */
-              opened: {
-                type: Boolean,
-                notify: true,
-                observer: _openedChanged
-              },
+            /**
+             * True if the overlay has open/close animation.
+             */
+            animated: {
+              type: Boolean
+            },
 
-              /**
-               * True if the overlay has open/close animation.
-               */
-              animated: {
-                type: Boolean
-              },
+            /**
+             * True if the overlay should have a backdrop.
+             */
+            withBackdrop: {
+              type: Boolean
+            },
 
-              /**
-               * True if the overlay should have a backdrop.
-               */
-              withBackdrop: {
-                type: Boolean
-              },
-
-              /**
-               * Contains the reason(s) this overlay was last closed (see `iron-overlay-closed`).
-               * `iron-overlay` provides the `canceled` reason.
-               */
-              closingReason: {
-                type: Object,
-                readOnly: true,
-                value: function() {
-                  return {
-                    canceled: false
-                  };
-                }
-              },
-
-              /**
-               * Set to true to disable canceling the overlay with the ESC key.
-               */
-              noCancelOnEscKey: {
-                type: Boolean
-              },
-
-              /**
-               * Set to true to disable canceling the overlay by clicking outside it.
-               */
-              noCancelOnOutsideClick: {
-                type: Boolean
-              },
-
-              /**
-               * Set to true to disable auto-focusing the overlay or child nodes with
-               * the `autofocus` attribute when the overlay is opened, and to
-               * disable the restoring of the focus to the previous node when closed.
-               */
-              noAutoFocus: {
-                type: Boolean
-              },
-
-              /**
-               * The renderer for the overlay.
-               */
-              renderer: {
-                type: Polymer.IronOverlayRenderer,
-                readOnly: true
-              },
-
-              _restoreFocusNode: {
-                type: Node,
-                value: null
+            /**
+             * Contains the reason(s) this overlay was last closed (see `iron-overlay-closed`).
+             * `iron-overlay` provides the `canceled` reason.
+             */
+            closingReason: {
+              type: Object,
+              readOnly: true,
+              value: function() {
+                return {
+                  canceled: false
+                };
               }
+            },
+
+            /**
+             * Set to true to disable canceling the overlay with the ESC key.
+             */
+            noCancelOnEscKey: {
+              type: Boolean
+            },
+
+            /**
+             * Set to true to disable canceling the overlay by clicking outside it.
+             */
+            noCancelOnOutsideClick: {
+              type: Boolean
+            },
+
+            /**
+             * Set to true to disable auto-focusing the overlay or child nodes with
+             * the `autofocus` attribute when the overlay is opened, and to
+             * disable the restoring of the focus to the previous node when closed.
+             */
+            noAutoFocus: {
+              type: Boolean
+            },
+
+            /**
+             * The renderer for the overlay.
+             */
+            renderer: {
+              type: Polymer.IronOverlayRenderer,
+              readOnly: true
+            },
+
+            _restoreFocusNode: {
+              type: Node,
+              value: null
             }
           };
         }
@@ -364,7 +358,7 @@ styling can be done like this:
           // first instance stamped by this element.
           this.__rendererInstance = new(Polymer.Templatize.templatize(this.$['renderer-template'], this, {
             forwardHostProp: function(prop, value) {
-              this.__rendererInstance.forwardHostProp(prop, value);
+              this.__rendererInstance && this.__rendererInstance.forwardHostProp(prop, value);
             }
           }))();
           const renderer = this.__rendererInstance.root.firstElementChild;
@@ -373,7 +367,7 @@ styling can be done like this:
           if (contentTemplate) {
             this.__contentInstance = new(Polymer.Templatize.templatize(contentTemplate, this, {
               forwardHostProp: function(prop, value) {
-                this.__contentInstance.forwardHostProp(prop, value);
+                this.__contentInstance && this.__contentInstance.forwardHostProp(prop, value);
               }
             }))();
             // Append children to renderer.

@@ -67,39 +67,37 @@ styling can be done like this:
           return 'iron-overlay-renderer';
         }
 
-        static get config() {
+        static get properties() {
           return {
-            properties: {
-              /**
-               * True if the overlay is currently displayed.
-               */
-              opened: {
-                type: Boolean,
-                observer: _openedChanged
-              },
+            /**
+             * True if the overlay is currently displayed.
+             */
+            opened: {
+              type: Boolean,
+              observer: _openedChanged
+            },
 
-              /**
-               * True if the overlay has open/close animation.
-               */
-              animated: {
-                type: Boolean
-              },
+            /**
+             * True if the overlay has open/close animation.
+             */
+            animated: {
+              type: Boolean
+            },
 
-              /**
-               * True if the overlay should have a backdrop.
-               */
-              withBackdrop: {
-                type: Boolean
-              },
+            /**
+             * True if the overlay should have a backdrop.
+             */
+            withBackdrop: {
+              type: Boolean
+            },
 
-              /**
-               * Is true during the transition from close to open and open to close.
-               */
-              transitioning: {
-                type: Boolean,
-                notify: true,
-                readOnly: true
-              }
+            /**
+             * Is true during the transition from close to open and open to close.
+             */
+            transitioning: {
+              type: Boolean,
+              notify: true,
+              readOnly: true
             }
           };
         }
