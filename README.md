@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/PolymerLabs/iron-overlay.svg?branch=master)](https://travis-ci.org/PolymerLabs/iron-overlay)
+
 ## The problem
 
 Overlays should always render on the top layer. This is achieved using the css
