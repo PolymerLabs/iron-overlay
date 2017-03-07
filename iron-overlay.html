@@ -347,7 +347,8 @@ styling can be done like this:
               this.__rendererInstance && this.__rendererInstance.forwardHostProp(prop, value);
             }
           }))();
-          const renderer = this.__rendererInstance.root.firstElementChild;
+          // NOTE: in MSEdge/IE DocumentFragments don't implement `firstElementChild`. 
+          const renderer = this.__rendererInstance.root.querySelector('*');
           // Stamp the content (if any)
           const contentTemplate = this.querySelector('template');
           if (contentTemplate) {
