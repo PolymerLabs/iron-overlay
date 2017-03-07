@@ -151,20 +151,6 @@ styling can be done like this:
 
       const sharedListener = new SharedEventListener();
 
-      /* Symbols for private properties/methods */
-      const _openedChanged = Symbol();
-      const _ensureInstance = Symbol();
-      const _ensureAttached = Symbol();
-      const _ensureDetached = Symbol();
-      const _onTransitioningChanged = Symbol();
-      const _fire = Symbol();
-
-      const _onTap = Symbol();
-      const _onKeydown = Symbol();
-      const _isTapOutside = Symbol();
-
-      const _eventHandler = Symbol();
-
       class IronOverlay extends Polymer.Element {
 
         static get is() {
@@ -179,7 +165,7 @@ styling can be done like this:
             opened: {
               type: Boolean,
               notify: true,
-              observer: _openedChanged
+              observer: '_openedChanged'
             },
 
             /**
@@ -250,12 +236,12 @@ styling can be done like this:
 
         connectedCallback() {
           super.connectedCallback();
-          this.opened && this[_openedChanged](this.opened);
+          this.opened && this._openedChanged(this.opened);
         }
 
         disconnectedCallback() {
           super.disconnectedCallback();
-          this[_ensureDetached]();
+          this._ensureDetached();
         }
 
         /**
@@ -322,7 +308,7 @@ styling can be done like this:
          * @protected
          */
         _cancel(event) {
-          const cancelEvent = this[_fire]('iron-overlay-canceled', event, {
+          const cancelEvent = this._fire('iron-overlay-canceled', event, {
             cancelable: true
           });
           if (!cancelEvent.defaultPrevented) {
@@ -338,8 +324,8 @@ styling can be done like this:
          */
         _toggleListeners() {
           if (this.opened) {
-            sharedListener.listen('tap', this, _onTap);
-            sharedListener.listen('keydown', this, _onKeydown);
+            sharedListener.listen('tap', this, '_onTap');
+            sharedListener.listen('keydown', this, '_onKeydown');
           } else {
             sharedListener.unlisten('tap', this);
             sharedListener.unlisten('keydown', this);
@@ -381,7 +367,7 @@ styling can be done like this:
          * @param {!Event} event
          * @return {boolean} handled
          */
-        [_onKeydown](event) {
+        _onKeydown(event) {
           // By default the overlay says it handles this event. It should say
           // it does not handle it if the user has pressed ESC and noCancelOnEscKey
           // is true.
@@ -405,12 +391,12 @@ styling can be done like this:
          * @param {!Event} event
          * @return {boolean} handled
          */
-        [_onTap](event) {
+        _onTap(event) {
           // By default the overlay says it handles this event. It should say
           // it does not handle it if the user has clicked outside the overlay
           // and noCancelOnOutsideClick is true.
           let handled = true;
-          if (this[_isTapOutside](event)) {
+          if (this._isTapOutside(event)) {
             if (this.noCancelOnOutsideClick) {
               handled = false;
             } else {
@@ -424,14 +410,14 @@ styling can be done like this:
          * @param {!Event} event
          * @returns {boolean}
          */
-        [_isTapOutside](event) {
+        _isTapOutside(event) {
           return event.composedPath().indexOf(this.renderer) === -1;
         }
 
         /**
          * Ensures the overlay is created and the content is stamped and appended into the overlay.
          */
-        [_ensureInstance]() {
+        _ensureInstance() {
           if (this.renderer) {
             return;
           }
@@ -439,19 +425,19 @@ styling can be done like this:
           const renderer = this._createRenderer();
 
           renderer.dataset.overlay = this.id;
-          renderer.addEventListener('transitioning-changed', this[_onTransitioningChanged].bind(this));
+          renderer.addEventListener('transitioning-changed', this._onTransitioningChanged.bind(this));
           this._setRenderer(renderer);
         }
 
         /**
          * Ensures the renderer is attached.
          */
-        [_ensureAttached]() {
-          this[_ensureInstance]();
+        _ensureAttached() {
+          this._ensureInstance();
           if (this.renderer.isConnected) {
             return;
           }
-          const event = this[_fire]('iron-overlay-attach', {
+          const event = this._fire('iron-overlay-attach', {
             overlay: this
           }, {
             cancelable: true
@@ -470,13 +456,13 @@ styling can be done like this:
         /**
          * Ensures the renderer is detached.
          */
-        [_ensureDetached]() {
+        _ensureDetached() {
           if (!this.renderer || !this.renderer.isConnected) {
             return;
           }
 
           // Trigger event to notify.
-          const event = this[_fire]('iron-overlay-detach', {
+          const event = this._fire('iron-overlay-detach', {
             overlay: this
           }, {
             node: this.renderer,
@@ -489,7 +475,7 @@ styling can be done like this:
           }
         }
 
-        [_openedChanged](opened) {
+        _openedChanged(opened) {
           if (!this.isConnected) {
             return;
           }
@@ -503,7 +489,7 @@ styling can be done like this:
             }
             // Consider <body> as "no active element".
             this._restoreFocusNode = active === document.body ? null : active;
-            this[_ensureAttached]();
+            this._ensureAttached();
           }
           // If renderer is already transitioning, it means the previous transition
           // didn't complete yet, e.g. close before open animation is completed.
@@ -515,22 +501,22 @@ styling can be done like this:
           }
         }
 
-        [_onTransitioningChanged](event) {
+        _onTransitioningChanged(event) {
           const transitioning = event.detail.value;
           if (transitioning) {
             this._toggleListeners();
             this.applyFocus();
           } else {
             if (this.opened) {
-              this[_fire]('iron-overlay-opened');
+              this._fire('iron-overlay-opened');
             } else {
-              this[_fire]('iron-overlay-closed', this.closingReason);
-              this[_ensureDetached]();
+              this._fire('iron-overlay-closed', this.closingReason);
+              this._ensureDetached();
             }
           }
         }
 
-        [_fire](type, detail, options) {
+        _fire(type, detail, options) {
           options = options || {};
           detail = (detail === null || detail === undefined) ? {} : detail;
           const event = new Event(type, {
