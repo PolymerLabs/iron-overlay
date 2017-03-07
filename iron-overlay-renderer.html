@@ -54,13 +54,6 @@ styling can be done like this:
     (function() {
       'use strict';
 
-      const _openedChanged = Symbol();
-      const _startRenderOpenedChanged = Symbol();
-      const _raf = Symbol();
-      const _onNextAF = Symbol();
-      const _forceLayout = Symbol();
-      const _onTransitionEnd = Symbol();
-
       class IronOverlayRenderer extends Polymer.Element {
 
         static get is() {
@@ -74,7 +67,7 @@ styling can be done like this:
              */
             opened: {
               type: Boolean,
-              observer: _openedChanged
+              observer: '_openedChanged'
             },
 
             /**
@@ -105,7 +98,7 @@ styling can be done like this:
         constructor() {
           super();
           // For a performant transition from open to close and close to open.
-          this[_raf] = null;
+          this._pendingRAF = null;
         }
 
         ready() {
@@ -115,7 +108,7 @@ styling can be done like this:
           if (!this.shadowRoot || !this.shadowRoot.delegatesFocus) {
             this.setAttribute('tabindex', '-1');
           }
-          this.$.overlay.addEventListener('transitionend', this[_onTransitionEnd].bind(this));
+          this.$.overlay.addEventListener('transitionend', this._onTransitionEnd.bind(this));
         }
 
         /**
@@ -156,20 +149,20 @@ styling can be done like this:
         /**
          * @param {boolean} opened
          */
-        [_openedChanged](opened) {
-          this[_onNextAF](this[_startRenderOpenedChanged]);
+        _openedChanged(opened) {
+          this._onNextAF(this._startRenderOpenedChanged);
         }
 
         /**
          * Starts the update from open to closed & viceversa.
          */
-        [_startRenderOpenedChanged]() {
+        _startRenderOpenedChanged() {
           this._setTransitioning(true);
           // Update interactions with element.
           this.style.pointerEvents = this.opened ? '' : 'none';
           // Need to force layout for any animation to trigger.
           if (this.animated) {
-            this[_forceLayout]();
+            this._forceLayout();
           }
           // Update classes for overlay and backdrop.
           this.$.overlay.classList.toggle('opened', this.opened);
@@ -181,7 +174,7 @@ styling can be done like this:
         /**
          * Forces layout.
          */
-        [_forceLayout]() {
+        _forceLayout() {
           return this.offsetWidth;
         }
 
@@ -189,11 +182,11 @@ styling can be done like this:
          * Callback for transitionend, ends the animation.
          * @param {!Event} event
          */
-        [_onTransitionEnd](event) {
+        _onTransitionEnd(event) {
           if (event.target === this.$.overlay && this.transitioning) {
             // Since there might be multiple animations (e.g. opacity + transition),
             // call finish function only once (reuse RAF).
-            this[_onNextAF](this._finishRenderOpenedChanged);
+            this._onNextAF(this._finishRenderOpenedChanged);
           }
         }
 
@@ -201,11 +194,11 @@ styling can be done like this:
          * Executes the callback at the next available animation frame.
          * @param {!Function} callback Its scope will be the renderer itself
          */
-        [_onNextAF](callback) {
-          this[_raf] && window.cancelAnimationFrame(this[_raf]);
+        _onNextAF(callback) {
+          this._pendingRAF && window.cancelAnimationFrame(this._pendingRAF);
           const self = this;
-          this[_raf] = window.requestAnimationFrame(function nextAnimationFrame() {
-            self[_raf] = null;
+          this._pendingRAF = window.requestAnimationFrame(function nextAnimationFrame() {
+            self._pendingRAF = null;
             callback.call(self);
           });
         }

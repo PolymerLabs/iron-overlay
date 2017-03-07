@@ -39,13 +39,6 @@ Use `overlayType` to limit which types of overlays this container should host:
   (function() {
     'use strict';
 
-    /* Symbols for private properties/methods */
-    const _overlays = Symbol();
-    const _host = Symbol();
-    const _getHostRoot = Symbol();
-    const _onAttach = Symbol();
-    const _onDetach = Symbol();
-
     class IronOverlayContainer extends Polymer.Element {
       static get is() {
         return 'iron-overlay-container';
@@ -61,28 +54,28 @@ Use `overlayType` to limit which types of overlays this container should host:
       constructor() {
         super();
         // List of overlays handled by this container.
-        this[_overlays] = [];
-        this[_host] = null;
+        this._overlays = [];
+        this._host = null;
         // Bind these methods to `this` as they are used for event listeners.
-        this[_onAttach] = this[_onAttach].bind(this);
-        this[_onDetach] = this[_onDetach].bind(this);
+        this._onAttach = this._onAttach.bind(this);
+        this._onDetach = this._onDetach.bind(this);
       }
 
       connectedCallback() {
         super.connectedCallback();
         // Listeners on the host.
-        const host = this[_getHostRoot]();
-        host.addEventListener('iron-overlay-attach', this[_onAttach]);
-        host.addEventListener('iron-overlay-detach', this[_onDetach]);
-        this[_host] = host;
+        const host = this._getHostRoot();
+        host.addEventListener('iron-overlay-attach', this._onAttach);
+        host.addEventListener('iron-overlay-detach', this._onDetach);
+        this._host = host;
       }
 
       disconnectedCallback() {
         super.disconnectedCallback();
-        const host = this[_host];
-        host.removeEventListener('iron-overlay-attach', this[_onAttach]);
-        host.removeEventListener('iron-overlay-detach', this[_onDetach]);
-        this[_host] = null;
+        const host = this._host;
+        host.removeEventListener('iron-overlay-attach', this._onAttach);
+        host.removeEventListener('iron-overlay-detach', this._onDetach);
+        this._host = null;
       }
 
       /**
@@ -90,7 +83,7 @@ Use `overlayType` to limit which types of overlays this container should host:
        * @type {Node|undefined}
        */
       get currentOverlay() {
-        return this[_overlays][this[_overlays].length - 1];
+        return this._overlays[this._overlays.length - 1];
       }
 
       /**
@@ -111,7 +104,7 @@ Use `overlayType` to limit which types of overlays this container should host:
       attachOverlay(overlay) {
         const canAttach = this.canAttach(overlay);
         if (canAttach) {
-          this[_overlays].push(overlay);
+          this._overlays.push(overlay);
           this.appendChild(overlay.renderer);
           // Appending twice seems to trigger ShadyCSS MO.
           // TODO(valdrin) remove when webcomponents/shadycss#17 is fixed.
@@ -128,10 +121,10 @@ Use `overlayType` to limit which types of overlays this container should host:
        * @returns {boolean}
        */
       detachOverlay(overlay) {
-        const i = this[_overlays].indexOf(overlay);
+        const i = this._overlays.indexOf(overlay);
         if (i >= 0) {
           this.removeChild(overlay.renderer);
-          this[_overlays].splice(i, 1);
+          this._overlays.splice(i, 1);
         }
         return i >= 0;
       }
@@ -140,7 +133,7 @@ Use `overlayType` to limit which types of overlays this container should host:
        * Adds the `root` and prevents/stops the event propagation.
        * @param {!Event} event
        */
-      [_onAttach](event) {
+      _onAttach(event) {
         if (event.defaultPrevented) {
           return;
         }
@@ -155,7 +148,7 @@ Use `overlayType` to limit which types of overlays this container should host:
        * Removes the `root` and prevents/stops the event propagation.
        * @param {!Event} event
        */
-      [_onDetach](event) {
+      _onDetach(event) {
         if (event.defaultPrevented) {
           return;
         }
@@ -169,7 +162,7 @@ Use `overlayType` to limit which types of overlays this container should host:
        * Returns the root element hosting the container.
        * @returns {Node}
        */
-      [_getHostRoot]() {
+      _getHostRoot() {
         let n = this;
         while (n) {
           if (n.nodeType === Node.DOCUMENT_FRAGMENT_NODE && n.host) {
