@@ -81,7 +81,7 @@ styling can be done like this:
   </template>
 
   <script>
-    (function() {
+    (() => {
       'use strict';
 
       /**
@@ -95,19 +95,14 @@ styling can be done like this:
         constructor() {
           this._events = {};
           this._handleEvent = this._handleEvent.bind(this);
-          // Used to ensure document-wide tap recognizer is enabled.
-          this._tapEnsured = false;
+          // Enable document-wide gesture recognizer.
+          Polymer.Gestures.addListener(document, 'tap', null);
         }
         /**
          * Expects a callback that returns true when it handles the event, false
          * to allow the event to be handled by the next listener.
          */
         listen(eventName, listener, callback) {
-          if (!this._tapEnsured && eventName === 'tap') {
-            this._tapEnsured = true;
-            // Enable document-wide gesture recognizer.
-            Polymer.Gestures.add(document, 'tap', null);
-          }
           if (!this._events[eventName]) {
             this._events[eventName] = [];
             document.addEventListener(eventName, this._handleEvent, {
@@ -126,9 +121,7 @@ styling can be done like this:
             return;
           }
           // Remove all matching listeners.
-          const listeners = this._events[eventName].filter(function(obj) {
-            return obj.listener !== listener;
-          });
+          const listeners = this._events[eventName].filter(obj => obj.listener !== listener);
           if (listeners.length) {
             this._events[eventName] = listeners;
           } else {
@@ -189,7 +182,7 @@ styling can be done like this:
             closingReason: {
               type: Object,
               readOnly: true,
-              value: function() {
+              value() {
                 return {
                   canceled: false
                 };
@@ -343,7 +336,7 @@ styling can be done like this:
           // because Templatize memoizes the instance forwardHostProp and would invoke it on the
           // first instance stamped by this element.
           this.__rendererInstance = new(Polymer.Templatize.templatize(this.$['renderer-template'], this, {
-            forwardHostProp: function(prop, value) {
+            forwardHostProp(prop, value) {
               this.__rendererInstance && this.__rendererInstance.forwardHostProp(prop, value);
             }
           }))();
@@ -353,7 +346,7 @@ styling can be done like this:
           const contentTemplate = this.querySelector('template');
           if (contentTemplate) {
             this.__contentInstance = new(Polymer.Templatize.templatize(contentTemplate, this, {
-              forwardHostProp: function(prop, value) {
+              forwardHostProp(prop, value) {
                 this.__contentInstance && this.__contentInstance.forwardHostProp(prop, value);
               }
             }))();
