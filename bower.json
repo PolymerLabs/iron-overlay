@@ -1,6 +1,6 @@
 {
   "name": "iron-overlay",
-  "version": "0.0.1",
+  "version": "1.0.0-alpha.1",
   "license": "http://polymer.github.io/LICENSE.txt",
   "description": "Provides an overlay element",
   "private": true,
@@ -19,17 +19,14 @@
   },
   "dependencies": {
     "iron-flex-layout": "PolymerElements/iron-flex-layout#2.0-preview",
-    "polymer": "Polymer/polymer#^2.0.0-rc.1"
+    "polymer": "Polymer/polymer#^2.0.0-rc.2"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#2.0-preview",
     "iron-demo-helpers": "PolymerElements/iron-demo-helpers#2.0-preview",
     "iron-test-helpers": "PolymerElements/iron-test-helpers#2.0-preview",
     "web-component-tester": "Polymer/web-component-tester#^6.0.0-prerelease.6",
-    "webcomponentsjs": "webcomponents/webcomponentsjs#^1.0.0-rc.4"
+    "webcomponentsjs": "webcomponents/webcomponentsjs#^1.0.0-rc.5"
   },
-  "ignore": [],
-  "resolutions": {
-    "polymer": "^2.0.0-rc.1"
-  }
+  "ignore": []
 }

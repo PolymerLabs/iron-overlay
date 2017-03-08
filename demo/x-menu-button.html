@@ -30,7 +30,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </template>
 
   <script>
-    (function() {
+    (() => {
       'use strict';
 
       class XMenuButton extends Polymer.IronOverlay {
@@ -54,7 +54,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             _positionTarget: {
               type: Element,
               readOnly: true,
-              value: function() {
+              value() {
                 return this;
               }
             }
