@@ -334,7 +334,7 @@ styling can be done like this:
         _createRenderer() {
           // NOTE: we must keep track of __rendererInstance and __contentInstance
           // because Templatize memoizes the instance forwardHostProp and would invoke it on the
-          // first instance stamped by this element.
+          // first instance stamped by this element. https://github.com/Polymer/polymer/issues/4392
           this.__rendererInstance = new(Polymer.Templatize.templatize(this.$['renderer-template'], this, {
             forwardHostProp(prop, value) {
               this.__rendererInstance && this.__rendererInstance.forwardHostProp(prop, value);
