@@ -269,16 +269,30 @@ styling can be done like this:
           if (this.opened) {
             this._getFocusNode().focus();
           } else {
+            // Find if the focus is in the renderer.
             let active = document.activeElement;
-            if (active === this.renderer || this.renderer.contains(active)) {
-              active.blur();
+            // Consider <body> as null.
+            if (active === document.body) {
               active = null;
             }
-            // If the activeElement is body or null, we are allowed to restore
+            while (active) {
+              // The focus is in the renderer!
+              if (this.renderer.contains(active)) {
+                active.blur();
+                active = null;
+                break;
+              }
+              // Keep searching into shadowRoot's activeElement.
+              if (!active.shadowRoot) {
+                break;
+              }
+              active = active.shadowRoot.activeElement;
+            }
+            // If the activeElement is null, we are allowed to restore
             // the focus. In all the other cases focus might have been moved
             // elsewhere by another component or by an user interaction
             // (e.g. click on a button outside the overlay).
-            if (this._restoreFocusNode && (!active || active === document.body)) {
+            if (!active && this._restoreFocusNode) {
               this._restoreFocusNode.focus();
             }
           }
@@ -476,11 +490,14 @@ styling can be done like this:
           if (opened) {
             // Save the active element.
             let active = document.activeElement;
+            // Consider <body> as null.
+            if (active === document.body) {
+              active = null;
+            } 
             while (active && active.shadowRoot && active.shadowRoot.activeElement) {
               active = active.shadowRoot.activeElement;
             }
-            // Consider <body> as "no active element".
-            this._restoreFocusNode = active === document.body ? null : active;
+            this._restoreFocusNode = active;
             this._ensureAttached();
           }
           // If renderer is already transitioning, it means the previous transition
