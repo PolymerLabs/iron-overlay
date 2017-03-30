@@ -10,428 +10,431 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 <html>
 
-  <head>
+<head>
 
-    <title>iron-overlay tests</title>
+  <title>iron-overlay tests</title>
 
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
 
-    <script src="../../webcomponentsjs/webcomponents-loader.js"></script>
-    <script src="../../web-component-tester/browser.js"></script>
+  <script src="../../webcomponentsjs/webcomponents-loader.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
 
-    <link rel="import" href="../../iron-test-helpers/iron-test-helpers.html">
-    <link rel="import" href="../iron-overlay.html">
-    <style>
-      html { overflow: hidden; }
-    </style>
-  </head>
+  <link rel="import" href="../../iron-test-helpers/iron-test-helpers.html">
+  <link rel="import" href="../iron-overlay.html">
+  <style>
+    html {
+      overflow: hidden;
+    }
+  </style>
+</head>
 
-  <body>
+<body>
 
-    <test-fixture id="basic">
-      <template>
-        <iron-overlay>
-          <template>
-            Basic Overlay
-            <button autofocus>autofocused</button>
-          </template>
-        </iron-overlay>
-      </template>
-    </test-fixture>
+  <test-fixture id="basic">
+    <template>
+      <iron-overlay>
+        <template>
+          Basic Overlay
+          <button autofocus>autofocused</button>
+        </template>
+      </iron-overlay>
+    </template>
+  </test-fixture>
 
-    <test-fixture id="opened">
-      <template>
-        <iron-overlay opened>
-          <template>
-            Basic Overlay
-          </template>
-        </iron-overlay>
-      </template>
-    </test-fixture>
+  <test-fixture id="opened">
+    <template>
+      <iron-overlay opened>
+        <template>
+          Basic Overlay
+        </template>
+      </iron-overlay>
+    </template>
+  </test-fixture>
 
-    <test-fixture id="multiple">
-      <template>
-        <iron-overlay class="overlay-1">
-          <template>
-            Test overlay 1
-          </template>
-        </iron-overlay>
-        <iron-overlay class="overlay-2">
-          <template>
-            Test overlay 2
-            <button>Click</button>
-          </template>
-        </iron-overlay>
-        <iron-overlay class="overlay-3">
-          <template>
-            Other overlay 3
-          </template>
-        </iron-overlay>
-      </template>
-    </test-fixture>
+  <test-fixture id="multiple">
+    <template>
+      <iron-overlay class="overlay-1">
+        <template>
+          Test overlay 1
+        </template>
+      </iron-overlay>
+      <iron-overlay class="overlay-2">
+        <template>
+          Test overlay 2
+          <button>Click</button>
+        </template>
+      </iron-overlay>
+      <iron-overlay class="overlay-3">
+        <template>
+          Other overlay 3
+        </template>
+      </iron-overlay>
+    </template>
+  </test-fixture>
 
-    <test-fixture id="buttons">
-      <template>
-        <button>button</button>
-        <button>button</button>
-      </template>
-    </test-fixture>
+  <test-fixture id="buttons">
+    <template>
+      <button>button</button>
+      <button>button</button>
+    </template>
+  </test-fixture>
 
-    <script>
+  <script>
+    var overlay;
 
-      var overlay;
+    function runAfterOpen(overlay, callback) {
+      overlay.addEventListener('iron-overlay-opened', callback);
+      overlay.opened = true;
+    }
 
-      function runAfterOpen(overlay, callback) {
-        overlay.addEventListener('iron-overlay-opened', callback);
+    function runAfterClose(overlay, callback) {
+      overlay.addEventListener('iron-overlay-closed', callback);
+      overlay.opened = false;
+    }
+
+    suite('basic overlay', function() {
+
+      setup(function() {
+        overlay = fixture('basic');
+      });
+
+      test('overlay starts hidden', function() {
+        assert.isNotOk(overlay.opened, 'overlay starts closed');
+        assert.isNotOk(overlay.renderer, 'overlay w/o renderer');
+      });
+
+      test('overlay creates and opens the renderer', function() {
         overlay.opened = true;
-      }
+        assert.isOk(overlay.renderer, 'renderer initialized');
+        assert.isTrue(overlay.renderer.opened, 'renderer opened');
+      });
 
-      function runAfterClose(overlay, callback) {
-        overlay.addEventListener('iron-overlay-closed', callback);
-        overlay.opened = false;
-      }
-
-      suite('basic overlay', function () {
-
-        setup(function () {
-          overlay = fixture('basic');
+      test('overlay delegates renderer hosting via iron-overlay-attach', function(done) {
+        overlay.addEventListener('iron-overlay-attach', function(event) {
+          assert.isTrue(event.bubbles, 'bubbling event');
+          assert.isTrue(event.cancelable, 'cancelable event');
+          assert.deepEqual(event.detail, {
+            overlay: overlay
+          }, 'detail contains overlay and renderer');
+          done();
         });
+        overlay.opened = true;
+      });
 
-        test('overlay starts hidden', function () {
-          assert.isNotOk(overlay.opened, 'overlay starts closed');
-          assert.isNotOk(overlay.renderer, 'overlay w/o renderer');
+      test('overlay renderer attached on body', function() {
+        overlay.opened = true;
+        assert.isTrue(document.body.contains(overlay.renderer), 'renderer attached to body');
+      });
+
+      test('overlay fires iron-overlay-opened', function(done) {
+        var spy = sinon.stub();
+        overlay.addEventListener('iron-overlay-opened', spy);
+        runAfterOpen(overlay, function() {
+          assert.isTrue(spy.calledOnce, 'opened event fired once');
+          done();
         });
+      });
 
-        test('overlay creates and opens the renderer', function () {
-          overlay.opened = true;
-          assert.isOk(overlay.renderer, 'renderer initialized');
-          assert.isTrue(overlay.renderer.opened, 'renderer opened');
-        });
-
-        test('overlay delegates renderer hosting via iron-overlay-attach', function (done) {
-          overlay.addEventListener('iron-overlay-attach', function (event) {
-            assert.isTrue(event.bubbles, 'bubbling event');
-            assert.isTrue(event.cancelable, 'cancelable event');
-            assert.deepEqual(event.detail, {
-              overlay: overlay
-            }, 'detail contains overlay and renderer');
-            done();
-          });
-          overlay.opened = true;
-        });
-
-        test('overlay renderer attached on body', function () {
-          overlay.opened = true;
-          assert.isTrue(document.body.contains(overlay.renderer), 'renderer attached to body');
-        });
-
-        test('overlay fires iron-overlay-opened', function (done) {
-          var spy = sinon.stub();
-          overlay.addEventListener('iron-overlay-opened', spy);
-          runAfterOpen(overlay, function() {
-            assert.isTrue(spy.calledOnce, 'opened event fired once');
+      test('overlay fires iron-overlay-closed', function(done) {
+        var spy = sinon.stub();
+        overlay.addEventListener('iron-overlay-opened', spy);
+        overlay.addEventListener('iron-overlay-closed', spy);
+        runAfterOpen(overlay, function() {
+          runAfterClose(overlay, function() {
+            assert.isTrue(spy.calledTwice, 'opened and closed events fired');
             done();
           });
         });
+      });
 
-        test('overlay fires iron-overlay-closed', function (done) {
+      test('close an overlay quickly after open', function(done) {
+        // first, open the overlay
+        overlay.opened = true;
+        setTimeout(function() {
+          // during the opening transition, close the overlay
+          this.opened = false;
+          // wait for any exceptions to be thrown until the transition is done.
+          setTimeout(function() {
+            done();
+          }, 300);
+        });
+      });
+
+      test('clicking an overlay does not close it', function(done) {
+        runAfterOpen(overlay, function() {
           var spy = sinon.stub();
-          overlay.addEventListener('iron-overlay-opened', spy);
           overlay.addEventListener('iron-overlay-closed', spy);
+          MockInteractions.tap(overlay.renderer.$.overlay);
+          setTimeout(function() {
+            assert.isFalse(spy.called, 'iron-overlay-closed should not fire');
+            done();
+          }, 100);
+        });
+      });
+
+      test('open overlay on mousedown does not close it', function(done) {
+        var btn = document.createElement('button');
+        btn.addEventListener('mousedown', overlay.open.bind(overlay));
+        document.body.appendChild(btn);
+        // It triggers mousedown, mouseup, and click.
+        MockInteractions.tap(btn);
+        document.body.removeChild(btn);
+
+        assert.isTrue(overlay.opened, 'overlay opened');
+        setTimeout(function() {
+          assert.isTrue(overlay.opened, 'overlay is still open');
+          done();
+        }, 10);
+      });
+
+      test('clicking outside fires iron-overlay-canceled', function(done) {
+        runAfterOpen(overlay, function() {
+          overlay.addEventListener('iron-overlay-canceled', function(event) {
+            assert.equal(event.detail.target, document.body, 'detail contains original click event');
+            done();
+          });
+          MockInteractions.tap(document.body);
+        });
+      });
+
+      test('clicking outside closes the overlay', function(done) {
+        runAfterOpen(overlay, function() {
+          overlay.addEventListener('iron-overlay-closed', function(event) {
+            assert.isTrue(event.detail.canceled, 'overlay is canceled');
+            done();
+          });
+          MockInteractions.tap(document.body);
+        });
+      });
+
+      test('iron-overlay-canceled event can be prevented', function(done) {
+        runAfterOpen(overlay, function() {
+          overlay.addEventListener('iron-overlay-canceled', function(event) {
+            event.preventDefault();
+          });
+          var spy = sinon.stub();
+          overlay.addEventListener('iron-overlay-closed', spy);
+          MockInteractions.tap(document.body);
+          setTimeout(function() {
+            assert.isTrue(overlay.opened, 'overlay is still open');
+            assert.isFalse(spy.called, 'iron-overlay-closed not fired');
+            done();
+          }, 10);
+        });
+      });
+
+      test('cancel an overlay with esc key', function(done) {
+        runAfterOpen(overlay, function() {
+          overlay.addEventListener('iron-overlay-canceled', function(event) {
+            assert.equal(event.detail.type, 'keydown');
+            done();
+          });
+          MockInteractions.pressAndReleaseKeyOn(document, 27);
+        });
+      });
+
+      test('close an overlay with esc key', function(done) {
+        runAfterOpen(overlay, function() {
+          overlay.addEventListener('iron-overlay-closed', function(event) {
+            assert.isTrue(event.detail.canceled, 'overlay is canceled');
+            done();
+          });
+          MockInteractions.pressAndReleaseKeyOn(document, 27);
+        });
+      });
+
+      test('no-cancel-on-outside-click property', function(done) {
+        overlay.noCancelOnOutsideClick = true;
+        runAfterOpen(overlay, function() {
+          var spy = sinon.stub();
+          overlay.addEventListener('iron-overlay-closed', spy);
+          MockInteractions.tap(document.body);
+          setTimeout(function() {
+            assert.isFalse(spy.called, 'iron-overlay-closed should not fire');
+            done();
+          }, 10);
+        });
+      });
+
+      test('no-cancel-on-esc-key property', function(done) {
+        overlay.noCancelOnEscKey = true;
+        runAfterOpen(overlay, function() {
+          var spy = sinon.stub();
+          overlay.addEventListener('iron-overlay-closed', spy);
+          MockInteractions.pressAndReleaseKeyOn(document, 27);
+          setTimeout(function() {
+            assert.isFalse(spy.called, 'iron-overlay-cancel should not fire');
+            done();
+          }, 10);
+        });
+      });
+
+    });
+
+    suite('opened overlay', function() {
+
+      setup(function() {
+        overlay = fixture('opened');
+      });
+
+      test('overlay open by default', function() {
+        assert.isTrue(overlay.opened, 'overlay starts opened');
+        assert.isOk(overlay.renderer, 'overlay has a renderer');
+      });
+
+      test('overlay positioned & sized properly', function(done) {
+        setTimeout(function() {
+          var rect = overlay.renderer.$.overlay.getBoundingClientRect();
+          assert.closeTo(rect.left, (window.innerWidth - rect.width) / 2, 1, 'centered horizontally');
+          assert.closeTo(rect.top, (window.innerHeight - rect.height) / 2, 1, 'centered vertically');
+          done();
+        }, 10);
+      });
+    });
+
+    suite('focus handling', function() {
+
+      setup(function() {
+        overlay = fixture('basic');
+      });
+
+      test('node with autofocus is focused', function(done) {
+        runAfterOpen(overlay, function() {
+          assert.isTrue(overlay.renderer.contains(document.activeElement), '<button autofocus> is focused');
+          done();
+        });
+      });
+
+      test('no-auto-focus will not focus node with autofocus', function(done) {
+        overlay.noAutoFocus = true;
+        runAfterOpen(overlay, function() {
+          assert.isFalse(overlay.renderer.contains(document.activeElement), document.activeElement,
+            '<button autofocus> not focused after opened');
+          done();
+        });
+        // In Safari the element with autofocus will immediately receive focus when displayed for the first time http://jsbin.com/woroci/2/ Ensure this is not the case for overlay.
+        assert.isFalse(overlay.renderer.contains(document.activeElement),
+          '<button autofocus> not immediately focused');
+      });
+
+      test('with-backdrop traps the focus within the overlay', function() {
+        if (document.$blockingElements) {
+          overlay.withBackdrop = true;
+          assert.isFalse(document.$blockingElements.has(overlay), 'not a blocking element when closed');
+          overlay.opened = true;
+          assert.isTrue(document.$blockingElements.has(overlay), 'is a blocking element when opened');
+        }
+      });
+
+
+      suite('restore focus', function() {
+        let buttons;
+        setup(function() {
+          buttons = fixture('buttons');
+        });
+
+        test('restores focus to previous focusable', function(done) {
+          buttons[0].focus();
           runAfterOpen(overlay, function() {
             runAfterClose(overlay, function() {
-              assert.isTrue(spy.calledTwice, 'opened and closed events fired');
+              assert.equal(document.activeElement, buttons[0], 'focus returned to button');
               done();
             });
           });
         });
 
-        test('close an overlay quickly after open', function (done) {
-          // first, open the overlay
-          overlay.opened = true;
-          setTimeout(function () {
-            // during the opening transition, close the overlay
-            this.opened = false;
-            // wait for any exceptions to be thrown until the transition is done.
-            setTimeout(function () {
-              done();
-            }, 300);
-          });
-        });
-
-        test('clicking an overlay does not close it', function (done) {
-          runAfterOpen(overlay, function () {
-            var spy = sinon.stub();
-            overlay.addEventListener('iron-overlay-closed', spy);
-            MockInteractions.tap(overlay.renderer.$.overlay);
-            setTimeout(function () {
-              assert.isFalse(spy.called, 'iron-overlay-closed should not fire');
-              done();
-            }, 100);
-          });
-        });
-
-        test('open overlay on mousedown does not close it', function (done) {
-          var btn = document.createElement('button');
-          btn.addEventListener('mousedown', overlay.open.bind(overlay));
-          document.body.appendChild(btn);
-          // It triggers mousedown, mouseup, and click.
-          MockInteractions.tap(btn);
-          document.body.removeChild(btn);
-
-          assert.isTrue(overlay.opened, 'overlay opened');
-          setTimeout(function () {
-            assert.isTrue(overlay.opened, 'overlay is still open');
-            done();
-          }, 10);
-        });
-
-        test('clicking outside fires iron-overlay-canceled', function (done) {
-          runAfterOpen(overlay, function () {
-            overlay.addEventListener('iron-overlay-canceled', function (event) {
-              assert.equal(event.detail.target, document.body, 'detail contains original click event');
+        test('avoids restoring focus if focus changed', function(done) {
+          buttons[0].focus();
+          runAfterOpen(overlay, function() {
+            buttons[1].focus();
+            runAfterClose(overlay, function() {
+              assert.equal(document.activeElement, buttons[1], 'focus was not modified');
               done();
             });
-            MockInteractions.tap(document.body);
           });
         });
+      });
 
-        test('clicking outside closes the overlay', function (done) {
-          runAfterOpen(overlay, function () {
-            overlay.addEventListener('iron-overlay-closed', function (event) {
-              assert.isTrue(event.detail.canceled, 'overlay is canceled');
-              done();
-            });
-            MockInteractions.tap(document.body);
-          });
-        });
+    });
 
-        test('iron-overlay-canceled event can be prevented', function (done) {
-          runAfterOpen(overlay, function () {
-            overlay.addEventListener('iron-overlay-canceled', function (event) {
-              event.preventDefault();
-            });
-            var spy = sinon.stub();
-            overlay.addEventListener('iron-overlay-closed', spy);
-            MockInteractions.tap(document.body);
-            setTimeout(function () {
-              assert.isTrue(overlay.opened, 'overlay is still open');
-              assert.isFalse(spy.called, 'iron-overlay-closed not fired');
-              done();
-            }, 10);
-          });
-        });
+    suite('multiple overlays', function() {
+      var overlay1,
+        overlay2;
 
-        test('cancel an overlay with esc key', function (done) {
-          runAfterOpen(overlay, function () {
-            overlay.addEventListener('iron-overlay-canceled', function (event) {
-              assert.equal(event.detail.type, 'keydown');
-              done();
-            });
+      setup(function() {
+        var f = fixture('multiple');
+        overlay1 = f[0];
+        overlay2 = f[1];
+      });
+
+      test('ESC closes only the top overlay', function(done) {
+        runAfterOpen(overlay1, function() {
+          runAfterOpen(overlay2, function() {
             MockInteractions.pressAndReleaseKeyOn(document, 27);
+            assert.isFalse(overlay2.opened, 'overlay2 was closed');
+            assert.isTrue(overlay1.opened, 'overlay1 is still opened');
+            done();
           });
         });
+      });
 
-        test('close an overlay with esc key', function (done) {
-          runAfterOpen(overlay, function () {
-            overlay.addEventListener('iron-overlay-closed', function (event) {
-              assert.isTrue(event.detail.canceled, 'overlay is canceled');
-              done();
-            });
+      test('ESC event handling is delegated to interested overlay', function(done) {
+        overlay2.noCancelOnEscKey = true;
+        runAfterOpen(overlay1, function() {
+          runAfterOpen(overlay2, function() {
             MockInteractions.pressAndReleaseKeyOn(document, 27);
+            assert.isTrue(overlay2.opened, 'overlay2 still opened');
+            assert.isFalse(overlay1.opened, 'overlay1 closed');
+            done();
           });
         });
+      });
 
-        test('no-cancel-on-outside-click property', function (done) {
-          overlay.noCancelOnOutsideClick = true;
-          runAfterOpen(overlay, function () {
-            var spy = sinon.stub();
-            overlay.addEventListener('iron-overlay-closed', spy);
+      test('tap event handling is delegated to interested overlay', function(done) {
+        overlay2.noCancelOnOutsideClick = true;
+        runAfterOpen(overlay1, function() {
+          runAfterOpen(overlay2, function() {
             MockInteractions.tap(document.body);
-            setTimeout(function () {
-              assert.isFalse(spy.called, 'iron-overlay-closed should not fire');
-              done();
-            }, 10);
-          });
-        });
-
-        test('no-cancel-on-esc-key property', function (done) {
-          overlay.noCancelOnEscKey = true;
-          runAfterOpen(overlay, function () {
-            var spy = sinon.stub();
-            overlay.addEventListener('iron-overlay-closed', spy);
-            MockInteractions.pressAndReleaseKeyOn(document, 27);
-            setTimeout(function () {
-              assert.isFalse(spy.called, 'iron-overlay-cancel should not fire');
-              done();
-            }, 10);
-          });
-        });
-
-      });
-
-      suite('opened overlay', function () {
-
-        setup(function () {
-          overlay = fixture('opened');
-        });
-
-        test('overlay open by default', function () {
-          assert.isTrue(overlay.opened, 'overlay starts opened');
-          assert.isOk(overlay.renderer, 'overlay has a renderer');
-        });
-
-        test('overlay positioned & sized properly', function (done) {
-          setTimeout(function () {
-            var rect = overlay.renderer.$.overlay.getBoundingClientRect();
-            assert.closeTo(rect.left, (window.innerWidth - rect.width) / 2, 1, 'centered horizontally');
-            assert.closeTo(rect.top, (window.innerHeight - rect.height) / 2, 1, 'centered vertically');
-            done();
-          }, 10);
-        });
-      });
-
-      suite('focus handling', function () {
-
-        setup(function () {
-          overlay = fixture('basic');
-        });
-
-        test('node with autofocus is focused', function (done) {
-          runAfterOpen(overlay, function () {
-            assert.isTrue(overlay.renderer.contains(document.activeElement), '<button autofocus> is focused');
+            assert.isTrue(overlay2.opened, 'overlay2 still opened');
+            assert.isFalse(overlay1.opened, 'overlay1 closed');
             done();
           });
         });
-
-        test('no-auto-focus will not focus node with autofocus', function (done) {
-          overlay.noAutoFocus = true;
-          runAfterOpen(overlay, function () {
-            assert.isFalse(overlay.renderer.contains(document.activeElement), document.activeElement, '<button autofocus> not focused after opened');
-            done();
-          });
-          // In Safari the element with autofocus will immediately receive focus when displayed for the first time http://jsbin.com/woroci/2/ Ensure this is not the case for overlay.
-          assert.isFalse(overlay.renderer.contains(document.activeElement), '<button autofocus> not immediately focused');
-        });
-
-        test('with-backdrop traps the focus within the overlay', function () {
-          if (document.$blockingElements) {
-            overlay.withBackdrop = true;
-            assert.isFalse(document.$blockingElements.has(overlay), 'not a blocking element when closed');
-            overlay.opened = true;
-            assert.isTrue(document.$blockingElements.has(overlay), 'is a blocking element when opened');
-          }
-        });
-
-
-        suite('restore focus', function() {
-          let buttons;
-          setup(function() {
-            buttons = fixture('buttons');
-          });
-
-          test('restores focus to previous focusable', function (done) {
-            buttons[0].focus();
-            runAfterOpen(overlay, function () {
-              runAfterClose(overlay, function () {
-                assert.equal(document.activeElement, buttons[0], 'focus returned to button');
-                done();
-              });
-            });
-          });
-
-          test('avoids restoring focus if focus changed', function (done) {
-            buttons[0].focus();
-            runAfterOpen(overlay, function () {
-              buttons[1].focus();
-              runAfterClose(overlay, function () {
-                assert.equal(document.activeElement, buttons[1], 'focus was not modified');
-                done();
-              });
-            });
-          });
-        });
-
       });
 
-      suite('multiple overlays', function () {
-        var overlay1,
-          overlay2;
-
-        setup(function () {
-          var f = fixture('multiple');
-          overlay1 = f[0];
-          overlay2 = f[1];
-        });
-
-        test('ESC closes only the top overlay', function (done) {
-          runAfterOpen(overlay1, function () {
-            runAfterOpen(overlay2, function () {
-              MockInteractions.pressAndReleaseKeyOn(document, 27);
-              assert.isFalse(overlay2.opened, 'overlay2 was closed');
-              assert.isTrue(overlay1.opened, 'overlay1 is still opened');
-              done();
-            });
-          });
-        });
-
-        test('ESC event handling is delegated to interested overlay', function (done) {
-          overlay2.noCancelOnEscKey = true;
-          runAfterOpen(overlay1, function () {
-            runAfterOpen(overlay2, function () {
-              MockInteractions.pressAndReleaseKeyOn(document, 27);
-              assert.isTrue(overlay2.opened, 'overlay2 still opened');
-              assert.isFalse(overlay1.opened, 'overlay1 closed');
-              done();
-            });
-          });
-        });
-
-        test('tap event handling is delegated to interested overlay', function (done) {
-          overlay2.noCancelOnOutsideClick = true;
-          runAfterOpen(overlay1, function () {
-            runAfterOpen(overlay2, function () {
-              MockInteractions.tap(document.body);
-              assert.isTrue(overlay2.opened, 'overlay2 still opened');
-              assert.isFalse(overlay1.opened, 'overlay1 closed');
-              done();
-            });
-          });
-        });
-
-        test('button tap event handling closes only top overlay', function (done) {
-          overlay2.noCancelOnOutsideClick = true;
-          runAfterOpen(overlay1, function () {
-            runAfterOpen(overlay2, function () {
-              const button = overlay2.renderer.querySelector('button');
-              button.addEventListener('tap', overlay2.close.bind(overlay2));
-              MockInteractions.tap(button);
-              assert.isFalse(overlay2.opened, 'overlay2 closed');
-              assert.isTrue(overlay1.opened, 'overlay1 still opened');
-              done();
-            });
-          });
-        });
-
-        test('close an overlay in proximity to another overlay', function (done) {
-          // Open and close a separate overlay.
-          overlay1.opened = true;
-          overlay1.opened = false;
-
-          // Open the overlay we care about.
-          overlay2.opened = true;
-
-          // Immediately close the first overlay. Wait for infinite recursion, otherwise we win.
-          runAfterClose(overlay2, function () {
+      test('button tap event handling closes only top overlay', function(done) {
+        overlay2.noCancelOnOutsideClick = true;
+        runAfterOpen(overlay1, function() {
+          runAfterOpen(overlay2, function() {
+            const button = overlay2.renderer.querySelector('button');
+            button.addEventListener('tap', overlay2.close.bind(overlay2));
+            MockInteractions.tap(button);
+            assert.isFalse(overlay2.opened, 'overlay2 closed');
+            assert.isTrue(overlay1.opened, 'overlay1 still opened');
             done();
-          })
+          });
         });
-
       });
-    </script>
 
-  </body>
+      test('close an overlay in proximity to another overlay', function(done) {
+        // Open and close a separate overlay.
+        overlay1.opened = true;
+        overlay1.opened = false;
+
+        // Open the overlay we care about.
+        overlay2.opened = true;
+
+        // Immediately close the first overlay. Wait for infinite recursion, otherwise we win.
+        runAfterClose(overlay2, function() {
+          done();
+        })
+      });
+
+    });
+  </script>
+
+</body>
 
 </html>
