@@ -453,9 +453,6 @@ styling can be done like this:
           // If no handler responded, add it to body.
           if (!event.defaultPrevented && !this.renderer.isConnected) {
             document.body.appendChild(this.renderer);
-            // Appending twice seems to trigger ShadyCSS MO.
-            // TODO(valdrin) remove when webcomponents/shadycss#17 is fixed.
-            window.ShadyDOM && document.body.appendChild(this.renderer);
           }
         }
 
