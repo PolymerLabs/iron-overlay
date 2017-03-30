@@ -8,8 +8,7 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 
-<link rel="import" href="../polymer/polymer.html">
-<link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../polymer/polymer-element.html">
 
 <!--
 ### Styling
@@ -32,12 +31,25 @@ Custom property | Description | Default
     <style>
       :host {
         /* Take full screen */
-        @apply --layout-fixed-top;
-        @apply --layout-fixed-bottom;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
         /* Center content horizontally & vertically */
-        @apply --layout-vertical;
-        @apply --layout-center;
-        @apply --layout-center-justified;
+        display: -ms-flexbox;
+        display: -webkit-flex;
+        display: flex;
+        -ms-flex-direction: column;
+        -webkit-flex-direction: column;
+        flex-direction: column;
+        -ms-flex-align: center;
+        -webkit-align-items: center;
+        align-items: center;
+        -ms-flex-pack: center;
+        -webkit-justify-content: center;
+        justify-content: center;
+
         z-index: 101;
         outline: none;
         pointer-events: none;
@@ -45,8 +57,11 @@ Custom property | Description | Default
 
       #backdrop {
         /* Take full screen */
-        @apply --layout-fixed-top;
-        @apply --layout-fixed-bottom;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
         z-index: -1;
         background-color: transparent;
         opacity: 0;
