@@ -111,9 +111,9 @@ that styling of the overlay can be done like this:
 
 ### Styling the content
 
-Content can be styled by passing a `<style>` element into the template,
-but beware of possible conflicts with classes, as selectors will apply to all
-matching elements in the styling context where they're hosted:
+Content can be styled by passing a `<style>` element into the template.
+Styles will be scoped by creating an intermediate `shadowRoot` to host
+the content.
 
 ```html
 <iron-overlay>
@@ -129,7 +129,7 @@ matching elements in the styling context where they're hosted:
 
 <iron-overlay>
   <template>
-    <!-- Will have yellow background as well -->
+    <!-- Will not have yellow background -->
     <div class="my-content">Other Content</div>
   </template>
 </iron-overlay>
