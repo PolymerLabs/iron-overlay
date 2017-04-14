@@ -112,8 +112,8 @@ that styling of the overlay can be done like this:
 ### Styling the content
 
 Content can be styled by passing a `<style>` element into the template.
-Styles will be scoped by creating an intermediate `shadowRoot` to host
-the content.
+Styles will be scoped by creating an intermediate element and hosting
+the content in its `shadowRoot`. 
 
 ```html
 <iron-overlay>
@@ -133,6 +133,32 @@ the content.
     <div class="my-content">Other Content</div>
   </template>
 </iron-overlay>
+```
+
+⚠️ This will make your content "invisible" to query selectors and won't allow non-composed events to bubble ⚠️ ️
+
+Use `overlay.contentHost` to access to the element hosting your content.
+
+```html
+<iron-overlay id="overlay" opened>
+  <template>
+    <style>
+      my-content {
+        background-color: yellow;
+      }
+    </style>
+    <my-content class="my-content">Content</my-content>
+  </template>
+</iron-overlay>
+
+<script>
+  overlay.renderer.querySelector('my-content'); // null
+  overlay.contentHost.querySelector('my-content'); // <my-content>
+
+  // Imagine <my-content> fires 'my-content-ready' event, bubbling and non-composed
+  overlay.renderer.addEventListener('my-content-ready', doStuff); // callback never invoked
+  overlay.contentHost.addEventListener('my-content-ready', doStuff);
+</script>
 ```
 
 The best approach to ensure style encapsulation is to create a custom element

@@ -240,6 +240,14 @@ styling can be done like this:
               readOnly: true
             },
 
+            /**
+             * The host of the content.
+             */
+            contentHost: {
+              type: Element,
+              readOnly: true
+            },
+
             _restoreFocusNode: {
               type: Node,
               value: null
@@ -383,9 +391,9 @@ styling can be done like this:
             if (contentTemplate.content.querySelector('style')) {
               const el = contentHostGenerator.generate(contentTemplate);
               renderer.appendChild(el);
-              this._contentHost = el.shadowRoot;
+              this._setContentHost(el.shadowRoot);
             } else {
-              this._contentHost = renderer;
+              this._setContentHost(renderer);
             }
             this.__contentInstance = new(Polymer.Templatize.templatize(contentTemplate, this, {
               forwardHostProp(prop, value) {
@@ -393,7 +401,7 @@ styling can be done like this:
               }
             }))();
             // Append children to renderer.
-            this._contentHost.appendChild(this.__contentInstance.root);
+            this.contentHost.appendChild(this.__contentInstance.root);
           }
           return renderer;
         }

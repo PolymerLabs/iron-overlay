@@ -303,7 +303,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       test('node with autofocus is focused', function(done) {
         runAfterOpen(overlay, function() {
-          assert.isTrue(overlay._contentHost.contains(document.activeElement), '<button autofocus> is focused');
+          assert.isTrue(overlay.contentHost.contains(document.activeElement), '<button autofocus> is focused');
           done();
         });
       });
@@ -311,12 +311,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       test('no-auto-focus will not focus node with autofocus', function(done) {
         overlay.noAutoFocus = true;
         runAfterOpen(overlay, function() {
-          assert.isFalse(overlay._contentHost.contains(document.activeElement), document.activeElement,
+          assert.isFalse(overlay.contentHost.contains(document.activeElement), document.activeElement,
             '<button autofocus> not focused after opened');
           done();
         });
         // In Safari the element with autofocus will immediately receive focus when displayed for the first time http://jsbin.com/woroci/2/ Ensure this is not the case for overlay.
-        assert.isFalse(overlay._contentHost.contains(document.activeElement),
+        assert.isFalse(overlay.contentHost.contains(document.activeElement),
           '<button autofocus> not immediately focused');
       });
 
@@ -409,7 +409,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         overlay2.noCancelOnOutsideClick = true;
         runAfterOpen(overlay1, function() {
           runAfterOpen(overlay2, function() {
-            const button = overlay2._contentHost.querySelector('button');
+            const button = overlay2.contentHost.querySelector('button');
             button.addEventListener('tap', overlay2.close.bind(overlay2));
             MockInteractions.tap(button);
             assert.isFalse(overlay2.opened, 'overlay2 closed');
@@ -439,8 +439,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         overlay2.opened = true;
         // Force distribution & styling.
         window.ShadyDOM && ShadyDOM.flush();
-        var btn1 = overlay1._contentHost.querySelector('button');
-        var btn2 = overlay2._contentHost.querySelector('button');
+        var btn1 = overlay1.contentHost.querySelector('button');
+        var btn2 = overlay2.contentHost.querySelector('button');
         assert.notEqual(getComputedStyle(btn1).color, 'rgb(255, 0, 0)', 'overlay1 btn color ok');
         assert.equal(getComputedStyle(btn2).color, 'rgb(255, 0, 0)', 'overlay2 btn color ok');
       });
