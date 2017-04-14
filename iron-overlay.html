@@ -370,10 +370,13 @@ styling can be done like this:
             if (this.__contentInstance.root.querySelector('style')) {
               const el = document.createElement('div');
               el.attachShadow({
-                mode: 'open' //TODO(valdrin) consider mode: 'closed'
+                mode: 'open'
               }).appendChild(this.__contentInstance.root);
+              // Provide some way to query for the content.
+              this._contentHost = el.shadowRoot;
               renderer.appendChild(el);
             } else {
+              this._contentHost = renderer;
               // Append children to renderer.
               renderer.appendChild(this.__contentInstance.root);
             }
