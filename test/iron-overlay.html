@@ -437,6 +437,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         // Open so content is created
         overlay1.opened = true;
         overlay2.opened = true;
+        // Force distribution & styling.
+        window.ShadyDOM && ShadyDOM.flush();
         var btn1 = overlay1._contentHost.querySelector('button');
         var btn2 = overlay2._contentHost.querySelector('button');
         assert.notEqual(getComputedStyle(btn1).color, 'rgb(255, 0, 0)', 'overlay1 btn color ok');

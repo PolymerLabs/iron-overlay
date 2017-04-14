@@ -144,7 +144,25 @@ styling can be done like this:
         }
       }
 
+      class ScopingHostGenerator {
+        constructor(hostNamePrefix) {
+          this._count = 0;
+          this._prefix = hostNamePrefix;
+        }
+        generate(template) {
+          const hostName = this._prefix + '-' + this._count++;
+          window.ShadyCSS && ShadyCSS.prepareTemplate(template, hostName);
+          const el = document.createElement(hostName);
+          el.attachShadow({
+            mode: 'open'
+          });
+          window.ShadyCSS && ShadyCSS.styleElement(el);
+          return el;
+        }
+      }
+
       const sharedListener = new SharedEventListener();
+      const contentHostGenerator = new ScopingHostGenerator('content-host');
 
       class IronOverlay extends Polymer.Element {
 
@@ -361,25 +379,21 @@ styling can be done like this:
           // Stamp the content (if any)
           const contentTemplate = this.querySelector('template');
           if (contentTemplate) {
+            // Scope styles by creating an intermediate element's shadowRoot.
+            if (contentTemplate.content.querySelector('style')) {
+              const el = contentHostGenerator.generate(contentTemplate);
+              renderer.appendChild(el);
+              this._contentHost = el.shadowRoot;
+            } else {
+              this._contentHost = renderer;
+            }
             this.__contentInstance = new(Polymer.Templatize.templatize(contentTemplate, this, {
               forwardHostProp(prop, value) {
                 this.__contentInstance && this.__contentInstance.forwardHostProp(prop, value);
               }
             }))();
-            // Scope styles by creating an intermediate shadowRoot.
-            if (this.__contentInstance.root.querySelector('style')) {
-              const el = document.createElement('div');
-              el.attachShadow({
-                mode: 'open'
-              }).appendChild(this.__contentInstance.root);
-              // Provide some way to query for the content.
-              this._contentHost = el.shadowRoot;
-              renderer.appendChild(el);
-            } else {
-              this._contentHost = renderer;
-              // Append children to renderer.
-              renderer.appendChild(this.__contentInstance.root);
-            }
+            // Append children to renderer.
+            this._contentHost.appendChild(this.__contentInstance.root);
           }
           return renderer;
         }
