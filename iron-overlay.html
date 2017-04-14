@@ -366,8 +366,17 @@ styling can be done like this:
                 this.__contentInstance && this.__contentInstance.forwardHostProp(prop, value);
               }
             }))();
-            // Append children to renderer.
-            renderer.appendChild(this.__contentInstance.root);
+            // Scope styles by creating an intermediate shadowRoot.
+            if (this.__contentInstance.root.querySelector('style')) {
+              const el = document.createElement('div');
+              el.attachShadow({
+                mode: 'open' //TODO(valdrin) consider mode: 'closed'
+              }).appendChild(this.__contentInstance.root);
+              renderer.appendChild(el);
+            } else {
+              // Append children to renderer.
+              renderer.appendChild(this.__contentInstance.root);
+            }
           }
           return renderer;
         }
@@ -492,7 +501,7 @@ styling can be done like this:
             // Consider <body> as null.
             if (active === document.body) {
               active = null;
-            } 
+            }
             while (active && active.shadowRoot && active.shadowRoot.activeElement) {
               active = active.shadowRoot.activeElement;
             }
