@@ -43,6 +43,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </template>
   </test-fixture>
 
+  <test-fixture id="scoped">
+    <template>
+      <iron-overlay opened>
+        <template>
+          <style>
+            * {
+              color: red;
+            }
+          </style>
+          <button>click</button>
+        </template>
+      </iron-overlay>
+    </template>
+  </test-fixture>
+
   <test-fixture id="opened">
     <template>
       <iron-overlay opened>
@@ -63,11 +78,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </iron-overlay>
       <iron-overlay class="overlay-2">
         <template>
-          <style>
-            button {
-              color: red;
-            }
-          </style>
           Test overlay 2
           <button>Click</button>
         </template>
@@ -303,7 +313,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       test('node with autofocus is focused', function(done) {
         runAfterOpen(overlay, function() {
-          assert.isTrue(overlay.contentHost.contains(document.activeElement), '<button autofocus> is focused');
+          assert.isTrue(overlay.contentHost.contains(document.activeElement),
+            '<button autofocus> is focused');
           done();
         });
       });
@@ -433,16 +444,39 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         })
       });
 
+    });
+
+    suite('scoped overlay', function() {
+
+      setup(function() {
+        overlay = fixture('scoped');
+      });
+
+      test('can query content', function() {
+        assert.isOk(overlay.contentHost.querySelector('button'));
+      });
+
+      test('can listen to non-composed events content', function() {
+        var spy = sinon.spy();
+        overlay.contentHost.addEventListener('some-event', spy);
+        overlay.contentHost.querySelector('button').dispatchEvent(new CustomEvent('some-event', {
+          bubbles: true,
+          composed: false
+        }));
+        assert.equal(spy.callCount, 1);
+      });
+
       test('styles are scoped', function() {
-        // Open so content is created
-        overlay1.opened = true;
-        overlay2.opened = true;
         // Force distribution & styling.
         window.ShadyDOM && ShadyDOM.flush();
-        var btn1 = overlay1.contentHost.querySelector('button');
-        var btn2 = overlay2.contentHost.querySelector('button');
-        assert.notEqual(getComputedStyle(btn1).color, 'rgb(255, 0, 0)', 'overlay1 btn color ok');
-        assert.equal(getComputedStyle(btn2).color, 'rgb(255, 0, 0)', 'overlay2 btn color ok');
+        assert.notEqual(
+          getComputedStyle(overlay.renderer).color,
+          'rgb(255, 0, 0)',
+          'outside content color ok');
+        assert.equal(
+          getComputedStyle(overlay.contentHost.querySelector('button')).color,
+          'rgb(255, 0, 0)',
+          'content in overlay color ok');
       });
 
     });
