@@ -259,7 +259,7 @@ styling can be done like this:
          * @protected
          */
         _getFocusNode() {
-          return this.renderer.querySelector('[autofocus]') || this.renderer;
+          return this.contentHost.querySelector('[autofocus]') || this.renderer;
         }
 
         /**
