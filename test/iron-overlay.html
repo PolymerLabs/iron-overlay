@@ -437,7 +437,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         test('node with autofocus is focused', function(done) {
           runAfterOpen(overlay, function() {
-            assert.isTrue(overlay.contentHost.contains(getDeepActiveElement()),
+            const autofocused = overlay.contentHost.querySelector('[autofocus]');
+            assert.equal(getDeepActiveElement(), autofocused,
               '<button autofocus> is focused');
             done();
           });
@@ -446,23 +447,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         test('no-auto-focus will not focus node with autofocus', function(done) {
           overlay.noAutoFocus = true;
           runAfterOpen(overlay, function() {
-            assert.isFalse(overlay.contentHost.contains(getDeepActiveElement()),
+            const autofocused = overlay.contentHost.querySelector('[autofocus]');
+            assert.notEqual(getDeepActiveElement(), autofocused,
               '<button autofocus> not focused after opened');
             done();
           });
           // In Safari the element with autofocus will immediately receive focus when displayed for the first time http://jsbin.com/woroci/2/ Ensure this is not the case for overlay.
-          assert.isFalse(overlay.contentHost.contains(getDeepActiveElement()),
+          const autofocused = overlay.contentHost.querySelector('[autofocus]');
+          assert.notEqual(getDeepActiveElement(), autofocused,
             '<button autofocus> not immediately focused');
         });
 
         suite('restore focus', function() {
           let buttons;
-          setup(function(done) {
+          setup(function() {
             buttons = fixture('buttons');
             buttons[0].focus();
-            // setTimeout(function() {
-            done();
-            // });
           });
 
           test('restores focus to previous focusable', function(done) {
