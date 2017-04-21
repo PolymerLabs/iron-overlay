@@ -1,0 +1,76 @@
+<!--
+@license
+Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../polymer/polymer-element.html">
+
+<script>
+  (() => {
+    'use strict';
+
+    /**
+     * SharedEventListener allows to register callback for an event on document
+     * ensuring that the last registered callback is the one called.
+     * e.g. `node1`, `node2`, then `node3` listen for `click` event -> `node3`
+     * is the one to handle it.
+     */
+    Polymer.SharedEventListener = class SharedEventListener {
+
+      constructor() {
+        this._events = {};
+        this._handleEvent = this._handleEvent.bind(this);
+        // Enable document-wide gesture recognizer.
+        Polymer.Gestures.addListener(document, 'tap', null);
+      }
+
+      /**
+       * Expects a callback that returns true when it handles the event, false
+       * to allow the event to be handled by the next listener.
+       */
+      listen(eventName, listener, callback) {
+        if (!this._events[eventName]) {
+          this._events[eventName] = [];
+          document.addEventListener(eventName, this._handleEvent, {
+            capture: true
+          });
+        }
+        // It's fine if we have duplicates, as the last one counts.
+        this._events[eventName].push({
+          listener: listener,
+          callback: callback
+        });
+      }
+
+      unlisten(eventName, listener) {
+        if (!this._events[eventName]) {
+          return;
+        }
+        // Remove all matching listeners.
+        const listeners = this._events[eventName].filter(obj => obj.listener !== listener);
+        if (listeners.length) {
+          this._events[eventName] = listeners;
+        } else {
+          this._events[eventName] = null;
+          document.removeEventListener(eventName, this._handleEvent, {
+            capture: true
+          });
+        }
+      }
+
+      _handleEvent(event) {
+        const handlers = this._events[event.type];
+        let i = handlers.length - 1;
+        let handler = null;
+        while ((handler = handlers[i--]) && !handler.listener[handler.callback](event)) {
+          // Keep looping until someone handles the event.
+        }
+      }
+    };
+  })();
+</script>

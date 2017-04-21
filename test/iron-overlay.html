@@ -45,14 +45,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   <test-fixture id="scoped">
     <template>
-      <iron-overlay opened>
+      <iron-overlay>
         <template>
           <style>
             * {
               color: red;
             }
           </style>
-          <button>click</button>
+          <button autofocus>autofocused</button>
         </template>
       </iron-overlay>
     </template>
@@ -93,17 +93,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </test-fixture>
 
   <script>
-    var overlay;
-
-    function runAfterOpen(overlay, callback) {
-      overlay.addEventListener('iron-overlay-opened', callback);
-      overlay.opened = true;
-    }
-
-    function runAfterClose(overlay, callback) {
-      overlay.addEventListener('iron-overlay-closed', callback);
-      overlay.opened = false;
-    }
+    let overlay;
 
     suite('basic overlay', function() {
 
@@ -140,7 +130,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       });
 
       test('overlay fires iron-overlay-opened', function(done) {
-        var spy = sinon.stub();
+        const spy = sinon.stub();
         overlay.addEventListener('iron-overlay-opened', spy);
         runAfterOpen(overlay, function() {
           assert.isTrue(spy.calledOnce, 'opened event fired once');
@@ -149,7 +139,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       });
 
       test('overlay fires iron-overlay-closed', function(done) {
-        var spy = sinon.stub();
+        const spy = sinon.stub();
         overlay.addEventListener('iron-overlay-opened', spy);
         overlay.addEventListener('iron-overlay-closed', spy);
         runAfterOpen(overlay, function() {
@@ -175,7 +165,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       test('clicking an overlay does not close it', function(done) {
         runAfterOpen(overlay, function() {
-          var spy = sinon.stub();
+          const spy = sinon.stub();
           overlay.addEventListener('iron-overlay-closed', spy);
           MockInteractions.tap(overlay.renderer.$.overlay);
           setTimeout(function() {
@@ -186,8 +176,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       });
 
       test('open overlay on mousedown does not close it', function(done) {
-        var btn = document.createElement('button');
-        btn.addEventListener('mousedown', overlay.open.bind(overlay));
+        const btn = document.createElement('button');
+        btn.addEventListener('mousedown', () => overlay.opened = true);
         document.body.appendChild(btn);
         // It triggers mousedown, mouseup, and click.
         MockInteractions.tap(btn);
@@ -225,7 +215,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           overlay.addEventListener('iron-overlay-canceled', function(event) {
             event.preventDefault();
           });
-          var spy = sinon.stub();
+          const spy = sinon.stub();
           overlay.addEventListener('iron-overlay-closed', spy);
           MockInteractions.tap(document.body);
           setTimeout(function() {
@@ -259,7 +249,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       test('no-cancel-on-outside-click property', function(done) {
         overlay.noCancelOnOutsideClick = true;
         runAfterOpen(overlay, function() {
-          var spy = sinon.stub();
+          const spy = sinon.stub();
           overlay.addEventListener('iron-overlay-closed', spy);
           MockInteractions.tap(document.body);
           setTimeout(function() {
@@ -272,7 +262,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       test('no-cancel-on-esc-key property', function(done) {
         overlay.noCancelOnEscKey = true;
         runAfterOpen(overlay, function() {
-          var spy = sinon.stub();
+          const spy = sinon.stub();
           overlay.addEventListener('iron-overlay-closed', spy);
           MockInteractions.pressAndReleaseKeyOn(document, 27);
           setTimeout(function() {
@@ -297,7 +287,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       test('overlay positioned & sized properly', function(done) {
         setTimeout(function() {
-          var rect = overlay.renderer.$.overlay.getBoundingClientRect();
+          const rect = overlay.renderer.$.overlay.getBoundingClientRect();
           assert.closeTo(rect.left, (window.innerWidth - rect.width) / 2, 1, 'centered horizontally');
           assert.closeTo(rect.top, (window.innerHeight - rect.height) / 2, 1, 'centered vertically');
           done();
@@ -305,68 +295,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       });
     });
 
-    suite('focus handling', function() {
+    focusSuiteForFixture('basic');
 
-      setup(function() {
-        overlay = fixture('basic');
-      });
-
-      test('node with autofocus is focused', function(done) {
-        runAfterOpen(overlay, function() {
-          assert.isTrue(overlay.contentHost.contains(document.activeElement),
-            '<button autofocus> is focused');
-          done();
-        });
-      });
-
-      test('no-auto-focus will not focus node with autofocus', function(done) {
-        overlay.noAutoFocus = true;
-        runAfterOpen(overlay, function() {
-          assert.isFalse(overlay.contentHost.contains(document.activeElement),
-            '<button autofocus> not focused after opened');
-          done();
-        });
-        // In Safari the element with autofocus will immediately receive focus when displayed for the first time http://jsbin.com/woroci/2/ Ensure this is not the case for overlay.
-        assert.isFalse(overlay.contentHost.contains(document.activeElement),
-          '<button autofocus> not immediately focused');
-      });
-
-      suite('restore focus', function() {
-        let buttons;
-        setup(function() {
-          buttons = fixture('buttons');
-        });
-
-        test('restores focus to previous focusable', function(done) {
-          buttons[0].focus();
-          runAfterOpen(overlay, function() {
-            runAfterClose(overlay, function() {
-              assert.equal(document.activeElement, buttons[0], 'focus returned to button');
-              done();
-            });
-          });
-        });
-
-        test('avoids restoring focus if focus changed', function(done) {
-          buttons[0].focus();
-          runAfterOpen(overlay, function() {
-            buttons[1].focus();
-            runAfterClose(overlay, function() {
-              assert.equal(document.activeElement, buttons[1], 'focus was not modified');
-              done();
-            });
-          });
-        });
-      });
-
-    });
+    focusSuiteForFixture('scoped');
 
     suite('multiple overlays', function() {
-      var overlay1,
+      let overlay1,
         overlay2;
 
       setup(function() {
-        var f = fixture('multiple');
+        const f = fixture('multiple');
         overlay1 = f[0];
         overlay2 = f[1];
       });
@@ -411,7 +349,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         runAfterOpen(overlay1, function() {
           runAfterOpen(overlay2, function() {
             const button = overlay2.contentHost.querySelector('button');
-            button.addEventListener('tap', overlay2.close.bind(overlay2));
+            button.addEventListener('tap', () => overlay2.opened = false);
             MockInteractions.tap(button);
             assert.isFalse(overlay2.opened, 'overlay2 closed');
             assert.isTrue(overlay1.opened, 'overlay1 still opened');
@@ -440,6 +378,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       setup(function() {
         overlay = fixture('scoped');
+        overlay.opened = true;
       });
 
       test('can query content', function() {
@@ -447,7 +386,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       });
 
       test('can listen to non-composed events content', function() {
-        var spy = sinon.spy();
+        const spy = sinon.spy();
         overlay.contentHost.addEventListener('some-event', spy);
         overlay.contentHost.querySelector('button').dispatchEvent(new CustomEvent('some-event', {
           bubbles: true,
@@ -470,6 +409,84 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       });
 
     });
+
+    function runAfterOpen(overlay, callback) {
+      overlay.addEventListener('iron-overlay-opened', callback);
+      overlay.opened = true;
+    }
+
+    function runAfterClose(overlay, callback) {
+      overlay.addEventListener('iron-overlay-closed', callback);
+      overlay.opened = false;
+    }
+
+    function getDeepActiveElement() {
+      let active = document.activeElement;
+      while (active && active.shadowRoot && active.shadowRoot.activeElement) {
+        active = active.shadowRoot.activeElement;
+      }
+      return active;
+    }
+
+    function focusSuiteForFixture(fixtureName) {
+      return suite(fixtureName + ' overlay focus handling', function() {
+
+        setup(function() {
+          overlay = fixture(fixtureName);
+        });
+
+        test('node with autofocus is focused', function(done) {
+          runAfterOpen(overlay, function() {
+            assert.isTrue(overlay.contentHost.contains(getDeepActiveElement()),
+              '<button autofocus> is focused');
+            done();
+          });
+        });
+
+        test('no-auto-focus will not focus node with autofocus', function(done) {
+          overlay.noAutoFocus = true;
+          runAfterOpen(overlay, function() {
+            assert.isFalse(overlay.contentHost.contains(getDeepActiveElement()),
+              '<button autofocus> not focused after opened');
+            done();
+          });
+          // In Safari the element with autofocus will immediately receive focus when displayed for the first time http://jsbin.com/woroci/2/ Ensure this is not the case for overlay.
+          assert.isFalse(overlay.contentHost.contains(getDeepActiveElement()),
+            '<button autofocus> not immediately focused');
+        });
+
+        suite('restore focus', function() {
+          let buttons;
+          setup(function(done) {
+            buttons = fixture('buttons');
+            buttons[0].focus();
+            // setTimeout(function() {
+            done();
+            // });
+          });
+
+          test('restores focus to previous focusable', function(done) {
+            runAfterOpen(overlay, function() {
+              runAfterClose(overlay, function() {
+                assert.equal(getDeepActiveElement(), buttons[0], 'focus returned to button');
+                done();
+              });
+            });
+          });
+
+          test('avoids restoring focus if focus changed', function(done) {
+            runAfterOpen(overlay, function() {
+              buttons[1].focus();
+              runAfterClose(overlay, function() {
+                assert.equal(getDeepActiveElement(), buttons[1], 'focus was not modified');
+                done();
+              });
+            });
+          });
+        });
+
+      });
+    }
   </script>
 
 </body>
