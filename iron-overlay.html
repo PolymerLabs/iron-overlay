@@ -88,7 +88,6 @@ styling can be done like this:
     (() => {
       'use strict';
 
-      const sharedListener = new Polymer.SharedEventListener();
       const contentHostGenerator = new Polymer.ScopingHostGenerator('iron-overlay-content-host');
 
       class IronOverlay extends Polymer.Element {
@@ -169,15 +168,36 @@ styling can be done like this:
 
             /**
              * The host of the content.
+             * @type {Element|DocumentFragment}
              */
             contentHost: {
-              type: Element,
+              type: Object,
               readOnly: true
             },
 
+            /**
+             * The node where focus should be restored once the overlay is closed.
+             * Focus will be restored there only if nothing else is focused (e.g. if user
+             * clicked another button and overlay got closed, we don't restore focus).
+             * @type {Node}
+             * @protected
+             */
             _restoreFocusNode: {
-              type: Node,
+              type: Object,
               value: null
+            },
+
+            /**
+             * A shared event listener to handle interactions like tap or keydown.
+             * The last overlay opened will be the last to listen for events, but should
+             * be the first to handle the event. The shared event listener allows this, delegating
+             * the handling of the event to the last one listening for it.
+             * @protected
+             */
+            _sharedListener: {
+              type: Object,
+              readOnly: true,
+              value: new Polymer.SharedEventListener()
             }
           };
         }
@@ -286,11 +306,11 @@ styling can be done like this:
          */
         _toggleListeners() {
           if (this.opened) {
-            sharedListener.listen('tap', this, '_onTap');
-            sharedListener.listen('keydown', this, '_onKeydown');
+            this._sharedListener.listen('tap', this, '_onTap');
+            this._sharedListener.listen('keydown', this, '_onKeydown');
           } else {
-            sharedListener.unlisten('tap', this);
-            sharedListener.unlisten('keydown', this);
+            this._sharedListener.unlisten('tap', this);
+            this._sharedListener.unlisten('keydown', this);
           }
         }
 
