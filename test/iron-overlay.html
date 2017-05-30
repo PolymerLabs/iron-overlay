@@ -115,9 +115,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         overlay.addEventListener('iron-overlay-attach', function(event) {
           assert.isTrue(event.bubbles, 'bubbling event');
           assert.isTrue(event.cancelable, 'cancelable event');
-          assert.deepEqual(event.detail, {
-            overlay: overlay
-          }, 'detail contains overlay and renderer');
           done();
         });
         overlay.opened = true;
@@ -176,7 +173,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       test('open overlay on mousedown does not close it', function(done) {
         var btn = document.createElement('button');
-        btn.addEventListener('mousedown', overlay.open.bind(overlay));
+        btn.addEventListener('mousedown', () => overlay.opened = true);
         document.body.appendChild(btn);
         // It triggers mousedown, mouseup, and click.
         MockInteractions.tap(btn);
@@ -409,7 +406,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         runAfterOpen(overlay1, function() {
           runAfterOpen(overlay2, function() {
             const button = overlay2.renderer.querySelector('button');
-            button.addEventListener('tap', overlay2.close.bind(overlay2));
+            button.addEventListener('tap', () => overlay2.opened = false);
             MockInteractions.tap(button);
             assert.isFalse(overlay2.opened, 'overlay2 closed');
             assert.isTrue(overlay1.opened, 'overlay1 still opened');
