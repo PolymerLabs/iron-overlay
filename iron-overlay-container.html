@@ -64,17 +64,13 @@ Use `overlayType` to limit which types of overlays this container should host:
       connectedCallback() {
         super.connectedCallback();
         // Listeners on the host.
-        const host = this._getHostRoot();
-        host.addEventListener('iron-overlay-attach', this._onAttach);
-        host.addEventListener('iron-overlay-detach', this._onDetach);
-        this._host = host;
+        this._host = this._getHostRoot();
+        this._host.addEventListener('iron-overlay-attach', this._onAttach);
       }
 
       disconnectedCallback() {
         super.disconnectedCallback();
-        const host = this._host;
-        host.removeEventListener('iron-overlay-attach', this._onAttach);
-        host.removeEventListener('iron-overlay-detach', this._onDetach);
+        this._host.removeEventListener('iron-overlay-attach', this._onAttach);
         this._host = null;
       }
 
@@ -104,6 +100,7 @@ Use `overlayType` to limit which types of overlays this container should host:
       attachOverlay(overlay) {
         const canAttach = this.canAttach(overlay);
         if (canAttach) {
+          overlay.addEventListener('iron-overlay-detach', this._onDetach);
           this._overlays.push(overlay);
           this.appendChild(overlay.renderer);
         }
@@ -120,6 +117,7 @@ Use `overlayType` to limit which types of overlays this container should host:
       detachOverlay(overlay) {
         const i = this._overlays.indexOf(overlay);
         if (i >= 0) {
+          overlay.removeEventListener('iron-overlay-detach', this._onDetach);
           this.removeChild(overlay.renderer);
           this._overlays.splice(i, 1);
         }
@@ -135,7 +133,7 @@ Use `overlayType` to limit which types of overlays this container should host:
           return;
         }
 
-        if (this.attachOverlay(event.detail.overlay)) {
+        if (this.attachOverlay(event.target)) {
           event.preventDefault();
           event.stopPropagation();
         }
@@ -149,7 +147,7 @@ Use `overlayType` to limit which types of overlays this container should host:
         if (event.defaultPrevented) {
           return;
         }
-        if (this.detachOverlay(event.detail.overlay)) {
+        if (this.detachOverlay(event.target)) {
           event.preventDefault();
           event.stopPropagation();
         }

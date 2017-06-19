@@ -116,9 +116,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         overlay.addEventListener('iron-overlay-attach', function(event) {
           assert.isTrue(event.bubbles, 'bubbling event');
           assert.isTrue(event.cancelable, 'cancelable event');
-          assert.deepEqual(event.detail, {
-            overlay: overlay
-          }, 'detail contains overlay and renderer');
           done();
         });
         overlay.opened = true;

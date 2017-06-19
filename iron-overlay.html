@@ -213,27 +213,6 @@ styling can be done like this:
         }
 
         /**
-         * Toggle the opened state of the overlay.
-         */
-        toggle() {
-          this.opened = !this.opened;
-        }
-
-        /**
-         * Open the overlay.
-         */
-        open() {
-          this.opened = true;
-        }
-
-        /**
-         * Close the overlay.
-         */
-        close() {
-          this.opened = false;
-        }
-
-        /**
          * Focuses the overlay if opened, blurs it and restores the focus to
          * previous focused node if closed.
          */
@@ -290,9 +269,13 @@ styling can be done like this:
          * @protected
          */
         _cancel(event) {
-          const cancelEvent = this._fire('iron-overlay-canceled', event, {
-            cancelable: true
+          const cancelEvent = new CustomEvent('iron-overlay-canceled', {
+            cancelable: true,
+            bubbles: true,
+            composed: true,
+            detail : event
           });
+          this.dispatchEvent(cancelEvent);
           if (!cancelEvent.defaultPrevented) {
             // _openedChanged will reset the closing reason, so set it to true right after.
             this.opened = false;
@@ -428,11 +411,12 @@ styling can be done like this:
           if (this.renderer.isConnected) {
             return;
           }
-          const event = this._fire('iron-overlay-attach', {
-            overlay: this
-          }, {
-            cancelable: true
+          const event = new CustomEvent('iron-overlay-attach', {
+            cancelable: true,
+            bubbles: true,
+            composed: true
           });
+          this.dispatchEvent(event);
           // If no handler responded, add it to body.
           if (!event.defaultPrevented && !this.renderer.isConnected) {
             document.body.appendChild(this.renderer);
@@ -448,13 +432,7 @@ styling can be done like this:
           }
 
           // Trigger event to notify.
-          const event = this._fire('iron-overlay-detach', {
-            overlay: this
-          }, {
-            node: this.renderer,
-            cancelable: true
-          });
-
+          this.dispatchEvent(new CustomEvent('iron-overlay-detach'));
           // Force removing.
           if (this.renderer.isConnected) {
             this.renderer.parentNode.removeChild(this.renderer);
@@ -497,26 +475,21 @@ styling can be done like this:
             this.applyFocus();
           } else {
             if (this.opened) {
-              this._fire('iron-overlay-opened');
+              this.dispatchEvent(new CustomEvent('iron-overlay-opened', {
+                cancelable: false,
+                bubbles: true,
+                composed: true
+              }));
             } else {
-              this._fire('iron-overlay-closed', this.closingReason);
+              this.dispatchEvent(new CustomEvent('iron-overlay-closed', {
+                cancelable: false,
+                bubbles: true,
+                composed: true,
+                detail : this.closingReason
+              }));
               this._ensureDetached();
             }
           }
-        }
-
-        _fire(type, detail, options) {
-          options = options || {};
-          detail = (detail === null || detail === undefined) ? {} : detail;
-          const event = new Event(type, {
-            bubbles: options.bubbles === undefined ? true : options.bubbles,
-            cancelable: Boolean(options.cancelable),
-            composed: options.composed === undefined ? true : options.composed
-          });
-          event.detail = detail;
-          const node = options.node || this;
-          node.dispatchEvent(event);
-          return event;
         }
 
       }

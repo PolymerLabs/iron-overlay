@@ -13,34 +13,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     'use strict';
 
     customElements.define('test-overlay', class TestOverlay extends HTMLElement {
-      _onTap() {}
-      _onEsc() {}
+      constructor() {
+        super();
+        this.renderer = document.createElement('div');
+      }
 
       fireAttach() {
-        this.renderer = this.renderer || document.createElement('div');
-
-        var event = new Event('iron-overlay-attach', {
+        var event = new CustomEvent('iron-overlay-attach', {
           bubbles: true,
           cancelable: true,
           composed: true
         });
-        event.detail = {
-          overlay: this
-        };
         this.dispatchEvent(event);
         return event;
       }
 
       fireDetach() {
-        var event = new Event('iron-overlay-detach', {
+        var event = new CustomEvent('iron-overlay-detach', {
           bubbles: true,
           cancelable: true,
           composed: true
         });
-        event.detail = {
-          overlay: this
-        };
-        this.renderer.dispatchEvent(event);
+        this.dispatchEvent(event);
         return event;
       }
     });
