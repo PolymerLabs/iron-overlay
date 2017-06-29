@@ -87,7 +87,8 @@ styling can be done like this:
     (() => {
       'use strict';
 
-      const contentHostGenerator = new Polymer.ScopingHostGenerator('iron-overlay-content-host');
+      const _contentHostGenerator = new ScopingHostGenerator('iron-overlay-content-host');
+      const _sharedListener = new SharedEventListener();
 
       class IronOverlay extends Polymer.Element {
 
@@ -184,19 +185,6 @@ styling can be done like this:
             _restoreFocusNode: {
               type: Object,
               value: null
-            },
-
-            /**
-             * A shared event listener to handle interactions like click or keydown.
-             * The last overlay opened will be the last to listen for events, but should
-             * be the first to handle the event. The shared event listener allows this, delegating
-             * the handling of the event to the last one listening for it.
-             * @protected
-             */
-            _sharedListener: {
-              type: Object,
-              readOnly: true,
-              value: new Polymer.SharedEventListener()
             }
           };
         }
@@ -272,7 +260,7 @@ styling can be done like this:
             cancelable: true,
             bubbles: true,
             composed: true,
-            detail : event
+            detail: event
           });
           this.dispatchEvent(cancelEvent);
           if (!cancelEvent.defaultPrevented) {
@@ -288,11 +276,11 @@ styling can be done like this:
          */
         _toggleListeners() {
           if (this.opened) {
-            this._sharedListener.listen('click', this, '_captureOutsideClick');
-            this._sharedListener.listen('keydown', this, '_captureEscapeKey');
+            _sharedListener.listen('click', this, '_captureOutsideClick');
+            _sharedListener.listen('keydown', this, '_captureEscapeKey');
           } else {
-            this._sharedListener.unlisten('click', this);
-            this._sharedListener.unlisten('keydown', this);
+            _sharedListener.unlisten('click', this);
+            _sharedListener.unlisten('keydown', this);
           }
         }
 
@@ -318,7 +306,7 @@ styling can be done like this:
           if (contentTemplate) {
             // Scope styles by creating an intermediate element's shadowRoot.
             if (contentTemplate.content.querySelector('style')) {
-              const el = contentHostGenerator.generate(contentTemplate);
+              const el = _contentHostGenerator.generate(contentTemplate);
               renderer.appendChild(el);
               this._setContentHost(el.shadowRoot);
             } else {
@@ -484,7 +472,7 @@ styling can be done like this:
                 cancelable: false,
                 bubbles: true,
                 composed: true,
-                detail : this.closingReason
+                detail: this.closingReason
               }));
               this._ensureDetached();
             }

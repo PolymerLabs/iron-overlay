@@ -8,18 +8,15 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 
-<link rel="import" href="../polymer/polymer-element.html">
-
 <script>
   (() => {
     'use strict';
-
     /**
      * ScopingHostGenerator allows to create an element with a shadow root.
      * The generated element can be used to scope styles by inserting content
      * in its shadowRoot.
      */
-    Polymer.ScopingHostGenerator = class ScopingHostGenerator {
+    window.ScopingHostGenerator = class ScopingHostGenerator {
       /**
        * @type {!string} hostTagName
        */
