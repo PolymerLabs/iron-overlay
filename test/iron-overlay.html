@@ -329,7 +329,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         });
       });
 
-      test('tap event handling is delegated to interested overlay', function(done) {
+      test('click event handling is delegated to interested overlay', function(done) {
         overlay2.noCancelOnOutsideClick = true;
         runAfterOpen(overlay1, function() {
           runAfterOpen(overlay2, function() {
@@ -341,12 +341,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         });
       });
 
-      test('button tap event handling closes only top overlay', function(done) {
+      test('button click event handling closes only top overlay', function(done) {
         overlay2.noCancelOnOutsideClick = true;
         runAfterOpen(overlay1, function() {
           runAfterOpen(overlay2, function() {
             const button = overlay2.contentHost.querySelector('button');
-            button.addEventListener('tap', () => overlay2.opened = false);
+            button.addEventListener('click', () => overlay2.opened = false);
             MockInteractions.tap(button);
             assert.isFalse(overlay2.opened, 'overlay2 closed');
             assert.isTrue(overlay1.opened, 'overlay1 still opened');

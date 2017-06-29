@@ -9,7 +9,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../polymer/polymer-element.html">
-<link rel="import" href="../polymer/lib/utils/gestures.html">
 <link rel="import" href="../polymer/lib/utils/templatize.html">
 <link rel="import" href="iron-overlay-renderer.html">
 <link rel="import" href="shared-event-listener.html">
@@ -44,7 +43,7 @@ overlays. Insert it in a stacking-context safe node (e.g. `document.body`).
 
 An overlay may be hidden by closing or canceling. The difference between close and cancel is user
 intent. Closing generally implies that the user acknowledged the content on the overlay. By default,
-it will cancel whenever the user taps outside it or presses the escape key. This behavior is
+it will cancel whenever the user clicks outside it or presses the escape key. This behavior is
 configurable with the `no-cancel-on-esc-key` and the `no-cancel-on-outside-click` properties.
 `close()` should be called explicitly by the implementer when the user interacts with a control
 in the overlay element. When the overlay is canceled, it fires an 'iron-overlay-canceled'
@@ -188,7 +187,7 @@ styling can be done like this:
             },
 
             /**
-             * A shared event listener to handle interactions like tap or keydown.
+             * A shared event listener to handle interactions like click or keydown.
              * The last overlay opened will be the last to listen for events, but should
              * be the first to handle the event. The shared event listener allows this, delegating
              * the handling of the event to the last one listening for it.
@@ -289,10 +288,10 @@ styling can be done like this:
          */
         _toggleListeners() {
           if (this.opened) {
-            this._sharedListener.listen('tap', this, '_onTap');
-            this._sharedListener.listen('keydown', this, '_onKeydown');
+            this._sharedListener.listen('click', this, '_captureOutsideClick');
+            this._sharedListener.listen('keydown', this, '_captureEscapeKey');
           } else {
-            this._sharedListener.unlisten('tap', this);
+            this._sharedListener.unlisten('click', this);
             this._sharedListener.unlisten('keydown', this);
           }
         }
@@ -341,7 +340,7 @@ styling can be done like this:
          * @param {!Event} event
          * @return {boolean} handled
          */
-        _onKeydown(event) {
+        _captureEscapeKey(event) {
           // By default the overlay says it handles this event. It should say
           // it does not handle it if the user has pressed ESC and noCancelOnEscKey
           // is true.
@@ -365,12 +364,12 @@ styling can be done like this:
          * @param {!Event} event
          * @return {boolean} handled
          */
-        _onTap(event) {
+        _captureOutsideClick(event) {
           // By default the overlay says it handles this event. It should say
           // it does not handle it if the user has clicked outside the overlay
           // and noCancelOnOutsideClick is true.
           let handled = true;
-          if (this._isTapOutside(event)) {
+          if (this._isClickOutside(event)) {
             if (this.noCancelOnOutsideClick) {
               handled = false;
             } else {
@@ -384,7 +383,7 @@ styling can be done like this:
          * @param {!Event} event
          * @returns {boolean}
          */
-        _isTapOutside(event) {
+        _isClickOutside(event) {
           return event.composedPath().indexOf(this.renderer) === -1;
         }
 
