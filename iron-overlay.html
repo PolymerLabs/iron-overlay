@@ -193,11 +193,6 @@ styling can be done like this:
           };
         }
 
-        connectedCallback() {
-          super.connectedCallback();
-          this.opened && this._openedChanged(this.opened);
-        }
-
         disconnectedCallback() {
           super.disconnectedCallback();
           this._ensureDetached();
@@ -214,26 +209,14 @@ styling can be done like this:
           if (this.opened) {
             this._getFocusNode().focus();
           } else {
-            // Find if the focus is in the renderer.
-            let active = document.activeElement;
-            // Consider <body> as null.
-            if (active === document.body) {
+            // Find if the focus is in the renderer by looking at
+            // the active element in the root node containing the renderer.
+            let active = this.renderer.getRootNode().activeElement;
+            if (active === document.body || this.renderer.contains(active)) {
+              active.blur();
               active = null;
             }
-            while (active) {
-              // The focus is in the renderer!
-              if (this.renderer.contains(active)) {
-                active.blur();
-                active = null;
-                break;
-              }
-              // Keep searching into shadowRoot's activeElement.
-              if (!active.shadowRoot) {
-                break;
-              }
-              active = active.shadowRoot.activeElement;
-            }
-            // If the activeElement is null, we are allowed to restore
+            // If there is no activeElement, we are allowed to restore
             // the focus. In all the other cases focus might have been moved
             // elsewhere by another component or by an user interaction
             // (e.g. click on a button outside the overlay).
