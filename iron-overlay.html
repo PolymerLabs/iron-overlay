@@ -192,10 +192,15 @@ styling can be done like this:
             }
           };
         }
+        connectedCallback() {
+          super.connectedCallback();
+          this.opened && this._ensureAttached();
+        }
 
         disconnectedCallback() {
           super.disconnectedCallback();
-          this._ensureDetached();
+          // Force closing.
+          this.opened = false;
         }
 
         /**
@@ -414,9 +419,6 @@ styling can be done like this:
         }
 
         _openedChanged(opened) {
-          if (!this.isConnected) {
-            return;
-          }
           // Reset the closing reason to false.
           this.closingReason.canceled = false;
           if (opened) {
@@ -430,13 +432,13 @@ styling can be done like this:
               active = active.shadowRoot.activeElement;
             }
             this._restoreFocusNode = active;
-            this._ensureAttached();
+            this.isConnected && this._ensureAttached();
           }
           // If renderer is already transitioning, it means the previous transition
           // didn't complete yet, e.g. close before open animation is completed.
           // We need to update here the listeners and move focus, as we won't receive
           // a `transitioning = true` notification.
-          if (this.renderer.transitioning) {
+          if (this.renderer && this.renderer.transitioning) {
             this._toggleListeners();
             this.applyFocus();
           }

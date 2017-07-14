@@ -85,13 +85,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </template>
   </test-fixture>
 
-  <test-fixture id="buttons">
-    <template>
-      <button>button</button>
-      <button>button</button>
-    </template>
-  </test-fixture>
-
+  <button id="button0">button0</button>
+  <button id="button1">button1</button>
   <script>
     let overlay;
 
@@ -311,6 +306,66 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       });
     });
 
+    const waitNextEvent = (el, event) =>
+      new Promise(resolve => el.addEventListener(event, resolve));
+
+    const openPromise = overlay => {
+      overlay.opened = true;
+      return waitNextEvent(overlay, 'iron-overlay-opened');
+    };
+
+    const closePromise = overlay => {
+      overlay.opened = false;
+      return waitNextEvent(overlay, 'iron-overlay-closed');
+    };
+
+    suite('attach/detach', function() {
+
+      setup(function() {
+        overlay = fixture('basic');
+      });
+
+      test('detached overlay does not create the renderer', function(done) {
+        const spy = sinon.stub();
+        overlay.addEventListener('iron-overlay-opened', spy);
+        overlay.parentNode.removeChild(overlay);
+        overlay.opened = true;
+        assert.isNotOk(overlay.renderer, 'renderer not initialized');
+        setTimeout(function() {
+          assert.isFalse(spy.called, 'iron-overlay-opened should not fire');
+          done();
+        }, 100);
+      });
+
+      test('removing overlay from the DOM closes it', function(done) {
+        openPromise(overlay)
+          .then(() => {
+            overlay.parentNode.removeChild(overlay);
+            assert.isFalse(overlay.opened, 'overlay not closed');
+            return waitNextEvent(overlay, 'iron-overlay-closed');
+          })
+          .then(() => done())
+          .catch(done);
+      });
+
+      test('reparent overlay', function(done) {
+        const parent = overlay.parentNode;
+        openPromise(overlay)
+          .then(() => {
+            document.body.appendChild(overlay);
+            assert.isFalse(overlay.opened, 'overlay not closed');
+            button0.focus();
+            return openPromise(overlay);
+          })
+          .then(() => closePromise(overlay))
+          .then(() => {
+            assert.equal(getDeepActiveElement(), button0, 'focus not returned to button');
+            done();
+          })
+          .catch(done);
+      });
+    });
+
     focusSuiteForFixture('basic');
 
     focusSuiteForFixture('scoped');
@@ -475,16 +530,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         });
 
         suite('restore focus', function() {
-          let buttons;
           setup(function() {
-            buttons = fixture('buttons');
-            buttons[0].focus();
+            button0.focus();
           });
 
           test('restores focus to previous focusable', function(done) {
             runAfterOpen(overlay, function() {
               runAfterClose(overlay, function() {
-                assert.equal(getDeepActiveElement(), buttons[0], 'focus returned to button');
+                assert.equal(getDeepActiveElement(), button0, 'focus returned to button');
                 done();
               });
             });
@@ -492,9 +545,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           test('avoids restoring focus if focus changed', function(done) {
             runAfterOpen(overlay, function() {
-              buttons[1].focus();
+              button1.focus();
               runAfterClose(overlay, function() {
-                assert.equal(getDeepActiveElement(), buttons[1], 'focus was not modified');
+                assert.equal(getDeepActiveElement(), button1, 'focus was not modified');
                 done();
               });
             });
