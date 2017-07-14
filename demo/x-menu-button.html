@@ -19,8 +19,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
     <template id="renderer-template">
-      <x-menu-button-renderer opened$="[[opened]]" animated$="[[animated]]" vertical-align="[[verticalAlign]]" horizontal-align="[[horizontalAlign]]"
-        position-target="[[_positionTarget]]" on-iron-select="close">
+      <x-menu-button-renderer 
+        opened$="[[opened]]"
+        animated$="[[animated]]"
+        vertical-align="[[verticalAlign]]"
+        horizontal-align="[[horizontalAlign]]"
+        position-target="[[_positionTarget]]"
+        on-iron-select="_close">
       </x-menu-button-renderer>
     </template>
     <div on-click="open" id="trigger">
@@ -59,6 +64,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               }
             }
           };
+        }
+
+        _close() {
+          this.opened = false;
         }
       }
 

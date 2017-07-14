@@ -59,13 +59,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         constructor() {
           super();
           this._positionRAF = null;
-          document.addEventListener('scroll', this._position.bind(this), {
+        }
+
+        ready() {
+          document.addEventListener('scroll', () => this._position(), {
             passive: true
           });
         }
 
         _renderOpenedChanged() {
           super._renderOpenedChanged();
+          this._positionRAF && window.cancelAnimationFrame(this._positionRAF);
+          this._positionRAF = null;
           this.position();
         }
 
@@ -83,7 +88,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         _position() {
           this._positionRAF && window.cancelAnimationFrame(this._positionRAF);
           if (this.opened && !this.transitioning) {
-            this._positionRAF = window.requestAnimationFrame(this.position.bind(this));
+            this._positionRAF = window.requestAnimationFrame(() => {
+              this._positionRAF = null;
+              this.position();
+            });
           }
         }
       }

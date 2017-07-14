@@ -55,6 +55,10 @@ Custom property | Description | Default
         pointer-events: none;
       }
 
+      :host([no-cancel-on-outside-click]) {
+        pointer-events: all;
+      }
+
       #backdrop {
         /* Take full screen */
         position: fixed;
@@ -71,7 +75,6 @@ Custom property | Description | Default
       }
 
       :host([with-backdrop]) #backdrop.opened {
-        pointer-events: all;
         background-color: var(--iron-backdrop-background-color, black);
         opacity: var(--iron-backdrop-opacity, 0.6);
         @apply --iron-backdrop-opened;

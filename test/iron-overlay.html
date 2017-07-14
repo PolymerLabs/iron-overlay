@@ -172,6 +172,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         });
       });
 
+      test('clicking outside an overlay closes it', function(done) {
+        runAfterOpen(overlay, function() {
+          overlay.addEventListener('iron-overlay-closed', function() {
+            done();
+          });
+          MockInteractions.tap(document.elementFromPoint(2, 2));
+        });
+      });
+
+      test('clicking outside an overlay with-backdrop closes it', function(done) {
+        overlay.withBackdrop = true;
+        runAfterOpen(overlay, function() {
+          overlay.addEventListener('iron-overlay-closed', function() {
+            done();
+          });
+          MockInteractions.tap(document.elementFromPoint(2, 2));
+        });
+      });
+
       test('open overlay on mousedown does not close it', function(done) {
         const btn = document.createElement('button');
         btn.addEventListener('mousedown', () => overlay.opened = true);

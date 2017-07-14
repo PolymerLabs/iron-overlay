@@ -45,8 +45,8 @@ An overlay may be hidden by closing or canceling. The difference between close a
 intent. Closing generally implies that the user acknowledged the content on the overlay. By default,
 it will cancel whenever the user clicks outside it or presses the escape key. This behavior is
 configurable with the `no-cancel-on-esc-key` and the `no-cancel-on-outside-click` properties.
-`close()` should be called explicitly by the implementer when the user interacts with a control
-in the overlay element. When the overlay is canceled, it fires an 'iron-overlay-canceled'
+Closing should be performed by the implementer when the user interacts with a control in the overlay
+element (`this.opened = false`). When the overlay is canceled, it fires an 'iron-overlay-canceled'
 event. Call `preventDefault` on this event to prevent the overlay from closing.
 
 
@@ -79,7 +79,11 @@ styling can be done like this:
   <template>
     <slot></slot>
     <template id="renderer-template">
-      <iron-overlay-renderer opened$="[[opened]]" animated$="[[animated]]" with-backdrop$="[[withBackdrop]]"></iron-overlay-renderer>
+      <iron-overlay-renderer 
+        opened$="[[opened]]" 
+        animated$="[[animated]]" 
+        with-backdrop$="[[withBackdrop]]" 
+        no-cancel-on-outside-click$="[[noCancelOnOutsideClick]]"></iron-overlay-renderer>
     </template>
   </template>
 
