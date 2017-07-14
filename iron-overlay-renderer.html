@@ -85,6 +85,13 @@ styling can be done like this:
             },
 
             /**
+             * Set to true to disable canceling the overlay by clicking outside it.
+             */
+            noCancelOnOutsideClick: {
+              type: Boolean
+            },
+
+            /**
              * Is true during the transition from close to open and open to close.
              */
             transitioning: {
@@ -196,10 +203,9 @@ styling can be done like this:
          */
         _onNextAF(callback) {
           this._pendingRAF && window.cancelAnimationFrame(this._pendingRAF);
-          const self = this;
-          this._pendingRAF = window.requestAnimationFrame(function nextAnimationFrame() {
-            self._pendingRAF = null;
-            callback.call(self);
+          this._pendingRAF = window.requestAnimationFrame(() => {
+            this._pendingRAF = null;
+            callback.call(this);
           });
         }
 
