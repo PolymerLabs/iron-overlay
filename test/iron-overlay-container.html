@@ -43,32 +43,32 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </test-fixture>
 
   <script>
-    suite('<iron-overlay-container>', function() {
-      var container;
-      var overlay1;
-      var overlay2;
+    suite('<iron-overlay-container>', () => {
+      let container;
+      let overlay1;
+      let overlay2;
 
-      setup(function() {
+      setup(() => {
         container = fixture('basic');
-        var overlays = fixture('overlays');
+        const overlays = fixture('overlays');
         overlay1 = overlays[0];
         overlay2 = overlays[1];
       });
 
-      test('handles iron-overlay-attach', function() {
+      test('handles iron-overlay-attach', () => {
         assert.isTrue(overlay1.fireAttach().defaultPrevented, 'event handled');
         assert.equal(overlay1.renderer.parentNode, container, 'renderer hosted');
         assert.equal(overlay1, container.currentOverlay, 'currentOverlay updated');
       });
 
-      test('handles iron-overlay-detach', function() {
+      test('handles iron-overlay-detach', () => {
         overlay1.fireAttach();
         assert.isTrue(overlay1.fireDetach().defaultPrevented, 'event handled');
         assert.isNotOk(overlay1.renderer.parentNode, 'renderer detached');
         assert.isNotOk(container.currentOverlay, 'currentOverlay updated');
       });
 
-      test('detach and attach to bring overlay on top', function() {
+      test('detach and attach to bring overlay on top', () => {
         overlay1.fireAttach();
         overlay2.fireAttach();
         assert.equal(overlay2, container.currentOverlay, 'renderer2 on top');
