@@ -189,18 +189,37 @@ styling can be done like this:
             _restoreFocusNode: {
               type: Object,
               value: null
+            },
+
+            /**
+             * Wether the opened should be restored to true on next attach.
+             * @type {Boolean}
+             * @private
+             */
+            __restoreOpened: {
+              type: Boolean
             }
           };
         }
+
         connectedCallback() {
           super.connectedCallback();
-          this.opened && this._ensureAttached();
+          if (this.__restoreOpened) {
+            this.opened = true;
+          } else if (this.opened) {
+            this._ensureAttached();
+          }
         }
 
         disconnectedCallback() {
           super.disconnectedCallback();
           // Force closing.
-          this.opened = false;
+          if (this.opened) {
+            this.opened = false;
+            // Should restore at next attach. If someone changes
+            // it, _openedChanged will reset this boolean.
+            this.__restoreOpened = true;
+          }
         }
 
         /**
@@ -419,6 +438,8 @@ styling can be done like this:
         }
 
         _openedChanged(opened) {
+          // Someone modified `opened`, do not restore it.
+          this.__restoreOpened = false;
           // Reset the closing reason to false.
           this.closingReason.canceled = false;
           if (opened) {

@@ -348,14 +348,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           .catch(done);
       });
 
-      test('reparent overlay', done => {
-        const parent = overlay.parentNode;
+      test('reparenting overlay keeps it opened', done => {
         openPromise(overlay)
           .then(() => {
             document.body.appendChild(overlay);
-            assert.isFalse(overlay.opened, 'overlay not closed');
+            assert.isTrue(overlay.opened, 'overlay not opened');
+            return waitNextEvent(overlay, 'iron-overlay-opened');
+          })
+          .then(() => done())
+          .catch(done);
+      });
+
+      test('focus restoring works when reparenting overlay', done => {
+        const parent = overlay.parentNode;
+        openPromise(overlay)
+          .then(() => {
             button0.focus();
-            return openPromise(overlay);
+            document.body.appendChild(overlay);
+            return waitNextEvent(overlay, 'iron-overlay-opened');
           })
           .then(() => closePromise(overlay))
           .then(() => {
