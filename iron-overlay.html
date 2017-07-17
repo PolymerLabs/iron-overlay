@@ -175,7 +175,7 @@ styling can be done like this:
              * @type {Element|DocumentFragment}
              */
             contentHost: {
-              type: Object,
+              type: Node,
               readOnly: true
             },
 
@@ -405,6 +405,9 @@ styling can be done like this:
          * Ensures the renderer is attached.
          */
         _ensureAttached() {
+          if (!this.isConnected) {
+            return;
+          }
           this._ensureInstance();
           if (this.renderer.isConnected) {
             return;
@@ -453,7 +456,7 @@ styling can be done like this:
               active = active.shadowRoot.activeElement;
             }
             this._restoreFocusNode = active;
-            this.isConnected && this._ensureAttached();
+            this._ensureAttached();
           }
           // If renderer is already transitioning, it means the previous transition
           // didn't complete yet, e.g. close before open animation is completed.
