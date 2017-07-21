@@ -133,7 +133,7 @@ Use `overlayType` to limit which types of overlays this container should host:
           return;
         }
 
-        if (this.attachOverlay(event.target)) {
+        if (this.attachOverlay(event.composedPath()[0])) {
           event.preventDefault();
           event.stopPropagation();
         }

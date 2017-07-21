@@ -30,7 +30,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <custom-style><style is="custom-style" include="demo-pages-shared-styles">
     demo-snippet {
       --demo-snippet-code: {
-        max-height: 250px;
+        padding: 0 5px;
       }
     }
     demo-snippet.no-demo {
@@ -141,7 +141,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <demo-snippet class="no-demo">
     <template>
       <custom-style><style is="custom-style">
-        [data-overlay] {
+        iron-overlay-container > * {
           --iron-overlay: {
             border: 1px solid gray;
             padding: 10px;
@@ -156,7 +156,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           };
         }
       </style></custom-style>
-      <iron-overlay-container overlay-type="iron-overlay"></iron-overlay-container>
+      <iron-overlay-container></iron-overlay-container>
     </template>
   </demo-snippet>
 
