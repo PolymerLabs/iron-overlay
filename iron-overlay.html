@@ -464,27 +464,24 @@ styling can be done like this:
           }
         }
 
-        _onTransitioningChanged(event) {
-          const transitioning = event.detail.value;
-          if (transitioning) {
+        _onTransitioningChanged() {
+          if (this.renderer.transitioning) {
             this._toggleListeners();
             this.applyFocus();
+          } else if (this.opened) {
+            this.dispatchEvent(new CustomEvent('iron-overlay-opened', {
+              cancelable: false,
+              bubbles: true,
+              composed: true
+            }));
           } else {
-            if (this.opened) {
-              this.dispatchEvent(new CustomEvent('iron-overlay-opened', {
-                cancelable: false,
-                bubbles: true,
-                composed: true
-              }));
-            } else {
-              this.dispatchEvent(new CustomEvent('iron-overlay-closed', {
-                cancelable: false,
-                bubbles: true,
-                composed: true,
-                detail: this.closingReason
-              }));
-              this._ensureDetached();
-            }
+            this.dispatchEvent(new CustomEvent('iron-overlay-closed', {
+              cancelable: false,
+              bubbles: true,
+              composed: true,
+              detail: this.closingReason
+            }));
+            this._ensureDetached();
           }
         }
 
