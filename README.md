@@ -106,53 +106,50 @@ be placed in a stacking-context safe node (e.g. `document.body`).
 
 ## Styling
 
-Styling must be done in the context of where iron-overlay-renderer will be hosted.
-
-### Styling the content
-
-Content can be styled by passing a `<style>` element into the template.
+You can style the content by passing a `<style>` element into the template.
 
 ```html
 <iron-overlay>
   <template>
     <style>
-      .my-content {
-        background-color: yellow;
-      }
+      div { background-color: yellow; }
     </style>
-    <div class="my-content">Content</div>
+    <div>Warning</div>
   </template>
 </iron-overlay>
 
 <iron-overlay>
   <template>
-    <!-- Will not have yellow background -->
-    <div class="my-content">Other Content</div>
+    <style>
+      div { background-color: red; }
+    </style>
+    <div>Error</div>
   </template>
 </iron-overlay>
 ```
 
-### Styling the renderer
-
-`iron-overlay` sets the renderer's `data-overlay` attribute to be its id, so
+Additionally, `iron-overlay` sets the renderer's `data-overlay` attribute to be its `id`, so
 that styling of the overlay can be done like this:
 
 ```html
 <custom-style><style is="custom-style">
-  [data-overlay] {  
+  iron-overlay-container [data-overlay] {  
     --iron-overlay-background-color: yellow;
   }
-  [data-overlay="overlay1"] {
-    --iron-overlay-background-color: orange;
+  iron-overlay-container [data-overlay="overlay1"] {
+    --iron-overlay-background-color: red;
   }
 </style></custom-style>
 
 <div style="transform: translateZ(0);">
   <iron-overlay>
-    <template>Yellow overlay</template>
+    <template>Warning</template>
   </iron-overlay>
   <iron-overlay id="overlay1">
-    <template>Orange overlay</template>
+    <template>Error</template>
   </iron-overlay>
 </div>
+
+<!-- it will contain all the overlay renderers -->
+<iron-overlay-container></iron-overlay-container>
 ```
