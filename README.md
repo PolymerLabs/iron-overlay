@@ -55,6 +55,30 @@ events `iron-overlay-attach` and `iron-overlay-detach`, or append it to `<body>`
 It requires overlay contents to be contained in a `<template>` (since they need
 to be hosted in the renderer).
 
+Template content will be scoped by creating an intermediate element and hosting
+the content in its `shadowRoot`. 
+
+⚠️ This will make your content "invisible" to query selectors and won't allow non-composed events to bubble ⚠️ ️
+
+Use `overlay.contentHost` to access to the element hosting your content.
+
+```html
+<iron-overlay id="overlay" opened>
+  <template>
+    <my-content>Content</my-content>
+  </template>
+</iron-overlay>
+
+<script>
+  overlay.renderer.querySelector('my-content'); // null
+  overlay.contentHost.querySelector('my-content'); // <my-content>
+
+  // Imagine <my-content> fires 'my-content-ready' event, bubbling and non-composed
+  overlay.renderer.addEventListener('my-content-ready', doStuff); // callback never invoked
+  overlay.contentHost.addEventListener('my-content-ready', doStuff);
+</script>
+```
+
 ## iron-overlay-renderer
 
 Takes care of the rendering (e.g. center overlay), and handles the switch from
@@ -82,38 +106,11 @@ be placed in a stacking-context safe node (e.g. `document.body`).
 
 ## Styling
 
-Styling must be done in the context of where iron-overlay will be hosted.
-
-### Styling the renderer
-
-`iron-overlay` sets the renderer's `data-overlay` attribute to be its id, so
-that styling of the overlay can be done like this:
-
-```html
-<custom-style><style is="custom-style">
-  [data-overlay] {  
-    --iron-overlay-background-color: yellow;
-  }
-  [data-overlay="overlay1"] {
-    --iron-overlay-background-color: orange;
-  }
-</style></custom-style>
-
-<div style="transform: translateZ(0);">
-  <iron-overlay>
-    <template>Overlay Content</template>
-  </iron-overlay>
-  <iron-overlay id="overlay1">
-    <template>Overlay 1 Content</template>
-  </iron-overlay>
-</div>
-```
+Styling must be done in the context of where iron-overlay-renderer will be hosted.
 
 ### Styling the content
 
 Content can be styled by passing a `<style>` element into the template.
-Styles will be scoped by creating an intermediate element and hosting
-the content in its `shadowRoot`. 
 
 ```html
 <iron-overlay>
@@ -135,45 +132,27 @@ the content in its `shadowRoot`.
 </iron-overlay>
 ```
 
-⚠️ This will make your content "invisible" to query selectors and won't allow non-composed events to bubble ⚠️ ️
+### Styling the renderer
 
-Use `overlay.contentHost` to access to the element hosting your content.
-
-```html
-<iron-overlay id="overlay" opened>
-  <template>
-    <style>
-      my-content {
-        background-color: yellow;
-      }
-    </style>
-    <my-content class="my-content">Content</my-content>
-  </template>
-</iron-overlay>
-
-<script>
-  overlay.renderer.querySelector('my-content'); // null
-  overlay.contentHost.querySelector('my-content'); // <my-content>
-
-  // Imagine <my-content> fires 'my-content-ready' event, bubbling and non-composed
-  overlay.renderer.addEventListener('my-content-ready', doStuff); // callback never invoked
-  overlay.contentHost.addEventListener('my-content-ready', doStuff);
-</script>
-```
-
-The best approach to ensure style encapsulation is to create a custom element
-for your content.
+`iron-overlay` sets the renderer's `data-overlay` attribute to be its id, so
+that styling of the overlay can be done like this:
 
 ```html
-<iron-overlay>
-  <template>
-    <my-content>Content</my-content>
-  </template>
-</iron-overlay>
+<custom-style><style is="custom-style">
+  [data-overlay] {  
+    --iron-overlay-background-color: yellow;
+  }
+  [data-overlay="overlay1"] {
+    --iron-overlay-background-color: orange;
+  }
+</style></custom-style>
 
-<iron-overlay>
-  <template>
-    <my-other-content>Other Content</my-other-content>
-  </template>
-</iron-overlay>
+<div style="transform: translateZ(0);">
+  <iron-overlay>
+    <template>Yellow overlay</template>
+  </iron-overlay>
+  <iron-overlay id="overlay1">
+    <template>Orange overlay</template>
+  </iron-overlay>
+</div>
 ```

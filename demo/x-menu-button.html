@@ -28,7 +28,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         on-iron-select="_close">
       </x-menu-button-renderer>
     </template>
-    <div on-click="open" id="trigger">
+    <div on-click="_open" id="trigger">
       <slot name="trigger"></slot>
     </div>
     <slot></slot>
@@ -64,6 +64,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               }
             }
           };
+        }
+
+        _open() {
+          this.opened = true;
         }
 
         _close() {
