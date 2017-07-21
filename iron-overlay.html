@@ -171,8 +171,8 @@ styling can be done like this:
             },
 
             /**
-             * The host of the content.
-             * @type {Element|DocumentFragment}
+             * The shadowRoot of the content host.
+             * @type {DocumentFragment}
              */
             contentHost: {
               type: Node,
@@ -187,7 +187,7 @@ styling can be done like this:
              * @protected
              */
             _restoreFocusNode: {
-              type: Object,
+              type: Node,
               value: null
             },
 
