@@ -31,19 +31,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
        * @return {HTMLElement}
        */
       generate(template) {
-        let hostTagName = this._hostTagName;
+        const needsScoping = window.ShadyCSS && (!ShadyCSS.nativeCss || !ShadyCSS.nativeShadow);
         // NOTE: we create a different element since ShadyCSS cannot
         // handle multiple templates for a single shadowRoot.
-        if (window.ShadyCSS) {
-          hostTagName += '-' + this._count;
-          template && ShadyCSS.prepareTemplate(template, hostTagName);
-        }
+        const hostTagName = this._hostTagName + (needsScoping ? '-' + this._count++ : '');
         const el = document.createElement(hostTagName);
         el.attachShadow({
           mode: 'open'
         });
-        window.ShadyCSS && ShadyCSS.styleElement(el);
-        this._count++;
+        if (needsScoping) {
+          ShadyCSS.prepareTemplate(template, hostTagName);
+          ShadyCSS.styleElement(el);
+        }
         return el;
       }
     };

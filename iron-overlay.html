@@ -316,13 +316,9 @@ styling can be done like this:
           const contentTemplate = this.querySelector('template');
           if (contentTemplate) {
             // Scope styles by creating an intermediate element's shadowRoot.
-            if (contentTemplate.content.querySelector('style')) {
-              const el = _contentHostGenerator.generate(contentTemplate);
-              renderer.appendChild(el);
-              this._setContentHost(el.shadowRoot);
-            } else {
-              this._setContentHost(renderer);
-            }
+            const el = _contentHostGenerator.generate(contentTemplate);
+            renderer.appendChild(el);
+            this._setContentHost(el.shadowRoot);
             this.__contentInstance = new(Polymer.Templatize.templatize(contentTemplate, this, {
               forwardHostProp(prop, value) {
                 this.__contentInstance && this.__contentInstance.forwardHostProp(prop, value);
