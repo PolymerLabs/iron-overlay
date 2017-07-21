@@ -11,23 +11,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../iron-overlay-renderer.html">
 
 <dom-module id="x-menu-button-renderer">
-  <template strip-whitespace>
-    <style include="iron-overlay-renderer-shared-styles">
-      #overlay {
-        position: absolute;
-        transform: translateY(20px);
-        transition: opacity .2s, transform .2s;
-      }
-      
-      #overlay.opened {
-        transform: translateY(0);
-      }
-    </style>
-    <div id="overlay">
-      <slot></slot>
-    </div>
-  </template>
-
   <script>
     (() => {
       'use strict';
@@ -36,6 +19,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         static get is() {
           return 'x-menu-button-renderer';
+        }
+
+        static get template() {
+          const template = super.template;
+          const style = document.createElement('style');
+          style.textContent =
+            `#overlay {
+  position: absolute;
+  transform: translateY(20px);
+  transition: opacity .2s, transform .2s;
+}
+#overlay.opened {
+  transform: translateY(0);
+}`;
+          template.content.appendChild(style);
+          return template;
         }
 
         static get properties() {
@@ -69,10 +68,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
 
         _renderOpenedChanged() {
-          super._renderOpenedChanged();
           this._positionRAF && window.cancelAnimationFrame(this._positionRAF);
           this._positionRAF = null;
           this.position();
+          super._renderOpenedChanged();
         }
 
         position() {

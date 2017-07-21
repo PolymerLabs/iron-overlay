@@ -45,7 +45,7 @@ styling can be done like this:
   <template strip-whitespace>
     <style include="iron-overlay-renderer-shared-styles"></style>
     <div id="backdrop"></div>
-    <div id="overlay">
+    <div id="overlay" on-transitionend="_onTransitionEnd">
       <slot></slot>
     </div>
   </template>
@@ -115,7 +115,6 @@ styling can be done like this:
           if (!this.shadowRoot || !this.shadowRoot.delegatesFocus) {
             this.setAttribute('tabindex', '-1');
           }
-          this.$.overlay.addEventListener('transitionend', this._onTransitionEnd.bind(this));
         }
 
         /**
