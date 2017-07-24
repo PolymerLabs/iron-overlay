@@ -171,9 +171,14 @@ styling can be done like this:
             this._forceLayout();
           }
           // Update classes for overlay and backdrop.
-          this.$.overlay.classList.toggle('opened', this.opened);
+          // NOTE: IE doesn't support 2nd arg for `classList.toggle()`.
+          this.$.overlay.classList.remove('opened');
           // Check if there is a backdrop in the shadow dom.
-          this.$.backdrop && this.$.backdrop.classList.toggle('opened', this.opened);
+          this.$.backdrop && this.$.backdrop.classList.remove('opened');
+          if (this.opened) {
+            this.$.overlay.classList.add('opened');
+            this.$.backdrop && this.$.backdrop.classList.add('opened');
+          }
           this._renderOpenedChanged();
         }
 
