@@ -55,7 +55,7 @@ Use `overlayType` to limit which types of overlays this container should host:
         super();
         // List of overlays handled by this container.
         this._overlays = [];
-        this._host = null;
+        this._rootNode = null;
         // Bind these methods to `this` as they are used for event listeners.
         this._onAttach = this._onAttach.bind(this);
         this._onDetach = this._onDetach.bind(this);
@@ -64,14 +64,14 @@ Use `overlayType` to limit which types of overlays this container should host:
       connectedCallback() {
         super.connectedCallback();
         // Listeners on the host.
-        this._host = this._getHostRoot();
-        this._host.addEventListener('iron-overlay-attach', this._onAttach);
+        this._rootNode = this.getRootNode();
+        this._rootNode.addEventListener('iron-overlay-attach', this._onAttach);
       }
 
       disconnectedCallback() {
         super.disconnectedCallback();
-        this._host.removeEventListener('iron-overlay-attach', this._onAttach);
-        this._host = null;
+        this._rootNode.removeEventListener('iron-overlay-attach', this._onAttach);
+        this._rootNode = null;
       }
 
       /**
@@ -151,21 +151,6 @@ Use `overlayType` to limit which types of overlays this container should host:
           event.preventDefault();
           event.stopPropagation();
         }
-      }
-
-      /**
-       * Returns the root element hosting the container.
-       * @returns {Node}
-       */
-      _getHostRoot() {
-        let n = this;
-        while (n) {
-          if (n.nodeType === Node.DOCUMENT_FRAGMENT_NODE && n.host) {
-            return n;
-          }
-          n = n.parentNode;
-        }
-        return document;
       }
     }
 
