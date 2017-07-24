@@ -33,7 +33,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       generate(template) {
         const needsScoping = window.ShadyCSS && (!ShadyCSS.nativeCss || !ShadyCSS.nativeShadow);
         // NOTE: we create a different element since ShadyCSS cannot
-        // handle multiple templates for a single shadowRoot.
+        // handle multiple templates for a single shadowRoot webcomponents/shadycss#115
         const hostTagName = this._hostTagName + (needsScoping ? '-' + this._count++ : '');
         const el = document.createElement(hostTagName);
         el.attachShadow({
