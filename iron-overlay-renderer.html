@@ -109,28 +109,15 @@ styling can be done like this:
         }
 
         ready() {
-          super.ready();
-          // If delegatesFocus is not supported or class is extended but doesn't
-          // have a shadow root, make the element focusable but not tabbable.
-          if (!this.shadowRoot || !this.shadowRoot.delegatesFocus) {
+          this.attachShadow({
+            mode: 'open',
+            delegatesFocus: true
+          });
+          // If delegatesFocus is not supported, fallback to tabindex.
+          if (!this.shadowRoot.delegatesFocus) {
             this.setAttribute('tabindex', '-1');
           }
-        }
-
-        /**
-         * Overridden from Polymer.Element to ensure the shadow root delegates focus.
-         * See Polymer/polymer#3988
-         * @protected
-         */
-        _attachDom(dom) {
-          // Create shadowRoot only when there is content to be added
-          if (dom && this.attachShadow && !this.shadowRoot) {
-            this.attachShadow({
-              mode: 'open',
-              delegatesFocus: true
-            });
-          }
-          return super._attachDom(dom);
+          super.ready();
         }
 
         /**
